@@ -408,7 +408,7 @@ if prompt:
                     "max_output_tokens": 150,
                     "temperature": 0.7
                 }
-            }           
+            )           
             if hasattr(response, "text") and response.text:
                 texto_crudo = response.text
             elif hasattr(response, "candidates"):
