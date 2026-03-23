@@ -406,7 +406,7 @@ if prompt:
                 f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                 generation_config={
                     "max_output_tokens": 150,
-                    "temperature": 0.8
+                    "temperature": 0.7
                 }
             )           
             if hasattr(response, "text") and response.text:
