@@ -10,7 +10,7 @@ import uuid
 import time
 from collections import deque
 
-# =========================
+# ========================= 
 # 1. CONEXIÓN Y SEGURIDAD
 # =========================
 try:
