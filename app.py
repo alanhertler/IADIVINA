@@ -46,7 +46,7 @@ def reproducir_audio(texto: str):
     try:
         filename = f"voz_{uuid.uuid4().hex}.mp3"
         gTTS(text=texto, lang="es", tld="com.mx").save(filename)
-        st.audio(filename, autoplay=True)
+        st.audio(audio_file, format="audio/mp3", autoplay=False)
     except Exception:
         pass
 
@@ -60,7 +60,7 @@ def normalizar(texto: str) -> str:
     return texto
 
 def clasificar_riesgo(texto: str) -> str:
-    t = normalizar(texto)
+    t = normalizar(texto) 
 
     frases_boludeo = [
         "me muero de risa",
