@@ -38,9 +38,6 @@ def get_base64(file_path: str):
         return None
 
 def asegurar_cierre(texto: str) -> str:
-    cierre = "¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
-    if cierre not in texto:
-        texto = f"{texto}\n\n{cierre}"
     return texto
 
 def reproducir_audio(texto: str):
@@ -345,7 +342,7 @@ PROMPT_BASE = (
     "Formato de citas: [Libro] capítulo [Número] versículo [Número]. "
     "Si te preguntan por Dios o Jesús, confirmá su presencia de forma cálida pero seguí charlando sobre lo que le pasa al usuario. "
     "Nunca uses negritas (**) ni asteriscos (*). "
-    "Terminá siempre con: ¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
+    "Podés cerrar con una frase cálida solo cuando tenga sentido. No repitas siempre lo mismo."
 )
 
 PROMPT_AMARILLO = (
@@ -404,8 +401,8 @@ if prompt:
             response = model.generate_content(
                 f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                 generation_config={
-                    "max_output_tokens": 150,
-                    "temperature": 0.7
+                    "max_output_tokens": 500,
+                    "temperature": 0.8
                 }
             )           
             if hasattr(response, "text") and response.text:
