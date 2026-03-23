@@ -1,3 +1,6 @@
+import os
+os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
+
 import streamlit as st
 import google.generativeai as genai
 from gtts import gTTS
