@@ -401,13 +401,14 @@ if prompt:
 
             contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
 
-            modelos = genai.list_models()
-            st.write("MODELOS DISPONIBLES:")
-            for m in modelos:
-                if "generateContent" in m.supported_generation_methods:
-                    st.write(m.name)
-            st.stop()
-
+            model = genai.GenerativeModel("models/gemini-2.0-flash")
+            response = model.generate_content(
+                f"{contexto}\n\n{historial}\nUsuario: {prompt}",
+                generation_config={
+                    "max_output_tokens": 150,
+                    "temperature": 0.7
+                }
+            }           
             if hasattr(response, "text") and response.text:
                 texto_crudo = response.text
             elif hasattr(response, "candidates"):
