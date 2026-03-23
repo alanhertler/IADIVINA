@@ -26,7 +26,7 @@ if not API_KEY or API_KEY == "TU_API_KEY_ACA":
     st.error("Falta configurar la API Key.")
     st.stop()
 
-client = genai.Client(api_key=API_KEY)
+genai.configure(api_key=API_KEY)
 # =========================
 # 2. CONFIGURACIÓN GENERAL
 # =========================
