@@ -410,12 +410,11 @@ if prompt:
             )           
             if hasattr(response, "text") and response.text:
                 texto_crudo = response.text
-            elif hasattr(response, "candidates"):
-                texto_crudo = response.candidates[0].content.parts[0].text
+            elif hasattr(response, "candidates") and response.candidates:
+                partes = response.candidates[0].content.parts
+                texto_crudo = "".join([p.text for p in partes if hasattr(p, "text")])
             else:
-                texto_crudo = str(response)
-            texto = re.sub(r"[*#_]", "", texto_crudo).strip()
-            texto = asegurar_cierre(texto)
+                texto_crudo = "No pude obtener una respuesta completa. Por favor, intentá de nuevo."
 
             st.markdown(texto)
             st.session_state.messages.append({"role": "assistant", "content": texto})
