@@ -420,7 +420,7 @@ if prompt:
                 f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                 generation_config={
                     "max_output_tokens": 1000,
-                    "temperature": 0.4
+                    "temperature": 0.2
                 }
             )           
             if hasattr(response, "text") and response.text:
