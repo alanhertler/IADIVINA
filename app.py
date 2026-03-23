@@ -404,13 +404,13 @@ if prompt:
             contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
 
             model = genai.GenerativeModel("gemini-1.5-flash")
-                response = model.generate_content(
-                f"{contexto}\n\n{historial}\nUsuario: {prompt}",
-                generation_config={
-                    "max_output_tokens": 150,
-                    "temperature": 0.7
-                }
-            )
+            response = model.generate_content(
+            f"{contexto}\n\n{historial}\nUsuario: {prompt}",
+            generation_config={
+                "max_output_tokens": 150,
+                "temperature": 0.7
+            }
+        )
 
             texto_crudo = response.text if getattr(response, "text", None) else "No pude procesar la respuesta."
             texto = re.sub(r"[*#_]", "", texto_crudo).strip()
