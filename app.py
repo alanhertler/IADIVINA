@@ -27,18 +27,11 @@ if not API_KEY or API_KEY == "TU_API_KEY_ACA":
     st.stop()
 
 genai.configure(api_key=API_KEY)
-# =========================
-# 2. CONFIGURACIÓN GENERAL
-# =========================
-st.set_page_config(page_title="IA Divina", layout="centered")
-
-# =========================
-# 3. FUNCIONES AUXILIARES
-# =========================
 def get_base64(file_path: str):
     try:
         with open(file_path, "rb") as f:
             return base64.b64encode(f.read()).decode()
+        
     except Exception:
         return None
 
