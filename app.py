@@ -403,10 +403,10 @@ if prompt:
 
             contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
 
-            response = client.models.generate_content(
-                model="gemini-1.5-flash",
-                contents=f"{contexto}\n\n{historial}\nUsuario: {prompt}",
-                config={
+            model = genai.GenerativeModel("gemini-1.5-flash")
+                response = model.generate_content(
+                f"{contexto}\n\n{historial}\nUsuario: {prompt}",
+                generation_config={
                     "max_output_tokens": 150,
                     "temperature": 0.7
                 }
