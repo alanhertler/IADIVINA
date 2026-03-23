@@ -424,7 +424,7 @@ if prompt:
             reproducir_audio(texto)
 
         except Exception as e:
-            print(e)
+            st.exception(e)
 
             if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
                 st.error("El sistema está momentáneamente saturado. Probá en unos minutos.")
