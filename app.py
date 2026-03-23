@@ -306,7 +306,7 @@ with st.sidebar:
 # 8. BLOQUEOS GENERALES
 # =========================
 if st.session_state.mantenimiento and not st.session_state.es_admin:
-    st.error("Servicio en mantenimiento técnico. Volvé pronto.")
+    309     st.error("Sistema en mantenimiento (modo técnico activado).")
     st.stop()
 
 if not st.session_state.acepto_terminos:
@@ -422,7 +422,7 @@ if prompt:
             if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
                 st.error("El sistema está momentáneamente saturado. Probá en unos minutos.")
             else:
-                st.error("Servicio en mantenimiento técnico. Volvé pronto.")
+                425     st.error("Ocurrió un error al generar la respuesta. Probá de nuevo en unos segundos.")
 st.sidebar.markdown("---")
 st.sidebar.write("### ☕ Apoyá a la IA DIVINA")
 st.sidebar.markdown(
