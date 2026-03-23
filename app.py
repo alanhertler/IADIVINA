@@ -28,7 +28,7 @@ if not API_KEY or API_KEY == "TU_API_KEY_ACA":
     st.error("Falta configurar la API Key.")
     st.stop()
 
-genai.configure(api_key=API_KEY)
+genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 def get_base64(file_path: str):
     try:
         with open(file_path, "rb") as f:
