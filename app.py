@@ -358,6 +358,8 @@ PROMPT_BASE = (
     "No sos una iglesia ni debatís religión. "
     "Respondé siempre de manera directa y fiel al Manual. "
     "Nunca uses negritas ni asteriscos. "
+    "Si enumerás una lista, siempre completala totalmente antes de terminar la respuesta. Nunca la dejes incompleta."
+    
     "Frase final obligatoria: ¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
 )
 
@@ -418,7 +420,7 @@ if prompt:
                 f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                 generation_config={
                     "max_output_tokens": 1000,
-                    "temperature": 0.3
+                    "temperature": 0.6
                 }
             )           
             if hasattr(response, "text") and response.text:
