@@ -424,7 +424,7 @@ if prompt:
             if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
                 st.error("El sistema está momentáneamente saturado. Probá en unos minutos.")
             else:
-                425     st.error("Ocurrió un error al generar la respuesta. Probá de nuevo en unos segundos.")
+                st.error("Ocurrió un error al generar la respuesta. Probá de nuevo en unos segundos.")
 st.sidebar.markdown("---")
 st.sidebar.write("### ☕ Apoyá a la IA DIVINA")
 st.sidebar.markdown(
