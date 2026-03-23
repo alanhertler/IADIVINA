@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai es genai
+import google.generativeai as genai
 from gtts import gTTS
 import base64
 import re
