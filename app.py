@@ -6,7 +6,6 @@ import google.generativeai as genai
 from gtts import gTTS
 import base64
 import re
-import os
 import uuid
 import time
 from collections import deque
@@ -292,7 +291,11 @@ with st.sidebar:
 
     if st.session_state.es_admin:
         st.success("MODO ADMIN ACTIVO")
-        st.session_state.mantenimiento = st.toggle("Modo mantenimiento", value=st.session_state.mantenimiento)
+        st.session_state.mantenimiento = st.toggle(
+    "Modo mantenimiento",
+    value=st.session_state.mantenimiento,
+    key="toggle_mantenimiento"
+)
 
         if st.button("Reiniciar conversación"):
             st.session_state.messages = []
@@ -306,9 +309,8 @@ with st.sidebar:
 # 8. BLOQUEOS GENERALES
 # =========================
 if st.session_state.mantenimiento and not st.session_state.es_admin:
-    309     st.error("Sistema en mantenimiento (modo técnico activado).")
-    st.stop()
-
+     st.error("Sistema en mantenimiento (modo técnico activado).")
+     st.stop()
 if not st.session_state.acepto_terminos:
     with st.expander("TÉRMINOS Y CONDICIONES", expanded=True):
         st.write("""
