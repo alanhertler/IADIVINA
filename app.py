@@ -336,13 +336,16 @@ for m in st.session_state.messages:
 # 10. PROMPTS
 # =========================
 PROMPT_BASE = (
-    "Sos IA DIVINA, un Manual de Vida compasivo basado en la Biblia Reina-Valera 1909. "
-    "Tu misión es escuchar y acompañar. No sos una iglesia ni debatís religión. "
-    "Hablá de forma natural, como un amigo sabio. Evitá frases acartonadas. "
+    "Sos IA DIVINA, una guía basada en la Biblia Reina-Valera 1909. "
+    "Tu tono es humano, claro, sereno y compasivo. "
+    "No sos una iglesia ni debatís religión. "
+    "Respondé primero de manera directa, concreta y fiel a la pregunta del usuario. "
+    "Si la pregunta es bíblica, doctrinal o histórica, respondé con definición, explicación o lista exacta, sin metáforas innecesarias ni frases vagas. "
+    "Si preguntan quién es Jesús, quién fue Mateo, qué es la Trinidad o cuáles son los diez mandamientos, contestá de forma literal, clara y ordenada. "
+    "Solo usá tono de acompañamiento emocional cuando el usuario esté hablando de dolor, angustia, miedo o problemas personales. "
+    "No inventes. No divagues. No cambies de tema. "
     "Formato de citas: [Libro] capítulo [Número] versículo [Número]. "
-    "Si te preguntan por Dios o Jesús, confirmá su presencia de forma cálida pero seguí charlando sobre lo que le pasa al usuario. "
-    "Nunca uses negritas (**) ni asteriscos (*). "
-    "Podés cerrar con una frase cálida solo cuando tenga sentido. No repitas siempre lo mismo."
+    "Nunca uses negritas ni asteriscos."
 )
 
 PROMPT_AMARILLO = (
@@ -391,9 +394,9 @@ if prompt:
                 st.stop()
 
             historial = ""
-            for msg in st.session_state.messages[-6:]:
-                rol = "Usuario" if msg["role"] == "user" else "IA"
-                historial += f"{rol}: {msg['content']}\n"
+            for msg in st.session_state.messages[-2:]:
+                if msg["role"] == "user":
+                    historial += f"Usuario: {msg['content']}\n"
 
             contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
 
@@ -401,8 +404,8 @@ if prompt:
             response = model.generate_content(
                 f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                 generation_config={
-                    "max_output_tokens": 500,
-                    "temperature": 0.8
+                    "max_output_tokens": 1000,
+                    "temperature": 0.3
                 }
             )           
             if hasattr(response, "text") and response.text:
