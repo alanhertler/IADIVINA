@@ -41,25 +41,26 @@ def asegurar_cierre(texto: str) -> str:
     return texto
 
 def reproducir_audio(texto: str):
-    if "audio_generado" not in st.session_state:
-        st.session_state.audio_generado = None
+    if "audio_bytes" not in st.session_state:
+        st.session_state.audio_bytes = None
 
-    if st.button("🔊 Escuchar respuesta"):
+    if st.button("🔊 Escuchar respuesta", key="escuchar_respuesta"):
         try:
-            filename = f"voz_{uuid.uuid4().hex}.mp3"
+            from io import BytesIO
             from gtts import gTTS
+
+            audio_buffer = BytesIO()
             tts = gTTS(text=texto, lang="es", tld="com.mx")
-            tts.save(filename)
+            tts.write_to_fp(audio_buffer)
+            audio_buffer.seek(0)
 
-            # GUARDAMOS EL AUDIO
-            st.session_state.audio_generado = filename
+            st.session_state.audio_bytes = audio_buffer.read()
 
-        except Exception:
-            st.error("No se pudo generar el audio.")
+        except Exception as e:
+            st.error(f"No se pudo generar el audio: {e}")
 
-    # 🔥 ESTO ES LA CLAVE
-    if st.session_state.audio_generado:
-        st.audio(st.session_state.audio_generado, format="audio/mp3")
+    if st.session_state.audio_bytes:
+        st.audio(st.session_state.audio_bytes, format="audio/mp3")
 
 def normalizar(texto: str) -> str:
     texto = texto.lower().strip()
