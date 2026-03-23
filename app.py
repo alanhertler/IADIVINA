@@ -44,7 +44,7 @@ def reproducir_audio(texto: str):
     if "audio_bytes" not in st.session_state:
         st.session_state.audio_bytes = None
 
-    if st.button("🔊 Escuchar respuesta", key="escuchar_respuesta"):
+    if st.button("🔊 Escuchar respuesta", key=f"escuchar_{hash(texto)}"):
         try:
             from io import BytesIO
             from gtts import gTTS
