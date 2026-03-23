@@ -1,5 +1,5 @@
 import streamlit as st
-from google import genai
+import google.generativeai as genai
 from gtts import gTTS
 import base64
 import re
@@ -26,7 +26,7 @@ if not API_KEY or API_KEY == "TU_API_KEY_ACA":
     st.error("Falta configurar la API Key.")
     st.stop()
 
-client = genai.Client(api_key=API_KEY)
+client = genai.GenerativeModel('gemini-1.5-flash')
 
 # =========================
 # 2. CONFIGURACIÓN GENERAL
