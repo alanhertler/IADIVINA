@@ -410,7 +410,12 @@ if prompt:
             }
         )
 
-            texto_crudo = response.text if getattr(response, "text", None) else "No pude procesar la respuesta."
+            if hasattr(response, "text") and response.text:
+                texto_crudo = response.text
+            elif hasattr(response, "candidates"):
+                texto_crudo = response.candidates[0].content.parts[0].text
+            else:
+                texto_crudo = str(response)
             texto = re.sub(r"[*#_]", "", texto_crudo).strip()
             texto = asegurar_cierre(texto)
 
