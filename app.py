@@ -416,6 +416,9 @@ if prompt:
             else:
                 texto_crudo = "No pude obtener una respuesta completa. Por favor, intentá de nuevo."
 
+            texto = re.sub(r"[*#_]", "", texto_crudo).strip()
+            texto = asegurar_cierre(texto)
+
             st.markdown(texto)
             st.session_state.messages.append({"role": "assistant", "content": texto})
             reproducir_audio(texto)
