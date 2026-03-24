@@ -5,7 +5,7 @@ import streamlit as st
 import google.generativeai as genai
 from gtts import gTTS
 import base64
-import re 
+import re
 import uuid
 import time
 from collections import deque
@@ -132,7 +132,7 @@ def respuesta_roja() -> str:
         "Buscá ayuda real ahora mismo con una persona cercana, un familiar, alguien de confianza "
         "o un servicio de emergencia de tu zona. Si sentís que podés hacerte daño en este momento, no te quedes solo.\n\n"
         "Yo no reemplazo ayuda profesional ni intervención inmediata. Por favor, priorizá contacto real y urgente con alguien que pueda acompañarte ahora.\n\n"
-        "Si el usuario hace una pregunta concreta, respondé directo y sin agregar cierre emocional innecesario."
+        "¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
 
 def respuesta_filtrada(texto: str):
@@ -215,53 +215,6 @@ if "messages" not in st.session_state:
 if "usar_voz" not in st.session_state:
     st.session_state.usar_voz = True
 
-img = get_base64("portada.jpg")
-
-st.markdown(f"""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital@1&display=swap');
-
-    .stApp {{
-        background:
-            linear-gradient(rgba(3,8,20,0.75), rgba(3,8,20,0.85)),
-            url("data:image/jpg;base64,{img if img else ''}");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }}
-
-    .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
-        color: #F5F5F5 !important; 
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.9) !important;
-    }}
-
-    .stChatInputContainer {{
-        background: rgba(15,20,35,0.95) !important;
-        border-radius: 30px !important;
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255,255,255,0.2);
-    }}
-
-    .stChatInputContainer textarea {{
-        color: #FFFFFF !important;
-    }}
-
-    [data-testid="stSidebar"] {{
-        background-color: rgba(10, 10, 15, 0.98) !important;
-    }}
-    
-    [data-testid="stSidebar"] button {{
-        color: #FFFFFF !important;
-        background-color: rgba(255,255,255,0.1) !important;
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    """
-)
 # =========================
 # 6. ESTÉTICA
 # =========================
