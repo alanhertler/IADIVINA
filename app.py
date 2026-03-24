@@ -373,9 +373,8 @@ PROMPT_BASE = (
     "Nunca uses negritas ni asteriscos. "
     "Si enumerás una lista, siempre completala totalmente antes de terminar la respuesta. Nunca la dejes incompleta."
     
-    "No repitas frases de cierre en todas las respuestas. 
-Solo invita a continuar la conversación cuando sea apropiado y de forma natural, variando el lenguaje."
-)
+    "No repitas frases de cierre en todas las respuestas. "
+    "Solo invita a continuar la conversación cuando sea apropiado y de forma natural, variando el lenguaje."
 
 PROMPT_AMARILLO = (
     PROMPT_BASE + " "
