@@ -421,7 +421,7 @@ if prompt:
                 st.stop()
 
             historial = ""
-            for msg in st.session_state.messages[-2:]:
+            for msg in st.session_state.messages[-15:]:
                 if msg["role"] == "user":
                     historial += f"Usuario: {msg['content']}\n"
 
