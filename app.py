@@ -289,7 +289,58 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
- """
+ # ========================= 
+# 6. ESTÉTICA
+# =========================
+img = get_base64("portada.jpg")
+
+st.markdown(
+    f"""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital@1&display=swap');
+
+    .stApp {{
+        background:
+            linear-gradient(rgba(3,8,20,0.70), rgba(3,8,20,0.80)),
+            url("data:image/jpg;base64,{img if img else ''}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+
+    /* Esto hace que las letras sean siempre blancas y legibles */
+    .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
+        color: #F5F5F5 !important; 
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
+    }}
+
+    .stChatInputContainer {{
+        background: rgba(15,20,35,0.95) !important;
+        border-radius: 30px !important;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255,255,255,0.2);
+    }}
+
+    .stChatInputContainer textarea {{
+        color: #FFFFFF !important;
+    }}
+
+    [data-testid="stSidebar"] {{
+        background-color: rgba(10, 10, 15, 0.98) !important;
+    }}
+    
+    [data-testid="stSidebar"] button {{
+        color: #FFFFFF !important;
+        background-color: rgba(255,255,255,0.1) !important;
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
     <div style="text-align:center; margin-top:30px; margin-bottom:50px;">
         <div style="
             color:#F5F5F5;
@@ -298,16 +349,18 @@ st.markdown(
             font-weight:700;
             letter-spacing:4px;
             text-transform: uppercase;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
         ">
             IA DIVINA
         </div>
         <div style="width: 60px; height: 1px; background-color: rgba(255,255,255,0.3); margin: 20px auto;"></div>
         <div style="
-            color:rgba(255,255,255,0.90);
+            color:rgba(255,255,255,0.95);
             font-family: 'Lora', serif;
             font-style: italic;
             font-size:24px;
             margin-top:10px;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
         ">
             Estoy acá para escucharte.
         </div>
