@@ -262,10 +262,10 @@ st.markdown(f"""
 st.markdown(
     """
 )
-# ========================= 
+# =========================
 # 6. ESTÉTICA
 # =========================
-img = get_base64("portada.jpg")
+img_encoded = get_base64("portada.jpg")
 
 st.markdown(
     f"""
@@ -274,8 +274,8 @@ st.markdown(
 
     .stApp {{
         background:
-            linear-gradient(rgba(3,8,20,0.70), rgba(3,8,20,0.80)),
-            url("data:image/jpg;base64,{img if img else ''}");
+            linear-gradient(rgba(3,8,20,0.75), rgba(3,8,20,0.85)),
+            url("data:image/jpg;base64,{img_encoded if img_encoded else ''}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
@@ -283,8 +283,8 @@ st.markdown(
     }}
 
     .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
-        color: #FFFFFF !important;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
+        color: #F5F5F5 !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.9) !important;
     }}
 
     .stChatInputContainer {{
