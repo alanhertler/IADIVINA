@@ -343,21 +343,17 @@ st.markdown(
             font-weight:700;
             letter-spacing:4px;
             text-transform: uppercase;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         ">
-            IA DIVINA
-        </div>
         <div style="
             color:rgba(255,255,255,0.95);
             font-family: 'Lora', serif;
             font-style: italic;
             font-size:24px;
             margin-top:10px;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
-        ">
-            Estoy acá para escucharte.
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+        
         </div>
-    </div>
     """,
     unsafe_allow_html=True
 )
