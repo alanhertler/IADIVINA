@@ -265,6 +265,9 @@ st.markdown(
 # ========================= 
 # 6. ESTÉTICA
 # =========================
+# =========================
+# 6. ESTÉTICA
+# =========================
 img = get_base64("portada.jpg")
 
 st.markdown(
@@ -282,9 +285,8 @@ st.markdown(
         background-attachment: fixed;
     }}
 
-    /* Esto hace que las letras sean siempre blancas y legibles */
     .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
-        color: #F5F5F5 !important; 
+        color: #F5F5F5 !important;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
     }}
 
@@ -302,12 +304,41 @@ st.markdown(
     [data-testid="stSidebar"] {{
         background-color: rgba(10, 10, 15, 0.98) !important;
     }}
-    
+
     [data-testid="stSidebar"] button {{
         color: #FFFFFF !important;
         background-color: rgba(255,255,255,0.1) !important;
     }}
     </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
+    <div style="text-align:center; margin-top:30px; margin-bottom:50px;">
+        <div style="
+            color:#F5F5F5;
+            font-family: 'Playfair Display', serif;
+            font-size:64px;
+            font-weight:700;
+            letter-spacing:4px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+        ">
+            IA DIVINA
+        </div>
+        <div style="
+            color:rgba(255,255,255,0.95);
+            font-family: 'Lora', serif;
+            font-style: italic;
+            font-size:24px;
+            margin-top:10px;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+        ">
+            Estoy acá para escucharte.
+        </div>
+    </div>
     """,
     unsafe_allow_html=True
 )
