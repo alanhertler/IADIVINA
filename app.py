@@ -289,8 +289,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-    """
+ """
     <div style="text-align:center; margin-top:30px; margin-bottom:50px;">
         <div style="
             color:#F5F5F5;
