@@ -272,7 +272,6 @@ st.markdown(
             text-transform: uppercase;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         ">
-            IA DIVINA
         </div>
         <div style="width: 60px; height: 1px; background-color: rgba(255,255,255,0.3); margin: 20px auto;"></div>
         <div style="
