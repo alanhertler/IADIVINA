@@ -132,7 +132,7 @@ def respuesta_roja() -> str:
         "Buscá ayuda real ahora mismo con una persona cercana, un familiar, alguien de confianza "
         "o un servicio de emergencia de tu zona. Si sentís que podés hacerte daño en este momento, no te quedes solo.\n\n"
         "Yo no reemplazo ayuda profesional ni intervención inmediata. Por favor, priorizá contacto real y urgente con alguien que pueda acompañarte ahora.\n\n"
-        "¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
+        "Si el usuario hace una pregunta concreta, respondé directo y sin agregar cierre emocional innecesario."
     )
 
 def respuesta_filtrada(texto: str):
