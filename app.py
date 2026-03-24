@@ -217,7 +217,6 @@ if "usar_voz" not in st.session_state:
 
 img = get_base64("portada.jpg")
 
-st.markdown(
     f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital@1&display=swap');
