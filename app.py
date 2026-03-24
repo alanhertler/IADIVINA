@@ -280,7 +280,6 @@ st.markdown(
             text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
         
         </div>
-    </div>
     """,
     unsafe_allow_html=True
 )
