@@ -282,10 +282,10 @@ st.markdown(
         background-attachment: fixed;
     }}
 
-    .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
-        color: #F5F5F5 !important;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
-    }}
+   .stApp, .stMarkdown, p, li, span, label, .stChatMessage {
+    color: #F5F5F5 !important;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
+}
 
     .stChatInputContainer {{
         background: rgba(15,20,35,0.95) !important;
