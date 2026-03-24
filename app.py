@@ -290,7 +290,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.markdown(
     """
     <div style="text-align:center; margin-top:30px; margin-bottom:50px;">
         <div style="
