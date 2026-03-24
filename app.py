@@ -5,7 +5,7 @@ import streamlit as st
 import google.generativeai as genai
 from gtts import gTTS
 import base64
-import re
+import re 
 import uuid
 import time
 from collections import deque
@@ -283,7 +283,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
- # ========================= 
+# ========================= 
 # 6. ESTÉTICA
 # =========================
 img = get_base64("portada.jpg")
