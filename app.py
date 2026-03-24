@@ -21,7 +21,7 @@ except Exception:
 try:
     ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 except Exception:
-    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "ALAN_DIVINO_2026")
+    ADMIN_PASSWORD = os.getenv("NOmerobesLAPLATA10K", "NOmerobesLAPLATA10K")
 
 if not API_KEY or API_KEY == "TU_API_KEY_ACA":
     st.set_page_config(page_title="IA Divina", layout="centered")
