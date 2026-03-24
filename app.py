@@ -265,10 +265,9 @@ st.markdown(
 # ========================= 
 # 6. ESTÉTICA
 # =========================
-img = get_base64("portada.jpg")
-
 img_base64 = get_base64("portada.jpg")
 
+# Definimos el estilo como un texto simple (sin f-string para evitar errores)
 estilo_css = """
 <style>
     .stApp {
@@ -289,7 +288,7 @@ estilo_css = """
 </style>
 """
 
-# Inyectamos la imagen de forma segura reemplazando el texto
+# Inyectamos la imagen reemplazando el texto de forma segura
 if img_base64:
     estilo_css = estilo_css.replace("REEMPLAZAR_URL", f"data:image/jpg;base64,{img_base64}")
 else:
@@ -297,13 +296,9 @@ else:
 
 st.markdown(estilo_css, unsafe_allow_html=True)
 
-# Encabezado centrado
-st.markdown("""
-    <div style="text-align:center; margin-top:30px; margin-bottom:50px;">
-        <h1 style="color:#F5F5F5; font-family:'Playfair Display', serif; font-size:64px;">IA DIVINA</h1>
-        <p style="color:rgba(255,255,255,0.9); font-family:'Lora', serif; font-style:italic; font-size:24px;">Estoy acá para escucharte.</p>
-    </div>
-    """, unsafe_allow_html=True)
+# Títulos centrados
+st.markdown('<h1 style="text-align:center; color:#F5F5F5;">IA DIVINA</h1>', unsafe_allow_html=True)
+st.markdown('<p style="text-align:center; color:#F5F5F5; font-style:italic;">Estoy acá para escucharte.</p>', unsafe_allow_html=True)
 )
 # =========================
 # 7. SIDEBAR / ADMIN
