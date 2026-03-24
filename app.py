@@ -419,7 +419,7 @@ if prompt:
             response = model.generate_content(
                 f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                 generation_config={
-                    "max_output_tokens": 1000,
+                    "max_output_tokens": 4000,
                     "temperature": 0.2
                 }
             )           
