@@ -239,6 +239,7 @@ st.markdown(
     .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
         color: #F5F5F5 !important;
         text-shadow: 1px 1px 3px rgba(0,0,0,1) !important;
+        font-size: 18px !important;
     }}
 
     .stChatInputContainer {{
