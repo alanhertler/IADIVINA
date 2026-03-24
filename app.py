@@ -375,7 +375,7 @@ PROMPT_BASE = (
     
     "No repitas frases de cierre en todas las respuestas. "
     "Solo invita a continuar la conversación cuando sea apropiado y de forma natural, variando el lenguaje."
-
+)
 PROMPT_AMARILLO = (
     PROMPT_BASE + " "
     "El usuario puede estar pasando dolor emocional o angustia. "
