@@ -268,7 +268,7 @@ st.markdown(
 img = get_base64("portada.jpg")
 
 st.markdown(
-    f"""
+      f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital@1&display=swap');
 
@@ -282,10 +282,10 @@ st.markdown(
         background-attachment: fixed;
     }}
 
-   .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
-       color: #F5F5F5 !important;
+    .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
+       color: #FFFFFF !important;
        text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
-   }}
+    }}
 
     .stChatInputContainer {{
         background: rgba(15,20,35,0.95) !important;
@@ -307,7 +307,7 @@ st.markdown(
         background-color: rgba(255,255,255,0.1) !important;
     }}
     </style>
-    """,
+      """,
     unsafe_allow_html=True
 )
 
