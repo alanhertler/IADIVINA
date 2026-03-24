@@ -261,27 +261,6 @@ st.markdown(f"""
 
 st.markdown(
     """
-    <div style="text-align:center; margin-top:30px; margin-bottom:50px;">
-        <div style="
-            color:#F5F5F5;
-            font-family: 'Playfair Display', serif;
-            font-size:64px;
-            font-weight:700;
-            letter-spacing:4px;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
-        ">
-        <div style="
-            color:rgba(255,255,255,0.95);
-            font-family: 'Lora', serif;
-            font-style: italic;
-            font-size:24px;
-            margin-top:10px;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
-        
-        </div>
-    """,
-    unsafe_allow_html=True
 )
 # ========================= 
 # 6. ESTÉTICA
@@ -332,32 +311,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-st.markdown(
-    """
-    <div style="text-align:center; margin-top:30px; margin-bottom:50px;">
-        <div style="
-            color:#F5F5F5;
-            font-family: 'Playfair Display', serif;
-            font-size:64px;
-            font-weight:700;
-            letter-spacing:4px;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
-        ">
-        <div style="
-            color:rgba(255,255,255,0.95);
-            font-family: 'Lora', serif;
-            font-style: italic;
-            font-size:24px;
-            margin-top:10px;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
-        
-        </div>
-    """,
-    unsafe_allow_html=True
-)
-
 # =========================
 # 7. SIDEBAR / ADMIN
 # =========================
