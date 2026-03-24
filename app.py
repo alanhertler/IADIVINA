@@ -351,7 +351,6 @@ st.markdown(
         ">
             IA DIVINA
         </div>
-        <div style="width: 60px; height: 1px; background-color: rgba(255,255,255,0.3); margin: 20px auto;"></div>
         <div style="
             color:rgba(255,255,255,0.95);
             font-family: 'Lora', serif;
