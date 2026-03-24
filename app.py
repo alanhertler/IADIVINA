@@ -267,77 +267,43 @@ st.markdown(
 # =========================
 img = get_base64("portada.jpg")
 
-st.markdown(
-    f"""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital@1&display=swap');
+img_base64 = get_base64("portada.jpg")
 
-    .stApp {{
-        background:
-            linear-gradient(rgba(3,8,20,0.70), rgba(3,8,20,0.80)),
-            url("data:image/jpg;base64,{img if img else ''}");
+estilo_css = """
+<style>
+    .stApp {
+        background: linear-gradient(rgba(3,8,20,0.7), rgba(3,8,20,0.8)), 
+                    url("REEMPLAZAR_URL");
         background-size: cover;
         background-position: center;
-        background-repeat: no-repeat;
         background-attachment: fixed;
-    }}
-
-    .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
-        color: #FFFFFF !important;
+    }
+    .stApp, .stMarkdown, p, li, span, label, .stChatMessage {
+        color: #F5F5F5 !important; 
         text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
-    }}
-
-    .stChatInputContainer {{
+    }
+    .stChatInputContainer {
         background: rgba(15,20,35,0.95) !important;
         border-radius: 30px !important;
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255,255,255,0.2);
-    }}
+    }
+</style>
+"""
 
-    .stChatInputContainer textarea {{
-        color: #FFFFFF !important;
-    }}
+# Inyectamos la imagen de forma segura reemplazando el texto
+if img_base64:
+    estilo_css = estilo_css.replace("REEMPLAZAR_URL", f"data:image/jpg;base64,{img_base64}")
+else:
+    estilo_css = estilo_css.replace("REEMPLAZAR_URL", "")
 
-    [data-testid="stSidebar"] {{
-        background-color: rgba(10, 10, 15, 0.98) !important;
-    }}
+st.markdown(estilo_css, unsafe_allow_html=True)
 
-    [data-testid="stSidebar"] button {{
-        color: #FFFFFF !important;
-        background-color: rgba(255,255,255,0.1) !important;
-    }}
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    """
+# Encabezado centrado
+st.markdown("""
     <div style="text-align:center; margin-top:30px; margin-bottom:50px;">
-        <div style="
-            color:#F5F5F5;
-            font-family: 'Playfair Display', serif;
-            font-size:64px;
-            font-weight:700;
-            letter-spacing:4px;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-        ">
-            IA DIVINA
-        </div>
-        <div style="
-            color:rgba(255,255,255,0.95);
-            font-family: 'Lora', serif;
-            font-style: italic;
-            font-size:24px;
-            margin-top:10px;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
-        ">
-            Estoy acá para escucharte.
-        </div>
+        <h1 style="color:#F5F5F5; font-family:'Playfair Display', serif; font-size:64px;">IA DIVINA</h1>
+        <p style="color:rgba(255,255,255,0.9); font-family:'Lora', serif; font-style:italic; font-size:24px;">Estoy acá para escucharte.</p>
     </div>
-    """,
-    unsafe_allow_html=True
+    """, unsafe_allow_html=True)
 )
 # =========================
 # 7. SIDEBAR / ADMIN
