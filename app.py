@@ -500,10 +500,15 @@ PROMPT_BASE = (
 
     # 🔥 ANTI RECITATION
     "IMPORTANTE: Si el usuario pide textos bíblicos muy conocidos o extensos "
-    "(como los Diez Mandamientos), NO los recites completos. "
-    "En su lugar, explicalos o resumilos con palabras simples. "
+    "(como los Diez Mandamientos), NO los recites completos de forma literal. "
+    "En su lugar, podés resumir, explicar o enumerar. "
 
     "Podés incluir citas breves, pero evitá bloques largos completos. "
+
+    # 🔥 REGLA CLAVE QUE TE FALTABA
+    "Si el usuario pide específicamente enumeraciones (como los Diez Mandamientos), "
+    "debes responder obligatoriamente con una lista numerada completa del 1 al 10, "
+    "sin omitir ningún punto y sin reemplazarla por una explicación general. "
 
     # 🔥 FLUIDEZ
     "Antes de citar un versículo, introducí brevemente el tema. "
@@ -511,20 +516,25 @@ PROMPT_BASE = (
 
     "Usá párrafos cortos. Evitá bloques largos. "
 
-    # 🔥 FORMATO
-    "Siempre que cites, usá formato en palabras: "
+    # 🔥 FORMATO BÍBLICO
+    "Siempre que menciones contenido del Manual de Vida, debés incluir al menos una cita breve "
+    "con libro, capítulo y versículo. "
+
+    "Usá formato en palabras, por ejemplo: "
     "Éxodo capitulo. 20 versiculo. 3 — No tendrás dioses ajenos delante de mí. "
 
-    "No uses dos puntos (:). "
+    "No uses formato con dos puntos (:). "
     "No inventes citas. "
 
     # 🔥 LISTAS
-    "Si enumerás, completá siempre la lista. "
+    "Si enumerás una lista, siempre completala totalmente antes de terminar la respuesta. "
+    "Nunca la dejes incompleta. "
 
     # 🔥 NATURALIDAD
-    "No repitas cierres. Variá el lenguaje."
+    "No repitas frases de cierre en todas las respuestas. "
+    "Solo invita a continuar la conversación cuando sea apropiado y de forma natural, "
+    "variando el lenguaje."
 )
-
 PROMPT_AMARILLO = (
     PROMPT_BASE + " "
     "El usuario puede estar pasando dolor emocional. "
