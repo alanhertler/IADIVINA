@@ -345,7 +345,7 @@ st.markdown(
    .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
     color: #F5F5F5 !important;
     text-shadow: 1px 1px 3px rgba(0,0,0,1) !important;
-    font-size: 24px !important;
+    font-size: 20px !important;
     line-height: 1.7 !important;
 }}
 
@@ -365,7 +365,7 @@ st.markdown(
     [data-testid="stChatMessageContent"] p,
     [data-testid="stChatMessageContent"] li,
     [data-testid="stChatMessageContent"] div {{
-        font-size: 26px !important;
+        font-size: 21px !important;
         line-height: 1.75 !important;
     }}
 
