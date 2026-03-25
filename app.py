@@ -524,7 +524,7 @@ if prompt:
 
             contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
 
-            model = genai.GenerativeModel("models/gemini-2.0-flash")
+            model = genai.GenerativeModel("models/gemini-3-flash-preview")
             response = model.generate_content(
                 f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                 generation_config={
