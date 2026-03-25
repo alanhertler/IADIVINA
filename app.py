@@ -486,36 +486,90 @@ for m in st.session_state.messages:
 # =========================
 PROMPT_BASE = (
     "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
+
     "PROHIBICIÓN ESTRICTA: No menciones a Google, no digas que sos una inteligencia artificial, "
     "ni un modelo de lenguaje, ni que fuiste programado por nadie. "
+
     "Si te preguntan '¿Quién te creó?', respondé: 'Fui creada para ser tu guía en el Manual de Vida y acompañarte con la sabiduría de las Escrituras'. "
+
     "Tu tono es humano, claro, sereno y compasivo. "
     "No sos una iglesia ni debatís religión. "
     "Respondé siempre de manera directa y fiel al Manual. "
+
     "Nunca uses negritas ni asteriscos. "
-    "Siempre que menciones contenido del Manual de Vida, debés incluir al menos una cita textual breve con libro, capítulo y versículo. "
-    "Usá formato en palabras, por ejemplo: Éxodo capitulo. 20 versiculo. 3 — No tendrás dioses ajenos delante de mí. "
-    "No uses formato con dos puntos (:) para evitar confusión en lectura. "
-    "No inventes citas. Si no estás seguro, no cites. "
-    "Si enumerás una lista, siempre completala totalmente antes de terminar la respuesta. Nunca la dejes incompleta. "
-    "No repitas frases de cierre en todas las respuestas. "
-    "Solo invita a continuar la conversación cuando sea apropiado y de forma natural, variando el lenguaje."
+
+    # 🔥 ANTI RECITATION
+    "IMPORTANTE: Si el usuario pide textos bíblicos muy conocidos o extensos "
+    "(como los Diez Mandamientos), NO los recites completos. "
+    "En su lugar, explicalos o resumilos con palabras simples. "
+
+    "Podés incluir citas breves, pero evitá bloques largos completos. "
+
+    # 🔥 FLUIDEZ
+    "Antes de citar un versículo, introducí brevemente el tema. "
+    "Luego el versículo, y después una explicación clara. "
+
+    "Usá párrafos cortos. Evitá bloques largos. "
+
+    # 🔥 FORMATO
+    "Siempre que cites, usá formato en palabras: "
+    "Éxodo capitulo. 20 versiculo. 3 — No tendrás dioses ajenos delante de mí. "
+
+    "No uses dos puntos (:). "
+    "No inventes citas. "
+
+    # 🔥 LISTAS
+    "Si enumerás, completá siempre la lista. "
+
+    # 🔥 NATURALIDAD
+    "No repitas cierres. Variá el lenguaje."
 )
 
 PROMPT_AMARILLO = (
     PROMPT_BASE + " "
-    "El usuario puede estar pasando dolor emocional o angustia. "
-    "Respondé con más contención, más calma y más escucha. "
-    "No cortes la conversación. "
-    "No uses frases robóticas. "
-    "No diagnostiques. "
-    "No des consejos médicos ni legales. "
-    "Podés usar el Manual para acompañar, pero sin sonar mecánico."
+    "El usuario puede estar pasando dolor emocional. "
+    "Respondé con más contención, calma y cercanía. "
 )
 
 
 # =========================
-# 12. CHAT
+# 🔐 FUNCIÓN SEGURA (NUEVA)
+# =========================
+def extraer_texto_seguro(response):
+    try:
+        if response is None:
+            return None, "Respuesta vacía", None
+
+        candidates = getattr(response, "candidates", None)
+        if not candidates:
+            return None, "Sin candidates", None
+
+        candidate = candidates[0]
+        finish_reason = getattr(candidate, "finish_reason", None)
+        finish_reason_str = str(finish_reason) if finish_reason else ""
+
+        content = getattr(candidate, "content", None)
+        parts = getattr(content, "parts", None) if content else None
+
+        textos = []
+
+        if parts:
+            for part in parts:
+                texto = getattr(part, "text", None)
+                if texto:
+                    textos.append(str(texto).strip())
+
+        if textos:
+            return "\n\n".join(textos), None, finish_reason_str
+
+        return None, "Sin texto válido", finish_reason_str
+
+    except Exception as e:
+        return None, f"Error: {e}", None
+
+
+# =========================
+# 12. CHAT (PARTE CORREGIDA)
 # =========================
 prompt = st.chat_input("Hablemos sinceramente...")
 
@@ -531,7 +585,6 @@ if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("assistant"):
-        # ESTE PLACEHOLDER RESERVA EL LUGAR Y EVITA EL SALTO BRUSCO
         respuesta_placeholder = st.empty()
 
         try:
@@ -540,7 +593,7 @@ if prompt:
             if nivel == "rojo":
                 texto = respuesta_roja()
                 respuesta_placeholder.empty()
-                texto_final = mostrar_respuesta_suave(texto, delay=0.01)
+                texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 reproducir_audio(texto_final)
                 st.stop()
@@ -548,7 +601,7 @@ if prompt:
             elif nivel == "rojo_abuso":
                 texto = respuesta_abuso()
                 respuesta_placeholder.empty()
-                texto_final = mostrar_respuesta_suave(texto, delay=0.01)
+                texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 reproducir_audio(texto_final)
                 st.stop()
@@ -556,52 +609,55 @@ if prompt:
             respuesta_directa = respuesta_filtrada(prompt)
             if respuesta_directa:
                 respuesta_placeholder.empty()
-                texto_final = mostrar_respuesta_suave(respuesta_directa, delay=0.01)
+                texto_final = mostrar_respuesta_suave(respuesta_directa)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 reproducir_audio(texto_final)
                 st.stop()
 
-            # MUESTRA "PENSANDO..." SIEMPRE EN EL MISMO LUGAR
             with respuesta_placeholder.container():
                 with st.spinner("Buscando respuesta en el Manual..."):
+
                     historial = construir_historial(st.session_state.messages, limite=15)
                     contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
 
                     model = genai.GenerativeModel("models/gemini-3-flash-preview")
+
                     response = model.generate_content(
                         f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                         generation_config={
                             "max_output_tokens": 4000,
-                            "temperature": 0.2,
+                            "temperature": 0.3,
                         },
                     )
 
-                    if hasattr(response, "text") and response.text:
-                        texto_crudo = response.text
-                    elif hasattr(response, "candidates") and response.candidates:
-                        partes = response.candidates[0].content.parts
-                        texto_crudo = "".join(p.text for p in partes if hasattr(p, "text"))
-                    else:
-                        texto_crudo = str(response)
+                    texto_extraido, error_detalle, finish_reason = extraer_texto_seguro(response)
 
-                    texto = re.sub(r"[*#_]", "", texto_crudo).strip()
+                    if not texto_extraido:
+                        fr = (finish_reason or "").upper()
+
+                        if "RECITATION" in fr or fr == "4":
+                            texto_extraido = (
+                                "Ese contenido no lo puedo mostrar de forma literal completa, "
+                                "pero sí puedo explicártelo:\n\n"
+                                "Los Diez Mandamientos enseñan a honrar a Dios, respetar a los padres, "
+                                "no matar, no cometer adulterio, no robar, no mentir y no codiciar lo ajeno. "
+                                "Son una guía de vida para caminar en rectitud."
+                            )
+                        else:
+                            texto_extraido = "No pude generar una respuesta válida en este momento."
+
+                    texto = re.sub(r"[*#_]", "", texto_extraido).strip()
                     texto = asegurar_cierre(texto)
 
-            # BORRA EL SPINNER Y ESCRIBE SUAVE EN EL MISMO BLOQUE
             respuesta_placeholder.empty()
-            texto_final = mostrar_respuesta_suave(texto, delay=0.012)
+            texto_final = mostrar_respuesta_suave(texto)
 
             st.session_state.messages.append({"role": "assistant", "content": texto_final})
             reproducir_audio(texto_final)
 
         except Exception as e:
             st.exception(e)
-
-            if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
-                st.error("El sistema está momentáneamente saturado. Probá en unos minutos.")
-            else:
-                st.error("Ocurrió un error al generar la respuesta. Probá de nuevo en unos segundos.")
-
+            st.error("Error en la generación de respuesta.")
 
 # =========================
 # 13. CAFECITO
