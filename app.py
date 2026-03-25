@@ -476,7 +476,7 @@ IA DIVINA es una herramienta de acompañamiento basada en textos bíblicos.
 # =========================
 for m in st.session_state.messages:
     with st.chat_message(m["role"]):
-        st.markdown(m["content"])
+        st.markdown(m["content"].replace("\n", "  \n"))
         if m["role"] == "assistant":
             reproducir_audio(m["content"])
 
