@@ -105,13 +105,6 @@ def stream_text(texto: str, delay: float = 0.02):
         time.sleep(delay)
 
 
-def mostrar_respuesta_suave(texto: str, delay: float = 0.012) -> str:
-    resultado = st.write_stream(stream_text(texto, delay=delay))
-    if isinstance(resultado, str):
-        return resultado
-    return texto
-
-
 # =========================
 # 3. CLASIFICACIÓN DE RIESGO
 # =========================
