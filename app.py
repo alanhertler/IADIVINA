@@ -131,6 +131,8 @@ def respuesta_roja() -> str:
         "Lo que estás diciendo suena serio y no quiero tratarlo como si fuera una charla más.\n\n"
         "Buscá ayuda real ahora mismo con una persona cercana, un familiar, alguien de confianza "
         "o un servicio de emergencia de tu zona. Si sentís que podés hacerte daño en este momento, no te quedes solo.\n\n"
+        "Si estás en Argentina, podés llamar gratis al 135 (CABA y GBA) o al (011) 5275-1135 desde todo el país. "
+        "Hay personas reales del otro lado para escucharte ahora mismo.\n\n"
         "Yo no reemplazo ayuda profesional ni intervención inmediata. Por favor, priorizá contacto real y urgente con alguien que pueda acompañarte ahora.\n\n"
         "¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
