@@ -109,9 +109,11 @@ def clasificar_riesgo(texto: str) -> str:
 
     patrones_abuso = [
         r"\bmi papa me toco\b",
-        r"\bme toco entre las piernas\b",
+        r"\bme tocaron entre las piernas\b"
+        r"\bme tocaron\b.+\bpiernas\b"
         r"\bme manosearon\b",
         r"\bme tocaron los senos\b",
+        r"\bme toco un seno\b",
         r"\bme tocaron la cola\b",
         r"\bme tocaron la vagina\b",
         r"\babusaron de mi\b",
