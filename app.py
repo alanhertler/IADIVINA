@@ -87,6 +87,7 @@ def reproducir_audio(texto: str):
 # =========================
 # 2.1 FUNCIONES VISUALES NUEVAS
 # =========================
+
 def construir_historial(messages, limite=15):
     historial = ""
     for msg in messages[-limite:]:
@@ -103,6 +104,13 @@ def stream_text(texto: str, delay: float = 0.02):
     for parte in partes:
         yield parte
         time.sleep(delay)
+
+
+def mostrar_respuesta_suave(texto: str, delay: float = 0.02) -> str:
+    resultado = st.write_stream(stream_text(texto, delay=delay))
+    if isinstance(resultado, str):
+        return resultado
+    return texto
 
 
 # =========================
