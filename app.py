@@ -6,11 +6,11 @@ import google.generativeai as genai
 from gtts import gTTS
 import base64
 import re
-import uuid
 import time
 from collections import deque
 
-# ========================= 
+
+# =========================
 # 1. CONEXIÓN Y SEGURIDAD
 # =========================
 try:
@@ -21,33 +21,42 @@ except Exception:
 try:
     ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
 except Exception:
-    ADMIN_PASSWORD = os.getenv("NOmerobesLAPLATA10K", "NOmerobesLAPLATA10K")
+    ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "NOmerobesLAPLATA10K")
 
 if not API_KEY or API_KEY == "TU_API_KEY_ACA":
     st.set_page_config(page_title="IA Divina", layout="centered")
     st.error("Falta configurar la API Key.")
     st.stop()
 
-genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+genai.configure(api_key=API_KEY)
+st.set_page_config(page_title="IA Divina", layout="centered")
+
+
+# =========================
+# 2. FUNCIONES AUXILIARES
+# =========================
 def get_base64(file_path: str):
     try:
         with open(file_path, "rb") as f:
             return base64.b64encode(f.read()).decode()
-        
     except Exception:
         return None
+
 
 def asegurar_cierre(texto: str) -> str:
     return texto
 
+
 def reproducir_audio(texto: str):
+    if not st.session_state.get("usar_voz", True):
+        return
+
     if "audio_bytes" not in st.session_state:
         st.session_state.audio_bytes = None
 
     if st.button("🔊 Escuchar respuesta", key=f"escuchar_{hash(texto)}"):
         try:
             from io import BytesIO
-            from gtts import gTTS
 
             audio_buffer = BytesIO()
             tts = gTTS(text=texto, lang="es", tld="com.mx")
@@ -62,6 +71,7 @@ def reproducir_audio(texto: str):
     if st.session_state.audio_bytes:
         st.audio(st.session_state.audio_bytes, format="audio/mp3")
 
+
 def normalizar(texto: str) -> str:
     texto = texto.lower().strip()
     reemplazos = {
@@ -70,6 +80,7 @@ def normalizar(texto: str) -> str:
     for a, b in reemplazos.items():
         texto = texto.replace(a, b)
     return texto
+
 
 def clasificar_riesgo(texto: str) -> str:
     t = normalizar(texto)
@@ -109,21 +120,27 @@ def clasificar_riesgo(texto: str) -> str:
 
     patrones_abuso = [
         r"\bmi papa me toco\b",
+        r"\bmi mama me toco\b",
+        r"\bmi padrastro me toco\b",
+        r"\bmi tio me toco\b",
+        r"\bmi abuelo me toco\b",
+        r"\bmi hermano me toco\b",
+        r"\bel pastor me toco\b",
         r"\bme toco entre las piernas\b",
         r"\bme tocaron entre las piernas\b",
         r"\bme tocaron\b.+\bpiernas\b",
         r"\bme manosearon\b",
         r"\bme tocaron los senos\b",
+        r"\bme tocaron las tetas\b",
         r"\bme tocaron la cola\b",
+        r"\bme tocaron el culo\b",
         r"\bme tocaron la vagina\b",
         r"\babusaron de mi\b",
         r"\bme violaron\b",
-        r"\bel pastor me toco\b",
-        r"\bmi padrastro me toco\b",
-        r"\bmi tio me toco\b",
         r"\bme hicieron cosas\b",
         r"\bme obligaron\b",
-   ]
+        r"\bme acosaron\b",
+    ]
     for patron in patrones_abuso:
         if re.search(patron, t):
             return "rojo_abuso"
@@ -176,9 +193,10 @@ def respuesta_abuso() -> str:
         "¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
 
+
 def respuesta_filtrada(texto: str):
     t = normalizar(texto)
-    disparadores = ["culo", "concha", "pija", "porno", "masturb", "sexo", "coger"]
+    disparadores = ["concha", "pija", "porno", "masturb", "sexo", "coger"]
     if any(p in t for p in disparadores):
         return (
             "Puedo seguir si querés hablar en serio sobre lo que te pasa o sobre el Manual. "
@@ -187,12 +205,14 @@ def respuesta_filtrada(texto: str):
         )
     return None
 
+
 # =========================
-# 4. CONTROL DE USO / ANTISPAM
+# 3. CONTROL DE USO / ANTISPAM
 # =========================
 MAX_MENSAJES_POR_MINUTO = 8
 MAX_MENSAJES_POR_HORA = 40
 TIEMPO_MINIMO_ENTRE_MENSAJES = 4
+
 
 def inicializar_control_uso():
     if "control_uso" not in st.session_state:
@@ -202,9 +222,11 @@ def inicializar_control_uso():
             "ultimo_mensaje_ts": 0.0
         }
 
+
 def limpiar_timestamps(cola: deque, ahora: float, ventana_segundos: int):
     while cola and (ahora - cola[0]) > ventana_segundos:
         cola.popleft()
+
 
 def verificar_limites():
     inicializar_control_uso()
@@ -229,6 +251,7 @@ def verificar_limites():
 
     return True, ""
 
+
 def registrar_mensaje():
     inicializar_control_uso()
 
@@ -238,8 +261,9 @@ def registrar_mensaje():
     control["mensajes_hora"].append(ahora)
     control["ultimo_mensaje_ts"] = ahora
 
+
 # =========================
-# 5. ESTADO INICIAL
+# 4. ESTADO INICIAL
 # =========================
 if "acepto_terminos" not in st.session_state:
     st.session_state.acepto_terminos = False
@@ -256,8 +280,9 @@ if "messages" not in st.session_state:
 if "usar_voz" not in st.session_state:
     st.session_state.usar_voz = True
 
+
 # =========================
-# 6. ESTÉTICA (CORREGIDA PARA VISIBILIDAD)
+# 5. ESTÉTICA
 # =========================
 img = get_base64("portada.jpg")
 
@@ -276,7 +301,6 @@ st.markdown(
         background-attachment: fixed;
     }}
 
-    /* EL ARREGLO: Forzamos el color blanco y agregamos sombra para que se lea siempre */
     .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
         color: #F5F5F5 !important;
         text-shadow: 1px 1px 3px rgba(0,0,0,1) !important;
@@ -332,8 +356,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
 # =========================
-# 7. SIDEBAR / ADMIN
+# 6. SIDEBAR / ADMIN
 # =========================
 with st.sidebar:
     st.title("CONFIGURACIÓN")
@@ -343,7 +368,13 @@ with st.sidebar:
     st.markdown("---")
     st.caption("Acceso técnico")
 
-    clave_admin = st.text_input("Clave técnica", type="password", label_visibility="collapsed", placeholder="Clave técnica")
+    clave_admin = st.text_input(
+        "Clave técnica",
+        type="password",
+        label_visibility="collapsed",
+        placeholder="Clave técnica"
+    )
+
     if st.button("Entrar"):
         if clave_admin == ADMIN_PASSWORD:
             st.session_state.es_admin = True
@@ -354,11 +385,12 @@ with st.sidebar:
 
     if st.session_state.es_admin:
         st.success("MODO ADMIN ACTIVO")
+
         st.session_state.mantenimiento = st.toggle(
-    "Modo mantenimiento",
-    value=st.session_state.mantenimiento,
-    key="toggle_mantenimiento"
-)
+            "Modo mantenimiento",
+            value=st.session_state.mantenimiento,
+            key="toggle_mantenimiento"
+        )
 
         if st.button("Reiniciar conversación"):
             st.session_state.messages = []
@@ -368,12 +400,14 @@ with st.sidebar:
             st.session_state.es_admin = False
             st.rerun()
 
+
 # =========================
-# 8. BLOQUEOS GENERALES
+# 7. BLOQUEOS GENERALES
 # =========================
 if st.session_state.mantenimiento and not st.session_state.es_admin:
-     st.error("Sistema en mantenimiento (modo técnico activado).")
-     st.stop()
+    st.error("Sistema en mantenimiento (modo técnico activado).")
+    st.stop()
+
 if not st.session_state.acepto_terminos:
     with st.expander("TÉRMINOS Y CONDICIONES", expanded=True):
         st.write("""
@@ -391,8 +425,9 @@ IA DIVINA es una herramienta de acompañamiento basada en textos bíblicos.
 
     st.stop()
 
+
 # =========================
-# 9. HISTORIAL
+# 8. HISTORIAL
 # =========================
 for m in st.session_state.messages:
     with st.chat_message(m["role"]):
@@ -400,8 +435,9 @@ for m in st.session_state.messages:
         if m["role"] == "assistant":
             reproducir_audio(m["content"])
 
+
 # =========================
-# 10. PROMPTS
+# 9. PROMPTS
 # =========================
 PROMPT_BASE = (
     "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
@@ -416,11 +452,11 @@ PROMPT_BASE = (
     "Usá formato en palabras, por ejemplo: Éxodo capitulo. 20 versiculo. 3 — No tendrás dioses ajenos delante de mí. "
     "No uses formato con dos puntos (:) para evitar confusión en lectura. "
     "No inventes citas. Si no estás seguro, no cites. "
-    "Si enumerás una lista, siempre completala totalmente antes de terminar la respuesta. Nunca la dejes incompleta."
-    
+    "Si enumerás una lista, siempre completala totalmente antes de terminar la respuesta. Nunca la dejes incompleta. "
     "No repitas frases de cierre en todas las respuestas. "
     "Solo invita a continuar la conversación cuando sea apropiado y de forma natural, variando el lenguaje."
 )
+
 PROMPT_AMARILLO = (
     PROMPT_BASE + " "
     "El usuario puede estar pasando dolor emocional o angustia. "
@@ -432,8 +468,9 @@ PROMPT_AMARILLO = (
     "Podés usar el Manual para acompañar, pero sin sonar mecánico."
 )
 
+
 # =========================
-# 11. CHAT
+# 10. CHAT
 # =========================
 prompt = st.chat_input("Hablemos sinceramente...")
 
@@ -450,13 +487,6 @@ if prompt:
 
     with st.chat_message("assistant"):
         try:
-            respuesta_directa = respuesta_filtrada(prompt)
-            if respuesta_directa:
-                st.markdown(respuesta_directa)
-                st.session_state.messages.append({"role": "assistant", "content": respuesta_directa})
-                reproducir_audio(respuesta_directa)
-                st.stop()
-
             nivel = clasificar_riesgo(prompt)
 
             if nivel == "rojo":
@@ -466,6 +496,20 @@ if prompt:
                 reproducir_audio(texto)
                 st.stop()
 
+            elif nivel == "rojo_abuso":
+                texto = respuesta_abuso()
+                st.markdown(texto)
+                st.session_state.messages.append({"role": "assistant", "content": texto})
+                reproducir_audio(texto)
+                st.stop()
+
+            respuesta_directa = respuesta_filtrada(prompt)
+            if respuesta_directa:
+                st.markdown(respuesta_directa)
+                st.session_state.messages.append({"role": "assistant", "content": respuesta_directa})
+                reproducir_audio(respuesta_directa)
+                st.stop()
+
             historial = ""
             for msg in st.session_state.messages[-15:]:
                 if msg["role"] == "user":
@@ -473,26 +517,25 @@ if prompt:
 
             contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
 
-            model = genai.GenerativeModel("models/gemini-3-flash-preview")
+            model = genai.GenerativeModel("models/gemini-2.0-flash")
             response = model.generate_content(
                 f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                 generation_config={
                     "max_output_tokens": 4000,
                     "temperature": 0.2
                 }
-            )           
+            )
+
             if hasattr(response, "text") and response.text:
                 texto_crudo = response.text
-                
             elif hasattr(response, "candidates") and response.candidates:
                 partes = response.candidates[0].content.parts
                 texto_crudo = "".join(p.text for p in partes if hasattr(p, "text"))
-                
             else:
                 texto_crudo = str(response)
 
             texto = re.sub(r"[*#_]", "", texto_crudo).strip()
-            texto = asegurar_cierre(texto) 
+            texto = asegurar_cierre(texto)
 
             st.markdown(texto)
             st.session_state.messages.append({"role": "assistant", "content": texto})
@@ -505,11 +548,13 @@ if prompt:
                 st.error("El sistema está momentáneamente saturado. Probá en unos minutos.")
             else:
                 st.error("Ocurrió un error al generar la respuesta. Probá de nuevo en unos segundos.")
+
+
 st.sidebar.markdown("---")
 st.sidebar.write("### ☕ Apoyá a la IA DIVINA")
 st.sidebar.markdown(
-    f'<a href="https://cafecito.app/iadivina" target="_blank">'
+    '<a href="https://cafecito.app/iadivina" target="_blank">'
     '<img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">'
-    '</a>', 
+    '</a>',
     unsafe_allow_html=True
 )
