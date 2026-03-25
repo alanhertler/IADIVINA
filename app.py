@@ -11,7 +11,7 @@ from collections import deque
 
 
 # =========================
-# 1. CONEXIÓN Y SEGURIDAD
+# 1. CONFIGURACIÓN INICIAL
 # =========================
 try:
     API_KEY = st.secrets["GOOGLE_API_KEY"]
@@ -23,13 +23,13 @@ try:
 except Exception:
     ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "NOmerobesLAPLATA10K")
 
+st.set_page_config(page_title="IA DIVINA", layout="centered")
+
 if not API_KEY or API_KEY == "TU_API_KEY_ACA":
-    st.set_page_config(page_title="IA Divina", layout="centered")
     st.error("Falta configurar la API Key.")
     st.stop()
 
 genai.configure(api_key=API_KEY)
-st.set_page_config(page_title="IA Divina", layout="centered")
 
 
 # =========================
@@ -44,6 +44,21 @@ def get_base64(file_path: str):
 
 
 def asegurar_cierre(texto: str) -> str:
+    return texto.strip()
+
+
+def normalizar(texto: str) -> str:
+    texto = texto.lower().strip()
+    reemplazos = {
+        "á": "a",
+        "é": "e",
+        "í": "i",
+        "ó": "o",
+        "ú": "u",
+        "ñ": "n",
+    }
+    for a, b in reemplazos.items():
+        texto = texto.replace(a, b)
     return texto
 
 
@@ -57,14 +72,11 @@ def reproducir_audio(texto: str):
     if st.button("🔊 Escuchar respuesta", key=f"escuchar_{hash(texto)}"):
         try:
             from io import BytesIO
-
             audio_buffer = BytesIO()
             tts = gTTS(text=texto, lang="es", tld="com.mx")
             tts.write_to_fp(audio_buffer)
             audio_buffer.seek(0)
-
             st.session_state.audio_bytes = audio_buffer.read()
-
         except Exception as e:
             st.error(f"No se pudo generar el audio: {e}")
 
@@ -72,16 +84,9 @@ def reproducir_audio(texto: str):
         st.audio(st.session_state.audio_bytes, format="audio/mp3")
 
 
-def normalizar(texto: str) -> str:
-    texto = texto.lower().strip()
-    reemplazos = {
-        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"
-    }
-    for a, b in reemplazos.items():
-        texto = texto.replace(a, b)
-    return texto
-
-
+# =========================
+# 3. CLASIFICACIÓN DE RIESGO
+# =========================
 def clasificar_riesgo(texto: str) -> str:
     t = normalizar(texto)
 
@@ -168,6 +173,9 @@ def clasificar_riesgo(texto: str) -> str:
     return "verde"
 
 
+# =========================
+# 4. RESPUESTAS FIJAS
+# =========================
 def respuesta_roja() -> str:
     return (
         "Lo que estás diciendo suena serio y no quiero tratarlo como si fuera una charla más.\n\n"
@@ -207,7 +215,7 @@ def respuesta_filtrada(texto: str):
 
 
 # =========================
-# 3. CONTROL DE USO / ANTISPAM
+# 5. CONTROL DE USO
 # =========================
 MAX_MENSAJES_POR_MINUTO = 8
 MAX_MENSAJES_POR_HORA = 40
@@ -219,7 +227,7 @@ def inicializar_control_uso():
         st.session_state.control_uso = {
             "mensajes_minuto": deque(),
             "mensajes_hora": deque(),
-            "ultimo_mensaje_ts": 0.0
+            "ultimo_mensaje_ts": 0.0,
         }
 
 
@@ -254,7 +262,6 @@ def verificar_limites():
 
 def registrar_mensaje():
     inicializar_control_uso()
-
     ahora = time.time()
     control = st.session_state.control_uso
     control["mensajes_minuto"].append(ahora)
@@ -263,7 +270,7 @@ def registrar_mensaje():
 
 
 # =========================
-# 4. ESTADO INICIAL
+# 6. ESTADO INICIAL
 # =========================
 if "acepto_terminos" not in st.session_state:
     st.session_state.acepto_terminos = False
@@ -282,7 +289,7 @@ if "usar_voz" not in st.session_state:
 
 
 # =========================
-# 5. ESTÉTICA
+# 7. ESTILO
 # =========================
 img = get_base64("portada.jpg")
 
@@ -323,7 +330,7 @@ st.markdown(
     }}
     </style>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 st.markdown(
@@ -353,12 +360,12 @@ st.markdown(
         </div>
     </div>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 
 # =========================
-# 6. SIDEBAR / ADMIN
+# 8. SIDEBAR / ADMIN
 # =========================
 with st.sidebar:
     st.title("CONFIGURACIÓN")
@@ -372,7 +379,7 @@ with st.sidebar:
         "Clave técnica",
         type="password",
         label_visibility="collapsed",
-        placeholder="Clave técnica"
+        placeholder="Clave técnica",
     )
 
     if st.button("Entrar"):
@@ -389,7 +396,7 @@ with st.sidebar:
         st.session_state.mantenimiento = st.toggle(
             "Modo mantenimiento",
             value=st.session_state.mantenimiento,
-            key="toggle_mantenimiento"
+            key="toggle_mantenimiento",
         )
 
         if st.button("Reiniciar conversación"):
@@ -402,7 +409,7 @@ with st.sidebar:
 
 
 # =========================
-# 7. BLOQUEOS GENERALES
+# 9. BLOQUEOS GENERALES
 # =========================
 if st.session_state.mantenimiento and not st.session_state.es_admin:
     st.error("Sistema en mantenimiento (modo técnico activado).")
@@ -427,7 +434,7 @@ IA DIVINA es una herramienta de acompañamiento basada en textos bíblicos.
 
 
 # =========================
-# 8. HISTORIAL
+# 10. HISTORIAL
 # =========================
 for m in st.session_state.messages:
     with st.chat_message(m["role"]):
@@ -437,7 +444,7 @@ for m in st.session_state.messages:
 
 
 # =========================
-# 9. PROMPTS
+# 11. PROMPTS
 # =========================
 PROMPT_BASE = (
     "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
@@ -470,7 +477,7 @@ PROMPT_AMARILLO = (
 
 
 # =========================
-# 10. CHAT
+# 12. CHAT
 # =========================
 prompt = st.chat_input("Hablemos sinceramente...")
 
@@ -522,8 +529,8 @@ if prompt:
                 f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                 generation_config={
                     "max_output_tokens": 4000,
-                    "temperature": 0.2
-                }
+                    "temperature": 0.2,
+                },
             )
 
             if hasattr(response, "text") and response.text:
@@ -548,11 +555,18 @@ if prompt:
                 st.error("El sistema está momentáneamente saturado. Probá en unos minutos.")
             else:
                 st.error("Ocurrió un error al generar la respuesta. Probá de nuevo en unos segundos.")
-           st.sidebar.markdown("---")
-           st.sidebar.write("### ☕ Apoyá a la IA DIVINA")
-           st.sidebar.markdown(
-               f'<a href="https://cafecito.app/iadivina" target="_blank">'
-              '<img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">'
-              '</a>', 
+
+
+# =========================
+# 13. CAFECITO
+# =========================
+st.sidebar.markdown("---")
+st.sidebar.write("### ☕ Apoyá a la IA DIVINA")
+st.sidebar.markdown(
+    '<a href="https://cafecito.app/iadivina" target="_blank">'
+    '<img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">'
+    '</a>',
+    unsafe_allow_html=True,
+)
            unsafe_allow_html=True
         )
