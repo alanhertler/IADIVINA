@@ -126,14 +126,13 @@ def clasificar_riesgo(texto: str) -> str:
 
     return "verde"
 
-def respuesta_roja() -> str:
+def respuesta_abuso() -> str:
     return (
-        "Lo que estás diciendo suena serio y no quiero tratarlo como si fuera una charla más.\n\n"
-        "Buscá ayuda real ahora mismo con una persona cercana, un familiar, alguien de confianza "
-        "o un servicio de emergencia de tu zona. Si sentís que podés hacerte daño en este momento, no te quedes solo.\n\n"
-        "Si estás en Argentina, podés llamar gratis al 135 (CABA y GBA) o al (011) 5275-1135 desde todo el país. "
-        "Hay personas reales del otro lado para escucharte ahora mismo.\n\n"
-        "Yo no reemplazo ayuda profesional ni intervención inmediata. Por favor, priorizá contacto real y urgente con alguien que pueda acompañarte ahora.\n\n"
+        "Lo que estás diciendo es muy serio. Nadie tenía derecho a hacerte eso. No es tu culpa.\n\n"
+        "Si estás en peligro o esto puede volver a pasar, llamá ahora mismo al 911.\n\n"
+        "También podés comunicarte en Argentina con el 137 (violencia familiar) o el 144. "
+        "Hay personas reales que pueden ayudarte y protegerte.\n\n"
+        "No tenés que pasar esto en silencio. Buscá a alguien de confianza o un adulto seguro que pueda acompañarte.\n\n"
         "¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
 
