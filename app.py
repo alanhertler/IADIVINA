@@ -553,11 +553,13 @@ if prompt:
 # =========================
 # 11. CAFECITO
 # =========================
-st.sidebar.markdown("---")
-st.sidebar.write("### ☕ Apoyá a la IA DIVINA")
 st.sidebar.markdown(
-    '<a href="https://cafecito.app/iadivina" target="_blank">'
-    '<img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">'
-    '</a>',
+    """
+    <div style="text-align: center;">
+        <a href="https://cafecito.app/iadivina" target="_blank">
+            <img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">
+        </a>
+    </div>
+    """,
     unsafe_allow_html=True
 )
