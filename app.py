@@ -548,16 +548,11 @@ if prompt:
                 st.error("El sistema está momentáneamente saturado. Probá en unos minutos.")
             else:
                 st.error("Ocurrió un error al generar la respuesta. Probá de nuevo en unos segundos.")
-                
-
-# =========================
-# 11. CAFECITO
-# =========================
-st.sidebar.markdown(
-    f'''
-    <a href="https://cafecito.app/iadivina" target="_blank">
-        <img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">
-    </a>
-    ''', 
-    unsafe_allow_html=True
-)
+           st.sidebar.markdown("---")
+           st.sidebar.write("### ☕ Apoyá a la IA DIVINA")
+           st.sidebar.markdown(
+               f'<a href="https://cafecito.app/iadivina" target="_blank">'
+              '<img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">'
+              '</a>', 
+           unsafe_allow_html=True
+        )
