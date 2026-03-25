@@ -554,12 +554,10 @@ if prompt:
 # 11. CAFECITO
 # =========================
 st.sidebar.markdown(
-    """
-    <div style="text-align: center;">
-        <a href="https://cafecito.app/iadivina" target="_blank">
-            <img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">
-        </a>
-    </div>
-    """,
+    f'''
+    <a href="https://cafecito.app/iadivina" target="_blank">
+        <img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">
+    </a>
+    ''', 
     unsafe_allow_html=True
 )
