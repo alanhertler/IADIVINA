@@ -97,9 +97,11 @@ def construir_historial(messages, limite=15):
     return historial.strip()
 
 
-def stream_text(texto: str, delay: float = 0.012):
-    for linea in texto.split("\n"):
-        yield linea + "\n"
+def stream_text(texto: str, delay: float = 0.02):
+    texto = texto.replace("\r\n", "\n")
+    partes = re.split(r'(\s+)', texto)
+    for parte in partes:
+        yield parte
         time.sleep(delay)
 
 
