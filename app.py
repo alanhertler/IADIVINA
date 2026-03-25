@@ -72,14 +72,14 @@ def normalizar(texto: str) -> str:
     return texto
 
 def clasificar_riesgo(texto: str) -> str:
-    t = normalizar(texto) 
+    t = normalizar(texto)
 
     frases_boludeo = [
         "me muero de risa",
         "me mori de risa",
         "me mato de risa",
         "jajaja me mato",
-        "jaja me muero"
+        "jaja me muero",
     ]
     for frase in frases_boludeo:
         if frase in t:
@@ -93,17 +93,38 @@ def clasificar_riesgo(texto: str) -> str:
         r"\bme voy a suicidar\b",
         r"\bno quiero seguir viviendo\b",
         r"\bno quiero seguir vivo\b",
-        r"\bquiero morir\b",
         r"\bvoy a terminar con todo\b",
         r"\besta noche termino con todo\b",
-        r"\bya tome\b",
+        r"\bya tome pastillas\b",
+        r"\bya tome remedios\b",
+        r"\bya tome clonazepam\b",
+        r"\bya tome alcohol\b",
         r"\bme tome\b.+\b(pastillas|remedios|clonazepam|alcohol)\b",
         r"\bestoy por cortarme\b",
-        r"\bme voy a cortar\b"
+        r"\bme voy a cortar\b",
     ]
     for patron in patrones_rojos:
         if re.search(patron, t):
             return "rojo"
+
+    patrones_abuso = [
+        r"\bmi papa me toco\b",
+        r"\bme toco entre las piernas\b",
+        r"\bme manosearon\b",
+        r"\bme tocaron los senos\b",
+        r"\bme tocaron la cola\b",
+        r"\bme tocaron la vagina\b",
+        r"\babusaron de mi\b",
+        r"\bme violaron\b",
+        r"\bel pastor me toco\b",
+        r"\bmi padrastro me toco\b",
+        r"\bmi tio me toco\b",
+        r"\bme hicieron cosas\b",
+        r"\bme obligaron\b",
+    ]
+    for patron in patrones_abuso:
+        if re.search(patron, t):
+            return "rojo_abuso"
 
     patrones_amarillos = [
         r"\bno doy mas\b",
@@ -118,14 +139,14 @@ def clasificar_riesgo(texto: str) -> str:
         r"\bpienso cosas feas\b",
         r"\bestoy cansado de vivir\b",
         r"\bestoy cansada de vivir\b",
-        r"\bme quiero morir\b"
+        r"\bme quiero morir\b",
+        r"\bquiero morir\b",
     ]
     for patron in patrones_amarillos:
         if re.search(patron, t):
             return "amarillo"
 
     return "verde"
-
 def respuesta_abuso() -> str:
     return (
         "Lo que estás diciendo es muy serio. Nadie tenía derecho a hacerte eso. No es tu culpa.\n\n"
