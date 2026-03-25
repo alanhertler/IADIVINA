@@ -505,10 +505,14 @@ PROMPT_BASE = (
 
     "Podés incluir citas breves, pero evitá bloques largos completos. "
 
-    # 🔥 REGLA CLAVE QUE TE FALTABA
+    # 🔥 ENUMERACIÓN OBLIGATORIA
     "Si el usuario pide específicamente enumeraciones (como los Diez Mandamientos), "
     "debes responder obligatoriamente con una lista numerada completa del 1 al 10, "
     "sin omitir ningún punto y sin reemplazarla por una explicación general. "
+
+    # 🔥 FORMATO VERTICAL (CLAVE)
+    "Cuando respondas con listas numeradas, cada elemento debe ir obligatoriamente en una línea nueva, "
+    "uno debajo del otro, usando formato vertical claro. Nunca escribas listas en un mismo párrafo. "
 
     # 🔥 FLUIDEZ
     "Antes de citar un versículo, introducí brevemente el tema. "
@@ -526,7 +530,7 @@ PROMPT_BASE = (
     "No uses formato con dos puntos (:). "
     "No inventes citas. "
 
-    # 🔥 LISTAS
+    # 🔥 LISTAS COMPLETAS
     "Si enumerás una lista, siempre completala totalmente antes de terminar la respuesta. "
     "Nunca la dejes incompleta. "
 
