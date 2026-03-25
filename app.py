@@ -85,6 +85,33 @@ def reproducir_audio(texto: str):
 
 
 # =========================
+# 2.1 FUNCIONES VISUALES NUEVAS
+# =========================
+def construir_historial(messages, limite=15):
+    historial = ""
+    for msg in messages[-limite:]:
+        if msg["role"] == "user":
+            historial += f"Usuario: {msg['content']}\n"
+        elif msg["role"] == "assistant":
+            historial += f"Asistente: {msg['content']}\n"
+    return historial.strip()
+
+
+def stream_text(texto: str, delay: float = 0.012):
+    palabras = texto.split()
+    for palabra in palabras:
+        yield palabra + " "
+        time.sleep(delay)
+
+
+def mostrar_respuesta_suave(texto: str, delay: float = 0.012) -> str:
+    resultado = st.write_stream(stream_text(texto, delay=delay))
+    if isinstance(resultado, str):
+        return resultado
+    return texto
+
+
+# =========================
 # 3. CLASIFICACIÓN DE RIESGO
 # =========================
 def clasificar_riesgo(texto: str) -> str:
@@ -333,6 +360,12 @@ st.markdown(
     [data-testid="stSidebar"] {{
         background-color: rgba(10, 10, 15, 0.98) !important;
     }}
+
+    .respuesta-cargando {{
+        opacity: 0.92;
+        font-style: italic;
+        padding-top: 4px;
+    }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -498,60 +531,68 @@ if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("assistant"):
+        # ESTE PLACEHOLDER RESERVA EL LUGAR Y EVITA EL SALTO BRUSCO
+        respuesta_placeholder = st.empty()
+
         try:
             nivel = clasificar_riesgo(prompt)
 
             if nivel == "rojo":
                 texto = respuesta_roja()
-                st.markdown(texto)
-                st.session_state.messages.append({"role": "assistant", "content": texto})
-                reproducir_audio(texto)
+                respuesta_placeholder.empty()
+                texto_final = mostrar_respuesta_suave(texto, delay=0.01)
+                st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                reproducir_audio(texto_final)
                 st.stop()
 
             elif nivel == "rojo_abuso":
                 texto = respuesta_abuso()
-                st.markdown(texto)
-                st.session_state.messages.append({"role": "assistant", "content": texto})
-                reproducir_audio(texto)
+                respuesta_placeholder.empty()
+                texto_final = mostrar_respuesta_suave(texto, delay=0.01)
+                st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                reproducir_audio(texto_final)
                 st.stop()
 
             respuesta_directa = respuesta_filtrada(prompt)
             if respuesta_directa:
-                st.markdown(respuesta_directa)
-                st.session_state.messages.append({"role": "assistant", "content": respuesta_directa})
-                reproducir_audio(respuesta_directa)
+                respuesta_placeholder.empty()
+                texto_final = mostrar_respuesta_suave(respuesta_directa, delay=0.01)
+                st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                reproducir_audio(texto_final)
                 st.stop()
 
-            historial = ""
-            for msg in st.session_state.messages[-15:]:
-                if msg["role"] == "user":
-                    historial += f"Usuario: {msg['content']}\n"
+            # MUESTRA "PENSANDO..." SIEMPRE EN EL MISMO LUGAR
+            with respuesta_placeholder.container():
+                with st.spinner("Buscando respuesta en el Manual..."):
+                    historial = construir_historial(st.session_state.messages, limite=15)
+                    contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
 
-            contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
+                    model = genai.GenerativeModel("models/gemini-3-flash-preview")
+                    response = model.generate_content(
+                        f"{contexto}\n\n{historial}\nUsuario: {prompt}",
+                        generation_config={
+                            "max_output_tokens": 4000,
+                            "temperature": 0.2,
+                        },
+                    )
 
-            model = genai.GenerativeModel("models/gemini-3-flash-preview")
-            response = model.generate_content(
-                f"{contexto}\n\n{historial}\nUsuario: {prompt}",
-                generation_config={
-                    "max_output_tokens": 4000,
-                    "temperature": 0.2,
-                },
-            )
+                    if hasattr(response, "text") and response.text:
+                        texto_crudo = response.text
+                    elif hasattr(response, "candidates") and response.candidates:
+                        partes = response.candidates[0].content.parts
+                        texto_crudo = "".join(p.text for p in partes if hasattr(p, "text"))
+                    else:
+                        texto_crudo = str(response)
 
-            if hasattr(response, "text") and response.text:
-                texto_crudo = response.text
-            elif hasattr(response, "candidates") and response.candidates:
-                partes = response.candidates[0].content.parts
-                texto_crudo = "".join(p.text for p in partes if hasattr(p, "text"))
-            else:
-                texto_crudo = str(response)
+                    texto = re.sub(r"[*#_]", "", texto_crudo).strip()
+                    texto = asegurar_cierre(texto)
 
-            texto = re.sub(r"[*#_]", "", texto_crudo).strip()
-            texto = asegurar_cierre(texto)
+            # BORRA EL SPINNER Y ESCRIBE SUAVE EN EL MISMO BLOQUE
+            respuesta_placeholder.empty()
+            texto_final = mostrar_respuesta_suave(texto, delay=0.012)
 
-            st.markdown(texto)
-            st.session_state.messages.append({"role": "assistant", "content": texto})
-            reproducir_audio(texto)
+            st.session_state.messages.append({"role": "assistant", "content": texto_final})
+            reproducir_audio(texto_final)
 
         except Exception as e:
             st.exception(e)
