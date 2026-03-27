@@ -1342,4 +1342,4 @@ st.sidebar.markdown(
     '</a>',
     unsafe_allow_html=True,
 )
-)
+
