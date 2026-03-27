@@ -8,7 +8,7 @@ from gtts import gTTS
 import base64
 import re
 import time
-from pathlib import Path
+from pathlib import Path 
 from collections import deque
 
 
@@ -420,7 +420,17 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
         if encontrado:
             return formatear_versiculo_local(encontrado)
         return "No encontré esa referencia en la base local actual."
-
+    def es_pregunta_explicativa(texto):
+    texto = texto.lower()
+    claves = [
+        "que significa",
+        "qué significa",
+        "explicame",
+        "explícame",
+        "que quiere decir",
+        "qué quiere decir"
+    ]
+    return any(k in texto for k in claves)
     tema = detectar_tema_local(consulta)
     if tema:
         versiculos = buscar_versiculos_por_tema_local(biblia, temas, tema)
