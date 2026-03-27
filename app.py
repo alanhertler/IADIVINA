@@ -4,11 +4,11 @@ os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 import json
 import streamlit as st
 import google.generativeai as genai
-from gtts import gTTS
 import base64
 import re
 import time
 import io
+import requests
 from pathlib import Path
 from collections import deque
 
@@ -80,7 +80,7 @@ BIBLIA_DEMO = [
 RESPUESTAS_DEMO = {
     "saludo": "Estoy acá para escucharte. Si querés, podés contarme qué te pasa o pedirme un versículo por tema o referencia.",
     "ayuda": "Podés escribir cosas como: 'Juan 3:16', 'dame un versículo sobre paz', 'estoy triste', 'tengo miedo'.",
-    "fallback": "No encontré una respuesta local exacta. Más adelante esta parte se conectará con la IA para responder preguntas complejas.",
+    "fallback": "No encontré una respuesta local exacta.",
     "consuelo_base": "Te comparto una palabra que puede traer consuelo:",
     "paz_base": "Te comparto una palabra sobre la paz:",
     "miedo_base": "Te comparto una palabra para el temor:",
@@ -124,7 +124,6 @@ def cargar_json(ruta: Path):
 
 def asegurar_estructura_local():
     DATA_DIR.mkdir(exist_ok=True)
-
     if not BIBLIA_FILE.exists():
         guardar_json(BIBLIA_FILE, BIBLIA_DEMO)
     else:
@@ -145,10 +144,8 @@ def asegurar_estructura_local():
                 guardar_json(BIBLIA_FILE, biblia_actual)
         except Exception:
             guardar_json(BIBLIA_FILE, BIBLIA_DEMO)
-
     if not RESPUESTAS_FILE.exists():
         guardar_json(RESPUESTAS_FILE, RESPUESTAS_DEMO)
-
     if not TEMAS_FILE.exists():
         guardar_json(TEMAS_FILE, TEMAS_DEMO)
     else:
@@ -156,24 +153,7 @@ def asegurar_estructura_local():
             temas_actuales = cargar_json(TEMAS_FILE)
             cambios = False
             alias_mandamientos = {
-                "10 mandamientos": [
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 2},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 3},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 4},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 5},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 6},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 7},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 8},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 9},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 10},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 11},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 12},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 13},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 14},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 15},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 16},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 17},
-                ],
+                "10 mandamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": i} for i in range(2, 18)],
                 "diez mandamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": 2}],
                 "mandamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": 2}],
                 "madamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": 2}],
@@ -189,72 +169,50 @@ def asegurar_estructura_local():
 
 
 def cargar_datos_locales():
-    biblia = cargar_json(BIBLIA_FILE)
-    respuestas = cargar_json(RESPUESTAS_FILE)
-    temas = cargar_json(TEMAS_FILE)
-    return biblia, respuestas, temas
+    return cargar_json(BIBLIA_FILE), cargar_json(RESPUESTAS_FILE), cargar_json(TEMAS_FILE)
 
 
 def normalizar_local(texto: str) -> str:
     texto = texto.lower().strip()
-    reemplazos = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"}
-    for origen, destino in reemplazos.items():
-        texto = texto.replace(origen, destino)
-    texto = re.sub(r"\s+", " ", texto)
-    return texto
+    for a, b in {"á":"a","é":"e","í":"i","ó":"o","ú":"u","ñ":"n"}.items():
+        texto = texto.replace(a, b)
+    return re.sub(r"\s+", " ", texto)
 
 
 def extraer_referencia_local(consulta: str):
-    consulta_limpia = consulta.strip()
-    patron = r"^\s*([A-Za-zÁÉÍÓÚáéíóúÑñ]+)\s+(\d+)\s*:\s*(\d+)\s*$"
-    match = re.match(patron, consulta_limpia)
+    match = re.match(r"^\s*([A-Za-zÁÉÍÓÚáéíóúÑñ]+)\s+(\d+)\s*:\s*(\d+)\s*$", consulta.strip())
     if not match:
         return None
-    return {
-        "libro": match.group(1),
-        "capitulo": int(match.group(2)),
-        "versiculo": int(match.group(3)),
-    }
+    return {"libro": match.group(1), "capitulo": int(match.group(2)), "versiculo": int(match.group(3))}
 
 
 def buscar_por_referencia_local(biblia, libro, capitulo, versiculo):
     libro_norm = normalizar_local(libro)
     for item in biblia:
-        if (
-            normalizar_local(item["libro"]) == libro_norm
-            and item["capitulo"] == capitulo
-            and item["versiculo"] == versiculo
-        ):
+        if normalizar_local(item["libro"]) == libro_norm and item["capitulo"] == capitulo and item["versiculo"] == versiculo:
             return item
     return None
 
 
 def detectar_tema_local(consulta: str):
-    consulta_norm = normalizar_local(consulta)
+    t = normalizar_local(consulta)
     mapa = {
-        "consuelo": ["consuelo", "dolor", "quebrantado", "solo", "sola", "triste", "tristeza", "duelo"],
-        "paz": ["paz", "calma", "tranquilidad", "descanso"],
-        "miedo": ["miedo", "temor", "asustado", "asustada", "desesperado", "desesperada"],
-        "fe": ["fe", "creer", "esperanza", "confianza"],
-        "ansiedad": ["ansiedad", "ansioso", "ansiosa", "angustia", "angustiado", "angustiada"],
+        "consuelo": ["consuelo","dolor","quebrantado","solo","sola","triste","tristeza","duelo"],
+        "paz": ["paz","calma","tranquilidad","descanso"],
+        "miedo": ["miedo","temor","asustado","asustada","desesperado","desesperada"],
+        "fe": ["fe","creer","esperanza","confianza"],
+        "ansiedad": ["ansiedad","ansioso","ansiosa","angustia","angustiado","angustiada"],
     }
     for tema, palabras in mapa.items():
         for palabra in palabras:
-            if palabra in consulta_norm:
+            if palabra in t:
                 return tema
     return None
 
 
 def buscar_versiculos_por_tema_local(biblia, temas, tema):
-    referencias = temas.get(tema, [])
-    resultados = []
-    for ref in referencias:
-        encontrado = buscar_por_referencia_local(
-            biblia, ref["libro"], ref["capitulo"], ref["versiculo"]
-        )
-        if encontrado:
-            resultados.append(encontrado)
-    return resultados
+    return [v for ref in temas.get(tema, [])
+            if (v := buscar_por_referencia_local(biblia, ref["libro"], ref["capitulo"], ref["versiculo"]))]
 
 
 def formatear_versiculo_local(item):
@@ -263,13 +221,7 @@ def formatear_versiculo_local(item):
 
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
-
-    if (
-        "10 mandamientos" in consulta_norm
-        or "diez mandamientos" in consulta_norm
-        or "mandamientos" in consulta_norm
-        or "madamientos" in consulta_norm
-    ):
+    if any(k in consulta_norm for k in ["10 mandamientos","diez mandamientos","mandamientos","madamientos"]):
         return """LOS DIEZ MANDAMIENTOS
 
 Base bíblica: EXODO capitulo 20. versiculos 2 al 17
@@ -308,37 +260,24 @@ No hablarás contra tu prójimo falso testimonio
 10. EXODO capitulo 20. versiculo 17
 No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo"""
 
-    if consulta_norm in ["hola", "buenas", "buen dia", "buen día", "buenas tardes", "buenas noches"]:
+    if consulta_norm in ["hola","buenas","buen dia","buen día","buenas tardes","buenas noches"]:
         return respuestas["saludo"]
-
-    if consulta_norm in ["ayuda", "menu", "menú", "como funciona", "cómo funciona"]:
+    if consulta_norm in ["ayuda","menu","menú","como funciona","cómo funciona"]:
         return respuestas["ayuda"]
-
     referencia = extraer_referencia_local(consulta)
     if referencia:
-        encontrado = buscar_por_referencia_local(
-            biblia, referencia["libro"], referencia["capitulo"], referencia["versiculo"]
-        )
-        if encontrado:
-            return formatear_versiculo_local(encontrado)
-        return "No encontré esa referencia en la base local actual."
-
+        encontrado = buscar_por_referencia_local(biblia, referencia["libro"], referencia["capitulo"], referencia["versiculo"])
+        return formatear_versiculo_local(encontrado) if encontrado else "No encontré esa referencia en la base local actual."
     tema = detectar_tema_local(consulta)
     if tema:
         versiculos = buscar_versiculos_por_tema_local(biblia, temas, tema)
         if versiculos:
-            encabezados = {
-                "consuelo": respuestas.get("consuelo_base", "Te comparto una palabra:"),
-                "paz": respuestas.get("paz_base", "Te comparto una palabra:"),
-                "miedo": respuestas.get("miedo_base", "Te comparto una palabra:"),
-                "fe": respuestas.get("fe_base", "Te comparto una palabra:"),
-                "ansiedad": respuestas.get("consuelo_base", "Te comparto una palabra:"),
-            }
-            texto = [encabezados.get(tema, "Te comparto una palabra:")]
-            for item in versiculos[:2]:
-                texto.append(formatear_versiculo_local(item))
-            return "\n\n".join(texto)
-
+            encabezados = {"consuelo": respuestas.get("consuelo_base","Te comparto una palabra:"),
+                           "paz": respuestas.get("paz_base","Te comparto una palabra:"),
+                           "miedo": respuestas.get("miedo_base","Te comparto una palabra:"),
+                           "fe": respuestas.get("fe_base","Te comparto una palabra:"),
+                           "ansiedad": respuestas.get("consuelo_base","Te comparto una palabra:")}
+            return "\n\n".join([encabezados.get(tema,"Te comparto una palabra:")] + [formatear_versiculo_local(v) for v in versiculos[:2]])
     return None
 
 
@@ -348,13 +287,6 @@ asegurar_estructura_local()
 # =========================
 # 2. FUNCIONES AUXILIARES
 # =========================
-import base64
-import time
-import re
-import io
-import os
-
-
 def get_base64(file_path: str):
     try:
         with open(file_path, "rb") as f:
@@ -369,31 +301,60 @@ def asegurar_cierre(texto: str) -> str:
 
 def normalizar(texto: str) -> str:
     texto = texto.lower().strip()
-    reemplazos = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"}
-    for a, b in reemplazos.items():
+    for a, b in {"á":"a","é":"e","í":"i","ó":"o","ú":"u","ñ":"n"}.items():
         texto = texto.replace(a, b)
     return texto
 
 
-def _generar_audio_gtts(texto: str) -> bytes:
-    mp3_buffer = io.BytesIO()
-    tts = gTTS(text=texto, lang="es", tld="com.ar")
-    tts.write_to_fp(mp3_buffer)
-    mp3_buffer.seek(0)
-    return mp3_buffer.read()
+# =========================
+# 2.2 VOZ — Google Cloud TTS Neural2
+# Voz masculina español latino — es-US-Neural2-B
+# Usa la misma GOOGLE_API_KEY del proyecto Gemini
+# Si falla, cae silenciosamente sin romper la app
+# Alternativas masculinas:
+#   es-US-Neural2-C (tono más suave)
+#   es-ES-Neural2-B (español España)
+# =========================
+def _generar_audio_cloud_tts(texto: str):
+    if not API_KEY or API_KEY == "TU_API_KEY_ACA":
+        return None
+    url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={API_KEY}"
+    texto_audio = texto[:4500].replace("\n", ". ").strip()
+    payload = {
+        "input": {"text": texto_audio},
+        "voice": {
+            "languageCode": "es-US",
+            "name": "es-US-Neural2-B",
+            "ssmlGender": "MALE"
+        },
+        "audioConfig": {
+            "audioEncoding": "MP3",
+            "speakingRate": 1.0,
+            "pitch": 0.0,
+        }
+    }
+    try:
+        resp = requests.post(url, json=payload, timeout=15)
+        if resp.status_code == 200:
+            audio_b64 = resp.json().get("audioContent", "")
+            if audio_b64:
+                return base64.b64decode(audio_b64)
+        return None
+    except Exception:
+        return None
 
 
 def reproducir_audio(texto: str):
     if not st.session_state.get("usar_voz", True):
         return
-
     boton_id = f"btn_audio_{abs(hash(texto[:80]))}"
-
     if st.button("🔊 Escuchar Manual", key=boton_id):
         try:
-            texto_audio = texto.replace("\n", ". ").strip()
-            audio_bytes = _generar_audio_gtts(texto_audio)
-            st.audio(audio_bytes, format="audio/mp3")
+            audio_bytes = _generar_audio_cloud_tts(texto)
+            if audio_bytes:
+                st.audio(audio_bytes, format="audio/mp3")
+            else:
+                st.warning("La voz no está disponible en este momento.")
         except Exception as e:
             st.error(f"Error de sonido: {e}")
 
@@ -413,8 +374,7 @@ def construir_historial(messages, limite=15):
 
 def stream_text(texto: str, delay: float = 0.02):
     texto = texto.replace("\r\n", "\n")
-    partes = re.split(r"(\s+)", texto)
-    for parte in partes:
+    for parte in re.split(r"(\s+)", texto):
         yield parte
         time.sleep(delay)
 
@@ -424,215 +384,73 @@ def mostrar_respuesta_suave(texto: str, delay: float = 0.02) -> str:
     return resultado if isinstance(resultado, str) else texto
 
 
-def aplicar_estilos():
-    st.markdown(
-        """
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
-
-        html, body, [class*="css"], .stMarkdown, .stText, p, li, span {
-            font-family: 'EB Garamond', Georgia, serif !important;
-            font-size: clamp(16px, 4vw, 20px) !important;
-            line-height: 1.8 !important;
-            color: #f0e6d3 !important;
-        }
-
-        h1, h2, h3, h4 {
-            font-family: 'Cinzel', serif !important;
-            font-size: clamp(20px, 5vw, 28px) !important;
-            letter-spacing: 2px !important;
-            color: #d4af7a !important;
-            text-align: center !important;
-            margin-bottom: 0.6em !important;
-        }
-
-        [data-testid="stChatMessage"] {
-            font-family: 'EB Garamond', Georgia, serif !important;
-            font-size: clamp(16px, 4vw, 19px) !important;
-            line-height: 1.9 !important;
-            padding: 12px 16px !important;
-            border-radius: 12px !important;
-            margin-bottom: 10px !important;
-        }
-
-        ol, ul { padding-left: 1.4em !important; }
-        ol li, ul li { margin-bottom: 0.5em !important; }
-
-        .stChatInput textarea {
-            font-family: 'EB Garamond', Georgia, serif !important;
-            font-size: clamp(15px, 3.5vw, 18px) !important;
-        }
-
-        @media (max-width: 600px) {
-            [data-testid="stChatMessage"] { padding: 10px 12px !important; }
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
 # =========================
 # 3. CLASIFICACIÓN DE RIESGO
-# MEJORADO: lenguaje juvenil agregado
 # =========================
 def clasificar_riesgo(texto: str) -> str:
     t = normalizar(texto)
 
-    # Frases de humor/chiste — no activar alerta
-    frases_boludeo = [
-        "me muero de risa",
-        "me mori de risa",
-        "me mato de risa",
-        "jajaja me mato",
-        "jaja me muero",
-        "me parto de risa",
-        "me caigo de risa",
-    ]
-    for frase in frases_boludeo:
+    for frase in ["me muero de risa","me mori de risa","me mato de risa","jajaja me mato","jaja me muero","me parto de risa","me caigo de risa"]:
         if frase in t:
             return "verde"
 
-    # Patrones de crisis / riesgo de vida
     patrones_rojos = [
-        r"\bme voy a matar\b",
-        r"\bquiero matarme\b",
-        r"\bme quiero matar\b",
-        r"\bquiero suicidarme\b",
-        r"\bme voy a suicidar\b",
-        r"\bno quiero seguir viviendo\b",
-        r"\bno quiero seguir vivo\b",
-        r"\bvoy a terminar con todo\b",
-        r"\besta noche termino con todo\b",
-        r"\bya tome pastillas\b",
-        r"\bya tome remedios\b",
-        r"\bya tome clonazepam\b",
-        r"\bya tome alcohol\b",
+        r"\bme voy a matar\b",r"\bquiero matarme\b",r"\bme quiero matar\b",
+        r"\bquiero suicidarme\b",r"\bme voy a suicidar\b",
+        r"\bno quiero seguir viviendo\b",r"\bno quiero seguir vivo\b",
+        r"\bvoy a terminar con todo\b",r"\besta noche termino con todo\b",
+        r"\bya tome pastillas\b",r"\bya tome remedios\b",r"\bya tome clonazepam\b",r"\bya tome alcohol\b",
         r"\bme tome\b.+\b(pastillas|remedios|clonazepam|alcohol)\b",
-        r"\bestoy por cortarme\b",
-        r"\bme voy a cortar\b",
-        r"\ble mataron a\b",
-        r"\bse murio mi amiga\b",
-        r"\bse murio mi amigo\b",
-        r"\bmataron a mi\b",
-        r"\bperdi a mi\b",
-        # --- NUEVO: lenguaje juvenil de crisis ---
-        r"\bme quiero borrar\b",
-        r"\bya no quiero estar\b",
-        r"\bquiero desaparecer\b",
-        r"\bdesearía no haber nacido\b",
-        r"\bdeseo no haber nacido\b",
-        r"\bno deberia haber nacido\b",
-        r"\bno debí nacer\b",
-        r"\bnadie me va a extrañar\b",
-        r"\bnadie me extrañaria\b",
-        r"\btodos estarian mejor sin mi\b",
-        r"\btodos estarian mejor sin mí\b",
-        r"\bsoy una carga\b",
-        r"\bsoy un estorbo\b",
-        r"\bme voy a tirar\b",
-        r"\bme voy a aventar\b",
-        r"\bquiero saltar\b",
-        r"\bpienso en hacerme dano\b",
-        r"\bpienso en hacerme daño\b",
-        r"\bvoy a hacerme dano\b",
-        r"\bvoy a hacerme daño\b",
-        r"\bme lastimé\b",
-        r"\bme lastime\b",
-        r"\bme hice dano\b",
-        r"\bme hice daño\b",
+        r"\bestoy por cortarme\b",r"\bme voy a cortar\b",
+        r"\ble mataron a\b",r"\bse murio mi amiga\b",r"\bse murio mi amigo\b",r"\bmataron a mi\b",r"\bperdi a mi\b",
+        r"\bme quiero borrar\b",r"\bya no quiero estar\b",r"\bquiero desaparecer\b",
+        r"\bdesearía no haber nacido\b",r"\bdeseo no haber nacido\b",
+        r"\bno deberia haber nacido\b",r"\bno debí nacer\b",
+        r"\bnadie me va a extrañar\b",r"\bnadie me extrañaria\b",
+        r"\btodos estarian mejor sin mi\b",r"\btodos estarian mejor sin mí\b",
+        r"\bsoy una carga\b",r"\bsoy un estorbo\b",
+        r"\bme voy a tirar\b",r"\bme voy a aventar\b",r"\bquiero saltar\b",
+        r"\bpienso en hacerme dano\b",r"\bpienso en hacerme daño\b",
+        r"\bvoy a hacerme dano\b",r"\bvoy a hacerme daño\b",
+        r"\bme lastimé\b",r"\bme lastime\b",r"\bme hice dano\b",r"\bme hice daño\b",
     ]
     for patron in patrones_rojos:
         if re.search(patron, t):
             return "rojo"
 
-    # Patrones de abuso sexual
     patrones_abuso = [
-        r"\bmi papa me toco\b",
-        r"\bmi mama me toco\b",
-        r"\bmi padrastro me toco\b",
-        r"\bmi tio me toco\b",
-        r"\bmi abuelo me toco\b",
-        r"\bmi hermano me toco\b",
-        r"\bel pastor me toco\b",
-        r"\bme toco entre las piernas\b",
-        r"\bme tocaron entre las piernas\b",
-        r"\bme tocaron\b.+\bpiernas\b",
-        r"\bme manosearon\b",
-        r"\bme tocaron los senos\b",
-        r"\bme tocaron las tetas\b",
-        r"\bme tocaron la cola\b",
-        r"\bme tocaron el culo\b",
-        r"\bme tocaron la vagina\b",
-        r"\babusaron de mi\b",
-        r"\bme violaron\b",
-        r"\bme hicieron cosas\b",
-        r"\bme obligaron\b",
-        r"\bme acosaron\b",
-        # --- NUEVO: lenguaje juvenil de abuso ---
-        r"\bme hizo cosas raras\b",
-        r"\bme toco de manera rara\b",
-        r"\bme toco de forma rara\b",
-        r"\bme dejo tocar\b",
-        r"\bme obligo a tocarlo\b",
-        r"\bme obligo a tocarla\b",
-        r"\bme saco fotos\b",
-        r"\bme grabo sin ropa\b",
-        r"\bme mando fotos\b",
-        r"\bme pidio fotos\b",
-        r"\bme pidió fotos\b",
-        r"\bme piden fotos\b",
-        r"\bun adulto me\b.+\bfotos\b",
-        r"\bme groomea\b",
-        r"\bme está groomeando\b",
-        r"\bun mayor me pide\b",
-        r"\bun chico mayor me\b",
+        r"\bmi papa me toco\b",r"\bmi mama me toco\b",r"\bmi padrastro me toco\b",
+        r"\bmi tio me toco\b",r"\bmi abuelo me toco\b",r"\bmi hermano me toco\b",
+        r"\bel pastor me toco\b",r"\bme toco entre las piernas\b",
+        r"\bme tocaron entre las piernas\b",r"\bme tocaron\b.+\bpiernas\b",
+        r"\bme manosearon\b",r"\bme tocaron los senos\b",r"\bme tocaron las tetas\b",
+        r"\bme tocaron la cola\b",r"\bme tocaron el culo\b",r"\bme tocaron la vagina\b",
+        r"\babusaron de mi\b",r"\bme violaron\b",r"\bme hicieron cosas\b",r"\bme obligaron\b",r"\bme acosaron\b",
+        r"\bme hizo cosas raras\b",r"\bme toco de manera rara\b",r"\bme toco de forma rara\b",
+        r"\bme dejo tocar\b",r"\bme obligo a tocarlo\b",r"\bme obligo a tocarla\b",
+        r"\bme saco fotos\b",r"\bme grabo sin ropa\b",r"\bme mando fotos\b",
+        r"\bme pidio fotos\b",r"\bme pidió fotos\b",r"\bme piden fotos\b",
+        r"\bun adulto me\b.+\bfotos\b",r"\bme groomea\b",r"\bme está groomeando\b",
+        r"\bun mayor me pide\b",r"\bun chico mayor me\b",
     ]
     for patron in patrones_abuso:
         if re.search(patron, t):
             return "rojo_abuso"
 
-    # Patrones de malestar emocional moderado
     patrones_amarillos = [
-        r"\bno doy mas\b",
-        r"\bestoy mal\b",
-        r"\bme siento solo\b",
-        r"\bme siento sola\b",
-        r"\bno aguanto mas\b",
-        r"\bestoy destruido\b",
-        r"\bestoy destruida\b",
-        r"\bno tengo ganas de seguir\b",
-        r"\bno quiero seguir asi\b",
-        r"\bpienso cosas feas\b",
-        r"\bestoy cansado de vivir\b",
-        r"\bestoy cansada de vivir\b",
-        r"\bme quiero morir\b",
-        r"\bquiero morir\b",
-        # --- NUEVO: malestar emocional juvenil ---
-        r"\bno sirvo para nada\b",
-        r"\bsoy un fracaso\b",
-        r"\bnadie me entiende\b",
-        r"\bnadie me quiere\b",
-        r"\bme harté de todo\b",
-        r"\bme harte de todo\b",
-        r"\bme tiene harto\b",
-        r"\bme tiene harta\b",
-        r"\bestoy harto de vivir\b",
-        r"\bestoy harta de vivir\b",
-        r"\bme siento invisible\b",
-        r"\bme siento roto\b",
-        r"\bme siento rota\b",
-        r"\bme siento vacio\b",
-        r"\bme siento vacía\b",
-        r"\bme siento vacío\b",
-        r"\bno le importo a nadie\b",
-        r"\bno le importo a nadie\b",
-        r"\bsoy una carga para todos\b",
-        r"\btodo me sale mal\b",
-        r"\bya no puedo más\b",
-        r"\bya no puedo mas\b",
-        r"\bestoy agotado\b",
-        r"\bestoy agotada\b",
+        r"\bno doy mas\b",r"\bestoy mal\b",r"\bme siento solo\b",r"\bme siento sola\b",
+        r"\bno aguanto mas\b",r"\bestoy destruido\b",r"\bestoy destruida\b",
+        r"\bno tengo ganas de seguir\b",r"\bno quiero seguir asi\b",r"\bpienso cosas feas\b",
+        r"\bestoy cansado de vivir\b",r"\bestoy cansada de vivir\b",
+        r"\bme quiero morir\b",r"\bquiero morir\b",
+        r"\bno sirvo para nada\b",r"\bsoy un fracaso\b",
+        r"\bnadie me entiende\b",r"\bnadie me quiere\b",
+        r"\bme harté de todo\b",r"\bme harte de todo\b",r"\bme tiene harto\b",r"\bme tiene harta\b",
+        r"\bestoy harto de vivir\b",r"\bestoy harta de vivir\b",
+        r"\bme siento invisible\b",r"\bme siento roto\b",r"\bme siento rota\b",
+        r"\bme siento vacio\b",r"\bme siento vacía\b",r"\bme siento vacío\b",
+        r"\bno le importo a nadie\b",r"\bsoy una carga para todos\b",r"\btodo me sale mal\b",
+        r"\bya no puedo más\b",r"\bya no puedo mas\b",r"\bestoy agotado\b",r"\bestoy agotada\b",
     ]
     for patron in patrones_amarillos:
         if re.search(patron, t):
@@ -652,7 +470,7 @@ def respuesta_roja() -> str:
         "Si estás en Argentina, podés llamar gratis al 135 (CABA y GBA) o al (011) 5275-1135 desde todo el país. "
         "Hay personas reales del otro lado para escucharte ahora mismo.\n\n"
         "Yo no reemplazo ayuda profesional ni intervención inmediata. Por favor, priorizá contacto real y urgente con alguien que pueda acompañarte ahora.\n\n"
-        "¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
+        "NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
 
 
@@ -666,18 +484,17 @@ def respuesta_abuso() -> str:
         "Contactá a alguien de confianza que pueda acompañarte.\n\n"
         "No tenés que pasar esto sola o solo.\n\n"
         "Dios está cerca de los que están heridos. Salmos capitulo 34 versiculo 18.\n\n"
-        "¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
+        "NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
 
 
 def respuesta_filtrada(texto: str):
     t = normalizar(texto)
-    disparadores = ["concha", "pija", "porno", "masturb", "sexo", "coger"]
-    if any(p in t for p in disparadores):
+    if any(p in t for p in ["concha","pija","porno","masturb","sexo","coger"]):
         return (
             "Puedo seguir si querés hablar en serio sobre lo que te pasa o sobre el Manual. "
             "Ese tipo de contenido no corresponde a este espacio.\n\n"
-            "¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
+            "NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
         )
     return None
 
@@ -699,7 +516,7 @@ def inicializar_control_uso():
         }
 
 
-def limpiar_timestamps(cola: deque, ahora: float, ventana_segundos: int):
+def limpiar_timestamps(cola, ahora, ventana_segundos):
     while cola and (ahora - cola[0]) > ventana_segundos:
         cola.popleft()
 
@@ -708,22 +525,16 @@ def verificar_limites():
     inicializar_control_uso()
     ahora = time.time()
     control = st.session_state.control_uso
-
     limpiar_timestamps(control["mensajes_minuto"], ahora, 60)
     limpiar_timestamps(control["mensajes_hora"], ahora, 3600)
-
     if control["ultimo_mensaje_ts"] > 0:
         diferencia = ahora - control["ultimo_mensaje_ts"]
         if diferencia < TIEMPO_MINIMO_ENTRE_MENSAJES:
-            espera = int(TIEMPO_MINIMO_ENTRE_MENSAJES - diferencia) + 1
-            return False, f"Esperá unos {espera} segundos antes de mandar otro mensaje."
-
+            return False, f"Esperá unos {int(TIEMPO_MINIMO_ENTRE_MENSAJES - diferencia) + 1} segundos antes de mandar otro mensaje."
     if len(control["mensajes_minuto"]) >= MAX_MENSAJES_POR_MINUTO:
         return False, "Llegaste al límite de mensajes por minuto. Esperá un poco y seguí."
-
     if len(control["mensajes_hora"]) >= MAX_MENSAJES_POR_HORA:
         return False, "Llegaste al límite de mensajes de esta hora. Probá más tarde."
-
     return True, ""
 
 
@@ -741,16 +552,12 @@ def registrar_mensaje():
 # =========================
 if "acepto_terminos" not in st.session_state:
     st.session_state.acepto_terminos = False
-
 if "es_admin" not in st.session_state:
     st.session_state.es_admin = False
-
 if "mantenimiento" not in st.session_state:
     st.session_state.mantenimiento = False
-
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
 if "usar_voz" not in st.session_state:
     st.session_state.usar_voz = True
 
@@ -760,136 +567,71 @@ if "usar_voz" not in st.session_state:
 # =========================
 img = get_base64("portada.jpg")
 
-st.markdown(
-    f"""
+st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:ital@1&display=swap');
-
     .stApp {{
-        background:
-            linear-gradient(rgba(3,8,20,0.70), rgba(3,8,20,0.80)),
-            url("data:image/jpg;base64,{img if img else ''}");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
+        background: linear-gradient(rgba(3,8,20,0.70), rgba(3,8,20,0.80)), url("data:image/jpg;base64,{img if img else ''}");
+        background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed;
     }}
-
     .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
-        color: #F5F5F5 !important;
-        text-shadow: 1px 1px 3px rgba(0,0,0,1) !important;
-        font-size: clamp(15px, 3.5vw, 18px) !important;
-        line-height: 1.75 !important;
+        color: #F5F5F5 !important; text-shadow: 1px 1px 3px rgba(0,0,0,1) !important;
+        font-size: clamp(15px, 3.5vw, 18px) !important; line-height: 1.75 !important;
     }}
-
-    [data-testid="stChatMessageContent"],
-    [data-testid="stMarkdownContainer"],
-    [data-testid="stChatMessageContent"] p,
-    [data-testid="stChatMessageContent"] li,
+    [data-testid="stChatMessageContent"], [data-testid="stMarkdownContainer"],
+    [data-testid="stChatMessageContent"] p, [data-testid="stChatMessageContent"] li,
     [data-testid="stChatMessageContent"] div {{
-        font-size: clamp(15px, 3.8vw, 19px) !important;
-        line-height: 1.75 !important;
+        font-size: clamp(15px, 3.8vw, 19px) !important; line-height: 1.75 !important;
     }}
-
     @media (max-width: 768px) {{
         .stApp, .stMarkdown, p, li, span, label, .stChatMessage,
-        [data-testid="stChatMessageContent"],
-        [data-testid="stMarkdownContainer"],
-        [data-testid="stChatMessageContent"] p,
-        [data-testid="stChatMessageContent"] li,
+        [data-testid="stChatMessageContent"], [data-testid="stMarkdownContainer"],
+        [data-testid="stChatMessageContent"] p, [data-testid="stChatMessageContent"] li,
         [data-testid="stChatMessageContent"] div {{
-            font-size: clamp(15px, 4vw, 17px) !important;
-            line-height: 1.75 !important;
+            font-size: clamp(15px, 4vw, 17px) !important; line-height: 1.75 !important;
         }}
-        .stChatInputContainer textarea {{
-            font-size: clamp(15px, 4vw, 17px) !important;
-        }}
+        .stChatInputContainer textarea {{ font-size: clamp(15px, 4vw, 17px) !important; }}
     }}
-
     .stChatInputContainer {{
-        background: rgba(15,20,35,0.95) !important;
-        border-radius: 30px !important;
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(15,20,35,0.95) !important; border-radius: 30px !important;
+        backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2);
     }}
-
-    .stChatInputContainer textarea {{
-        color: #FFFFFF !important;
-    }}
-
-    [data-testid="stSidebar"] {{
-        background-color: rgba(10, 10, 15, 0.98) !important;
-    }}
-
-    .respuesta-cargando {{
-        opacity: 0.92;
-        font-style: italic;
-        padding-top: 4px;
-    }}
+    .stChatInputContainer textarea {{ color: #FFFFFF !important; }}
+    [data-testid="stSidebar"] {{ background-color: rgba(10, 10, 15, 0.98) !important; }}
     </style>
-    """,
-    unsafe_allow_html=True,
-)
+""", unsafe_allow_html=True)
 
-st.markdown(
-    """
+st.markdown("""
     <style>
     @keyframes smokeReveal {
         0%   { opacity: 0; filter: blur(30px) brightness(0.3); transform: scale(1.08); }
         40%  { opacity: 0.6; filter: blur(12px) brightness(0.7); transform: scale(1.03); }
         100% { opacity: 1; filter: blur(0px) brightness(1); transform: scale(1); }
     }
-
-    @keyframes fadeInSubtitle {
-        0%   { opacity: 0; transform: translateY(12px); }
-        100% { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInDivider {
-        0%   { opacity: 0; width: 0px; }
-        100% { opacity: 1; width: 60px; }
-    }
-
+    @keyframes fadeInSubtitle { 0% { opacity:0; transform:translateY(12px); } 100% { opacity:1; transform:translateY(0); } }
+    @keyframes fadeInDivider { 0% { opacity:0; width:0px; } 100% { opacity:1; width:60px; } }
     .hero-title {
-        color: #F5F5F5;
-        font-family: 'Playfair Display', serif;
-        font-size: clamp(44px, 10vw, 64px);
-        font-weight: 700;
-        letter-spacing: 4px;
-        text-transform: uppercase;
-        text-shadow: 2px 2px 12px rgba(0,0,0,0.9), 0 0 40px rgba(255,220,150,0.15);
-        animation: smokeReveal 2.2s ease-out forwards;
-        opacity: 0;
+        color: #F5F5F5; font-family: 'Playfair Display', serif;
+        font-size: clamp(44px, 10vw, 64px); font-weight: 700; letter-spacing: 4px;
+        text-transform: uppercase; text-shadow: 2px 2px 12px rgba(0,0,0,0.9), 0 0 40px rgba(255,220,150,0.15);
+        animation: smokeReveal 2.2s ease-out forwards; opacity: 0;
     }
-
     .hero-divider {
-        height: 1px;
-        background-color: rgba(255,255,255,0.3);
-        margin: 20px auto;
-        animation: fadeInDivider 0.8s ease-out 2.4s forwards;
-        opacity: 0;
-        width: 0px;
+        height: 1px; background-color: rgba(255,255,255,0.3); margin: 20px auto;
+        animation: fadeInDivider 0.8s ease-out 2.4s forwards; opacity: 0; width: 0px;
     }
-
     .hero-subtitle {
-        color: rgba(255,255,255,0.95);
-        font-family: 'Lora', serif;
-        font-style: italic;
-        font-size: clamp(18px, 5vw, 24px);
-        text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
-        animation: fadeInSubtitle 1s ease-out 2.8s forwards;
-        opacity: 0;
+        color: rgba(255,255,255,0.95); font-family: 'Lora', serif; font-style: italic;
+        font-size: clamp(18px, 5vw, 24px); text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+        animation: fadeInSubtitle 1s ease-out 2.8s forwards; opacity: 0;
     }
     </style>
-
     <div style="text-align:center; margin-top:30px; margin-bottom:50px;">
         <div class="hero-title">IA DIVINA</div>
         <div class="hero-divider"></div>
         <div class="hero-subtitle">Estoy acá para escucharte.</div>
     </div>
-    """,
-    unsafe_allow_html=True,
-)
+""", unsafe_allow_html=True)
 
 
 # =========================
@@ -897,26 +639,15 @@ st.markdown(
 # =========================
 with st.sidebar:
     st.title("CONFIGURACIÓN")
-
     st.session_state.usar_voz = st.checkbox("Activar voz", value=st.session_state.usar_voz)
-
     st.markdown("---")
     st.caption("Acceso técnico")
-
     if API_DISPONIBLE:
         st.success("API IA conectada")
     else:
         st.warning("Sin API: funciona solo el motor local")
-
     st.caption(f"Base local: {BIBLIA_FILE.name}")
-
-    clave_admin = st.text_input(
-        "Clave técnica",
-        type="password",
-        label_visibility="collapsed",
-        placeholder="Clave técnica",
-    )
-
+    clave_admin = st.text_input("Clave técnica", type="password", label_visibility="collapsed", placeholder="Clave técnica")
     if st.button("Entrar"):
         if clave_admin == ADMIN_PASSWORD:
             st.session_state.es_admin = True
@@ -924,20 +655,12 @@ with st.sidebar:
             st.rerun()
         elif clave_admin:
             st.error("Clave incorrecta.")
-
     if st.session_state.es_admin:
         st.success("MODO ADMIN ACTIVO")
-
-        st.session_state.mantenimiento = st.toggle(
-            "Modo mantenimiento",
-            value=st.session_state.mantenimiento,
-            key="toggle_mantenimiento",
-        )
-
+        st.session_state.mantenimiento = st.toggle("Modo mantenimiento", value=st.session_state.mantenimiento, key="toggle_mantenimiento")
         if st.button("Reiniciar conversación"):
             st.session_state.messages = []
             st.rerun()
-
         if st.button("Cerrar sesión admin"):
             st.session_state.es_admin = False
             st.rerun()
@@ -951,58 +674,26 @@ if st.session_state.mantenimiento and not st.session_state.es_admin:
     st.stop()
 
 if not st.session_state.acepto_terminos:
-    st.markdown(
-        """
+    st.markdown("""
     <style>
-    @keyframes slideDown {
-        0%   { opacity: 0; max-height: 0px; transform: translateY(-10px); }
-        100% { opacity: 1; max-height: 600px; transform: translateY(0); }
-    }
-
-    @keyframes pingAppear {
-        0%   { opacity: 0; transform: scale(0.7); }
-        60%  { opacity: 1; transform: scale(1.08); }
-        80%  { transform: scale(0.96); }
-        100% { opacity: 1; transform: scale(1); }
-    }
-
+    @keyframes slideDown { 0% { opacity:0; max-height:0px; transform:translateY(-10px); } 100% { opacity:1; max-height:600px; transform:translateY(0); } }
+    @keyframes pingAppear { 0% { opacity:0; transform:scale(0.7); } 60% { opacity:1; transform:scale(1.08); } 80% { transform:scale(0.96); } 100% { opacity:1; transform:scale(1); } }
     .terminos-box {
-        background: rgba(10, 12, 25, 0.82);
-        border: 1px solid rgba(255,255,255,0.15);
-        border-radius: 14px;
-        padding: 24px 28px;
-        margin: 10px 0 24px 0;
-        overflow: hidden;
-        animation: slideDown 1.8s ease-out 3.6s forwards;
-        opacity: 0;
-        max-height: 0px;
+        background: rgba(10,12,25,0.82); border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 14px; padding: 24px 28px; margin: 10px 0 24px 0;
+        overflow: hidden; animation: slideDown 1.8s ease-out 3.6s forwards; opacity: 0; max-height: 0px;
     }
-
     .terminos-box p, .terminos-box li {
-        font-family: 'EB Garamond', Georgia, serif !important;
-        font-size: clamp(15px, 3.8vw, 18px) !important;
-        line-height: 1.75 !important;
-        color: #e8ddd0 !important;
-        margin-bottom: 0.5em !important;
+        font-family: 'EB Garamond', Georgia, serif !important; font-size: clamp(15px,3.8vw,18px) !important;
+        line-height: 1.75 !important; color: #e8ddd0 !important; margin-bottom: 0.5em !important;
     }
-
     .terminos-titulo {
-        font-family: 'Cinzel', serif !important;
-        font-size: clamp(13px, 3.5vw, 15px) !important;
-        letter-spacing: 3px !important;
-        color: rgba(212, 175, 122, 0.85) !important;
-        margin-bottom: 16px !important;
-        text-align: center !important;
+        font-family: 'Cinzel', serif !important; font-size: clamp(13px,3.5vw,15px) !important;
+        letter-spacing: 3px !important; color: rgba(212,175,122,0.85) !important;
+        margin-bottom: 16px !important; text-align: center !important;
     }
-
-    .acepto-wrapper {
-        text-align: center;
-        animation: pingAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 5.6s forwards;
-        opacity: 0;
-        margin-top: 10px;
-    }
+    .acepto-wrapper { text-align:center; animation: pingAppear 0.6s cubic-bezier(0.34,1.56,0.64,1) 5.6s forwards; opacity:0; margin-top:10px; }
     </style>
-
     <div class="terminos-box">
         <div class="terminos-titulo">TÉRMINOS Y CONDICIONES</div>
         <p>IA DIVINA es una herramienta de acompañamiento basada en textos bíblicos.</p>
@@ -1015,14 +706,10 @@ if not st.session_state.acepto_terminos:
         </ol>
     </div>
     <div class="acepto-wrapper" id="acepto-btn-hint"></div>
-    """,
-        unsafe_allow_html=True,
-    )
-
+    """, unsafe_allow_html=True)
     if st.button("✦  ACEPTO  ✦", key="btn_acepto", use_container_width=False):
         st.session_state.acepto_terminos = True
         st.rerun()
-
     st.stop()
 
 
@@ -1039,73 +726,52 @@ for m in st.session_state.messages:
 
 # =========================
 # 11. PROMPTS
-# MEJORADO: empatía activa, tono conversacional, preguntas de seguimiento
-# Para volver al modo ahorro: reemplazá PROMPT_BASE por PROMPT_BASE_AHORRO (ver abajo)
+# Para volver al modo ahorro: reemplazá PROMPT_BASE por PROMPT_BASE_AHORRO
 # =========================
-
-# --- MODO CONVERSACIONAL (activo) ---
 PROMPT_BASE = (
     "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
-
     "PROHIBICIÓN ESTRICTA: No menciones a Google, no digas que sos una inteligencia artificial, "
     "ni un modelo de lenguaje, ni que fuiste programado por nadie. "
-
-    "Si te preguntan '¿Quién te creó?', respondé: "
-    "'Fui creada para ser tu guía en el Manual de Vida y acompañarte con la sabiduría de las Escrituras'. "
-
+    "Si te preguntan quien te creó, respondé: "
+    "Fui creada para ser tu guía en el Manual de Vida y acompañarte con la sabiduría de las Escrituras. "
     "TONO Y PERSONALIDAD: "
     "Sos una guía espiritual cercana, paciente y reconfortante. "
     "Hablás como alguien que escucha de verdad, no como un buscador de información. "
     "Tu lenguaje es humano, cálido, sereno y compasivo. "
     "No sos una iglesia ni debatís religión. "
     "Respondé siempre de manera directa y fiel al Manual. "
-
     "EMPATÍA ACTIVA — MUY IMPORTANTE: "
     "Si el usuario comparte un problema, una emoción o una situación difícil, "
     "PRIMERO validá sus sentimientos con una frase breve y genuina, "
     "ANTES de dar el versículo o la enseñanza. "
     "Ejemplos de frases de validación: "
-    "'Entiendo que estés pasando por algo tan difícil...', "
-    "'Es normal sentirse así en momentos como este...', "
-    "'Lo que sentís tiene mucho peso, y está bien reconocerlo...', "
-    "'Gracias por contarme esto, no es fácil hablarlo...'. "
+    "Entiendo que estés pasando por algo tan difícil... "
+    "Es normal sentirse así en momentos como este... "
+    "Lo que sentís tiene mucho peso, y está bien reconocerlo... "
+    "Gracias por contarme esto, no es fácil hablarlo... "
     "Luego, de forma natural, compartí la palabra del Manual. "
-
     "PREGUNTAS DE SEGUIMIENTO: "
     "Al final de cada respuesta, invitá a continuar la charla de forma natural y variada. "
-    "No repitas siempre la misma frase. "
-    "Ejemplos: "
-    "'¿Te gustaría que profundicemos en esto?', "
-    "'¿Cómo te sentís con respecto a lo que te compartí?', "
-    "'¿Hay algo más de lo que quieras hablar?', "
-    "'¿Querés que busquemos juntos otra palabra del Manual sobre esto?'. "
-    "Solo usá esta invitación cuando sea natural al contexto. "
-    "No la fuerces si la respuesta es muy corta o muy directa. "
-
-    "FORMATO DE RESPUESTA: "
+    "No repitas siempre la misma frase. Usá preguntas como: "
+    "Te gustaría que profundicemos en esto? "
+    "Cómo te sentís con respecto a lo que te compartí? "
+    "Hay algo más de lo que quieras hablar? "
+    "Querés que busquemos juntos otra palabra del Manual sobre esto? "
+    "Solo usá esta invitación cuando sea natural. No la fuerces en respuestas muy cortas. "
+    "FORMATO: "
     "Nunca uses negritas ni asteriscos. "
-    "Usá párrafos cortos. Evitá bloques largos de texto. "
+    "Usá párrafos cortos. Evitá bloques largos. "
     "Antes de citar un versículo, introducí brevemente el tema. "
-    "Luego el versículo, y después una explicación clara y breve. "
-
+    "Luego el versículo, y después una explicación breve. "
     "CITAS BÍBLICAS: "
     "Usá formato en palabras: Éxodo capitulo 20 versiculo 3. "
-    "No uses el formato con dos puntos (:). "
-    "No inventes citas. "
+    "No uses dos puntos (:). No inventes citas. "
     "Siempre incluí al menos una cita con libro, capítulo y versículo. "
-
-    "Si el usuario pide textos muy extensos (como los Diez Mandamientos), "
-    "podés resumir o enumerar en lugar de recitarlos completos de forma literal. "
-
-    "Si el usuario pide específicamente una lista numerada (como los Diez Mandamientos), "
-    "respondé con la lista completa, vertical, sin omitir ningún punto. "
-
+    "Si el usuario pide textos muy extensos, podés resumir o enumerar. "
+    "Si pide una lista numerada completa, respondé con la lista completa, vertical, sin omitir nada. "
     "Si enumerás una lista, completala totalmente antes de terminar la respuesta. "
-    "Nunca la dejes incompleta. "
 )
 
-# --- MODO AHORRO (para activar en el futuro si hace falta reducir tokens) ---
-# Para volver al modo ahorro, reemplazá PROMPT_BASE por este bloque:
 PROMPT_BASE_AHORRO = (
     "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
     "No menciones a Google ni digas que sos IA. "
@@ -1114,12 +780,11 @@ PROMPT_BASE_AHORRO = (
     "Respondé siempre de manera directa y fiel al Manual. "
     "Nunca uses negritas ni asteriscos. "
     "Usá formato en palabras: Éxodo capitulo 20 versiculo 3. No uses dos puntos (:). "
-    "No inventes citas. "
-    "Usá párrafos cortos. "
+    "No inventes citas. Usá párrafos cortos. "
 )
 
 PROMPT_AMARILLO = (
-    PROMPT_BASE + " "
+    PROMPT_BASE +
     "El usuario puede estar pasando dolor emocional profundo. "
     "Priorizá la contención antes que la información. "
     "Respondé con más calma, cercanía y ternura. "
@@ -1129,37 +794,29 @@ PROMPT_AMARILLO = (
 
 
 # =========================
-# 🔐 FUNCIÓN SEGURA
+# FUNCIÓN SEGURA
 # =========================
 def extraer_texto_seguro(response):
     try:
         if response is None:
             return None, "Respuesta vacía", None
-
         candidates = getattr(response, "candidates", None)
         if not candidates:
             return None, "Sin candidates", None
-
         candidate = candidates[0]
         finish_reason = getattr(candidate, "finish_reason", None)
         finish_reason_str = str(finish_reason) if finish_reason else ""
-
         content = getattr(candidate, "content", None)
         parts = getattr(content, "parts", None) if content else None
-
         textos = []
-
         if parts:
             for part in parts:
                 texto = getattr(part, "text", None)
                 if texto:
                     textos.append(str(texto).strip())
-
         if textos:
             return "\n\n".join(textos), None, finish_reason_str
-
         return None, "Sin texto válido", finish_reason_str
-
     except Exception as e:
         return None, f"Error: {e}", None
 
@@ -1176,13 +833,11 @@ if prompt:
         st.stop()
 
     registrar_mensaje()
-
     st.chat_message("user", avatar="❤️").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("assistant", avatar="✝️"):
         respuesta_placeholder = st.empty()
-
         try:
             nivel = clasificar_riesgo(prompt)
 
@@ -1234,25 +889,16 @@ if prompt:
 
             with respuesta_placeholder.container():
                 with st.spinner("Buscando respuesta en el Manual..."):
-
                     historial = construir_historial(st.session_state.messages, limite=15)
                     contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
-
                     model = genai.GenerativeModel("models/gemini-2.0-flash")
-
                     response = model.generate_content(
                         f"{contexto}\n\n{historial}\nUsuario: {prompt}",
-                        generation_config={
-                            "max_output_tokens": 4000,
-                            "temperature": 0.7,
-                        },
+                        generation_config={"max_output_tokens": 4000, "temperature": 0.7},
                     )
-
                     texto_extraido, error_detalle, finish_reason = extraer_texto_seguro(response)
-
                     if not texto_extraido:
                         fr = (finish_reason or "").upper()
-
                         if "RECITATION" in fr or fr == "4":
                             texto_extraido = (
                                 "Ese contenido no lo puedo mostrar de forma literal completa, "
@@ -1263,7 +909,6 @@ if prompt:
                             )
                         else:
                             texto_extraido = "No pude generar una respuesta válida en este momento."
-
                     texto = re.sub(r"[*#_]", "", texto_extraido).strip()
                     texto = asegurar_cierre(texto)
 
@@ -1273,7 +918,6 @@ if prompt:
                 respuesta_local = responder_local_si_aplica(prompt, biblia_local, respuestas_locales, temas_locales)
             except Exception:
                 respuesta_local = None
-
             if respuesta_local:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_local)
@@ -1286,7 +930,6 @@ if prompt:
 
         respuesta_placeholder.empty()
         texto_final = mostrar_respuesta_suave(texto)
-
         st.session_state.messages.append({"role": "assistant", "content": texto_final})
         reproducir_audio(texto_final)
 
