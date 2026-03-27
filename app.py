@@ -435,18 +435,19 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
     return any(k in texto for k in claves)
 
 
-tema = detectar_tema_local(consulta)
-if tema:
-    versiculos = buscar_versiculos_por_tema_local(biblia, temas, tema)
+    tema = detectar_tema_local(consulta)
+    if tema:
+        versiculos = buscar_versiculos_por_tema_local(biblia, temas, tema)
 
-    if versiculos:
-        encabezados = {
-            "consuelo": respuestas.get("consuelo_base", "Te comparto una palabra:"),
-            "paz": respuestas.get("paz_base", "Te comparto una palabra:"),
-            "miedo": respuestas.get("miedo_base", "Te comparto una palabra:"),
-            "fe": respuestas.get("fe_base", "Te comparto una palabra:"),
-            "ansiedad": respuestas.get("consuelo_base", "Te comparto una palabra:")
-        }
+        if versiculos:
+            encabezados = {
+                "consuelo": respuestas.get("consuelo_base", "Te comparto una palabra:"),
+                "paz": respuestas.get("paz_base", "Te comparto una palabra:"),
+                "miedo": respuestas.get("miedo_base", "Te comparto una palabra:"),
+                "fe": respuestas.get("fe_base", "Te comparto una palabra:"),
+                "ansiedad": respuestas.get("consuelo_base", "Te comparto una palabra:")
+            }
+
             texto = [encabezados.get(tema, "Te comparto una palabra:")]
             for item in versiculos[:2]:
                 texto.append(formatear_versiculo_local(item))
