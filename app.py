@@ -418,8 +418,8 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
             referencia["versiculo"]
         )
     if encontrado:
-    return formatear_versiculo_local(encontrado)
-return "No encontré esa referencia en la base local actual."
+        return formatear_versiculo_local(encontrado)
+        return "No encontré esa referencia en la base local actual."
 
 
 def es_pregunta_explicativa(texto):
