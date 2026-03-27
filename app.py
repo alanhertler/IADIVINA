@@ -451,8 +451,6 @@ import base64
 import time
 import re
 import io
-import pyttsx3
-import tempfile
 import os
 
 def get_base64(file_path: str):
@@ -479,7 +477,6 @@ def normalizar(texto: str) -> str:
         texto = texto.replace(a, b)
     return texto
 
-def _generar_audio_pyttsx3(texto: str) -> bytes:
     """Genera audio WAV en memoria usando pyttsx3 (voz del sistema Windows)."""
     engine = pyttsx3.init()
 
@@ -520,24 +517,25 @@ def _generar_audio_pyttsx3(texto: str) -> bytes:
     os.unlink(tmp.name)
     return audio_bytes
 
+import io
+
+def _generar_audio_gtts(texto: str) -> bytes:
+    mp3_buffer = io.BytesIO()
+    tts = gTTS(text=texto, lang="es")
+    tts.write_to_fp(mp3_buffer)
+    mp3_buffer.seek(0)
+    return mp3_buffer.read()
+
 def reproducir_audio(texto: str):
-    """
-    Genera audio reproducible en el navegador usando pyttsx3 (voz del sistema).
-    """
     if not st.session_state.get("usar_voz", True):
         return
 
     boton_id = f"btn_audio_{abs(hash(texto[:80]))}"
+
     if st.button("🔊 Escuchar Manual", key=boton_id):
         try:
-            audio_bytes = _generar_audio_pyttsx3(texto)
-            audio_b64 = base64.b64encode(audio_bytes).decode()
-            audio_html = f"""
-                <audio autoplay controls style="width:100%; margin-top:8px;">
-                    <source src="data:audio/wav;base64,{audio_b64}" type="audio/wav">
-                </audio>
-            """
-            st.markdown(audio_html, unsafe_allow_html=True)
+            audio_bytes = _generar_audio_gtts(texto)
+            st.audio(audio_bytes, format="audio/mp3")
         except Exception as e:
             st.error(f"Error de sonido: {e}")
 
