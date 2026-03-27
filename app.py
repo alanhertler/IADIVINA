@@ -409,20 +409,20 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
     if consulta_norm in ["ayuda", "menu", "menú", "como funciona", "cómo funciona"]:
         return respuestas["ayuda"]
 
-       referencia = extraer_referencia_local(consulta)
+        referencia = extraer_referencia_local(consulta)
     if referencia:
         encontrado = buscar_por_referencia_local(
             biblia,
             referencia["libro"],
             referencia["capitulo"],
             referencia["versiculo"]
-    )
-    if encontrado:
-        return formatear_versiculo_local(encontrado)
-    return "No encontré esa referencia en la base local actual."
+        )
+        if encontrado:
+            return formatear_versiculo_local(encontrado)
+        return "No encontré esa referencia en la base local actual."
 
-
-def es_pregunta_explicativa(texto):
+    def es_pregunta_explicativa(texto):
+        ...
     texto = texto.lower()
     claves = [
         "que significa",
