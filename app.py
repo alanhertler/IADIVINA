@@ -2,15 +2,18 @@ import os
 os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 
 import json
-import streamlit as st
-import google.generativeai as genai
-from gtts import gTTS
 import base64
 import re
 import time
+import tempfile
+import io
+
 from pathlib import Path
 from collections import deque
 
+import streamlit as st
+import google.generativeai as genai
+import pyttsx3
 
 # =========================
 # 1. CONFIGURACIÓN INICIAL
