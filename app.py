@@ -8,7 +8,8 @@ from gtts import gTTS
 import base64
 import re
 import time
-from pathlib import Path 
+import io
+from pathlib import Path
 from collections import deque
 
 
@@ -34,7 +35,6 @@ if API_DISPONIBLE:
 
 # =========================
 # 1.1 MOTOR LOCAL BÍBLICO
-# Integrado sin romper el sistema principal
 # =========================
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -44,114 +44,37 @@ RESPUESTAS_FILE = DATA_DIR / "respuestas.json"
 TEMAS_FILE = DATA_DIR / "temas.json"
 
 BIBLIA_DEMO = [
-    {
-        "libro": "Salmos",
-        "capitulo": 34,
-        "versiculo": 18,
-        "texto": "Cercano está Jehová á los quebrantados de corazón; y salvará á los contritos de espíritu."
-    },
-    {
-        "libro": "Salmos",
-        "capitulo": 23,
-        "versiculo": 1,
-        "texto": "Jehová es mi pastor; nada me faltará."
-    },
-    {
-        "libro": "Juan",
-        "capitulo": 3,
-        "versiculo": 16,
-        "texto": "Porque de tal manera amó Dios al mundo, que ha dado á su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna."
-    },
-    {
-        "libro": "Mateo",
-        "capitulo": 11,
-        "versiculo": 28,
-        "texto": "Venid á mí todos los que estáis trabajados y cargados, que yo os haré descansar."
-    },
-    {
-        "libro": "Filipenses",
-        "capitulo": 4,
-        "versiculo": 7,
-        "texto": "Y la paz de Dios, que sobrepuja todo entendimiento, guardará vuestros corazones y vuestros entendimientos en Cristo Jesús."
-    },
-    {
-        "libro": "Isaías",
-        "capitulo": 41,
-        "versiculo": 10,
-        "texto": "No temas, porque yo soy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia."
-    },
-    {
-        "libro": "Romanos",
-        "capitulo": 8,
-        "versiculo": 28,
-        "texto": "Y sabemos que á los que á Dios aman, todas las cosas les ayudan á bien, es á saber, á los que conforme al propósito son llamados."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 3,
-        "texto": "No tendrás dioses ajenos delante de mí."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 4,
-        "texto": "No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, ni abajo en la tierra, ni en las aguas debajo de la tierra."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 5,
-        "texto": "No te inclinarás á ellas, ni las honrarás; porque yo soy Jehová tu Dios, fuerte, celoso."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 7,
-        "texto": "No tomarás el nombre de Jehová tu Dios en vano; porque no dará por inocente Jehová al que tomare su nombre en vano."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 8,
-        "texto": "Acordarte has del día del reposo, para santificarlo."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 12,
-        "texto": "Honra á tu padre y á tu madre, porque tus días se alarguen en la tierra que Jehová tu Dios te da."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 13,
-        "texto": "No matarás."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 14,
-        "texto": "No adulterarás."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 15,
-        "texto": "No hurtarás."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 16,
-        "texto": "No hablarás contra tu prójimo falso testimonio."
-    },
-    {
-        "libro": "Exodo",
-        "capitulo": 20,
-        "versiculo": 17,
-        "texto": "No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo."
-    }
+    {"libro": "Salmos", "capitulo": 34, "versiculo": 18,
+     "texto": "Cercano está Jehová á los quebrantados de corazón; y salvará á los contritos de espíritu."},
+    {"libro": "Salmos", "capitulo": 23, "versiculo": 1,
+     "texto": "Jehová es mi pastor; nada me faltará."},
+    {"libro": "Juan", "capitulo": 3, "versiculo": 16,
+     "texto": "Porque de tal manera amó Dios al mundo, que ha dado á su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna."},
+    {"libro": "Mateo", "capitulo": 11, "versiculo": 28,
+     "texto": "Venid á mí todos los que estáis trabajados y cargados, que yo os haré descansar."},
+    {"libro": "Filipenses", "capitulo": 4, "versiculo": 7,
+     "texto": "Y la paz de Dios, que sobrepuja todo entendimiento, guardará vuestros corazones y vuestros entendimientos en Cristo Jesús."},
+    {"libro": "Isaías", "capitulo": 41, "versiculo": 10,
+     "texto": "No temas, porque yo soy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia."},
+    {"libro": "Romanos", "capitulo": 8, "versiculo": 28,
+     "texto": "Y sabemos que á los que á Dios aman, todas las cosas les ayudan á bien, es á saber, á los que conforme al propósito son llamados."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 3, "texto": "No tendrás dioses ajenos delante de mí."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 4,
+     "texto": "No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, ni abajo en la tierra, ni en las aguas debajo de la tierra."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 5,
+     "texto": "No te inclinarás á ellas, ni las honrarás; porque yo soy Jehová tu Dios, fuerte, celoso."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 7,
+     "texto": "No tomarás el nombre de Jehová tu Dios en vano; porque no dará por inocente Jehová al que tomare su nombre en vano."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 8,
+     "texto": "Acordarte has del día del reposo, para santificarlo."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 12,
+     "texto": "Honra á tu padre y á tu madre, porque tus días se alarguen en la tierra que Jehová tu Dios te da."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 13, "texto": "No matarás."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 14, "texto": "No adulterarás."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 15, "texto": "No hurtarás."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 16, "texto": "No hablarás contra tu prójimo falso testimonio."},
+    {"libro": "Exodo", "capitulo": 20, "versiculo": 17,
+     "texto": "No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo."},
 ]
 
 RESPUESTAS_DEMO = {
@@ -161,33 +84,31 @@ RESPUESTAS_DEMO = {
     "consuelo_base": "Te comparto una palabra que puede traer consuelo:",
     "paz_base": "Te comparto una palabra sobre la paz:",
     "miedo_base": "Te comparto una palabra para el temor:",
-    "fe_base": "Te comparto una palabra para fortalecer la fe:"
+    "fe_base": "Te comparto una palabra para fortalecer la fe:",
 }
 
 TEMAS_DEMO = {
     "consuelo": [
         {"libro": "Salmos", "capitulo": 34, "versiculo": 18},
-        {"libro": "Mateo", "capitulo": 11, "versiculo": 28}
+        {"libro": "Mateo", "capitulo": 11, "versiculo": 28},
     ],
     "paz": [
         {"libro": "Filipenses", "capitulo": 4, "versiculo": 7},
-        {"libro": "Salmos", "capitulo": 23, "versiculo": 1}
+        {"libro": "Salmos", "capitulo": 23, "versiculo": 1},
     ],
-    "miedo": [
-        {"libro": "Isaías", "capitulo": 41, "versiculo": 10}
-    ],
+    "miedo": [{"libro": "Isaías", "capitulo": 41, "versiculo": 10}],
     "fe": [
         {"libro": "Juan", "capitulo": 3, "versiculo": 16},
-        {"libro": "Romanos", "capitulo": 8, "versiculo": 28}
+        {"libro": "Romanos", "capitulo": 8, "versiculo": 28},
     ],
     "tristeza": [
         {"libro": "Salmos", "capitulo": 34, "versiculo": 18},
-        {"libro": "Mateo", "capitulo": 11, "versiculo": 28}
+        {"libro": "Mateo", "capitulo": 11, "versiculo": 28},
     ],
     "ansiedad": [
         {"libro": "Filipenses", "capitulo": 4, "versiculo": 7},
-        {"libro": "Isaías", "capitulo": 41, "versiculo": 10}
-    ]
+        {"libro": "Isaías", "capitulo": 41, "versiculo": 10},
+    ],
 }
 
 
@@ -209,7 +130,10 @@ def asegurar_estructura_local():
     else:
         try:
             biblia_actual = cargar_json(BIBLIA_FILE)
-            claves = {(str(x.get("libro", "")).lower(), x.get("capitulo"), x.get("versiculo")) for x in biblia_actual if isinstance(x, dict)}
+            claves = {
+                (str(x.get("libro", "")).lower(), x.get("capitulo"), x.get("versiculo"))
+                for x in biblia_actual if isinstance(x, dict)
+            }
             agregados = 0
             for item in BIBLIA_DEMO:
                 clave = (str(item.get("libro", "")).lower(), item.get("capitulo"), item.get("versiculo"))
@@ -248,11 +172,11 @@ def asegurar_estructura_local():
                     {"libro": "Exodo", "capitulo": 20, "versiculo": 14},
                     {"libro": "Exodo", "capitulo": 20, "versiculo": 15},
                     {"libro": "Exodo", "capitulo": 20, "versiculo": 16},
-                    {"libro": "Exodo", "capitulo": 20, "versiculo": 17}
+                    {"libro": "Exodo", "capitulo": 20, "versiculo": 17},
                 ],
                 "diez mandamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": 2}],
                 "mandamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": 2}],
-                "madamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": 2}]
+                "madamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": 2}],
             }
             for clave, valor in alias_mandamientos.items():
                 if clave not in temas_actuales:
@@ -273,14 +197,7 @@ def cargar_datos_locales():
 
 def normalizar_local(texto: str) -> str:
     texto = texto.lower().strip()
-    reemplazos = {
-        "á": "a",
-        "é": "e",
-        "í": "i",
-        "ó": "o",
-        "ú": "u",
-        "ñ": "n"
-    }
+    reemplazos = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"}
     for origen, destino in reemplazos.items():
         texto = texto.replace(origen, destino)
     texto = re.sub(r"\s+", " ", texto)
@@ -291,20 +208,17 @@ def extraer_referencia_local(consulta: str):
     consulta_limpia = consulta.strip()
     patron = r"^\s*([A-Za-zÁÉÍÓÚáéíóúÑñ]+)\s+(\d+)\s*:\s*(\d+)\s*$"
     match = re.match(patron, consulta_limpia)
-
     if not match:
         return None
-
     return {
         "libro": match.group(1),
         "capitulo": int(match.group(2)),
-        "versiculo": int(match.group(3))
+        "versiculo": int(match.group(3)),
     }
 
 
 def buscar_por_referencia_local(biblia, libro, capitulo, versiculo):
     libro_norm = normalizar_local(libro)
-
     for item in biblia:
         if (
             normalizar_local(item["libro"]) == libro_norm
@@ -312,43 +226,34 @@ def buscar_por_referencia_local(biblia, libro, capitulo, versiculo):
             and item["versiculo"] == versiculo
         ):
             return item
-
     return None
 
 
 def detectar_tema_local(consulta: str):
     consulta_norm = normalizar_local(consulta)
-
     mapa = {
         "consuelo": ["consuelo", "dolor", "quebrantado", "solo", "sola", "triste", "tristeza", "duelo"],
         "paz": ["paz", "calma", "tranquilidad", "descanso"],
         "miedo": ["miedo", "temor", "asustado", "asustada", "desesperado", "desesperada"],
         "fe": ["fe", "creer", "esperanza", "confianza"],
-        "ansiedad": ["ansiedad", "ansioso", "ansiosa", "angustia", "angustiado", "angustiada"]
+        "ansiedad": ["ansiedad", "ansioso", "ansiosa", "angustia", "angustiado", "angustiada"],
     }
-
     for tema, palabras in mapa.items():
         for palabra in palabras:
             if palabra in consulta_norm:
                 return tema
-
     return None
 
 
 def buscar_versiculos_por_tema_local(biblia, temas, tema):
     referencias = temas.get(tema, [])
     resultados = []
-
     for ref in referencias:
         encontrado = buscar_por_referencia_local(
-            biblia,
-            ref["libro"],
-            ref["capitulo"],
-            ref["versiculo"]
+            biblia, ref["libro"], ref["capitulo"], ref["versiculo"]
         )
         if encontrado:
             resultados.append(encontrado)
-
     return resultados
 
 
@@ -412,10 +317,7 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
     referencia = extraer_referencia_local(consulta)
     if referencia:
         encontrado = buscar_por_referencia_local(
-            biblia,
-            referencia["libro"],
-            referencia["capitulo"],
-            referencia["versiculo"]
+            biblia, referencia["libro"], referencia["capitulo"], referencia["versiculo"]
         )
         if encontrado:
             return formatear_versiculo_local(encontrado)
@@ -424,23 +326,22 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
     tema = detectar_tema_local(consulta)
     if tema:
         versiculos = buscar_versiculos_por_tema_local(biblia, temas, tema)
-
         if versiculos:
             encabezados = {
                 "consuelo": respuestas.get("consuelo_base", "Te comparto una palabra:"),
                 "paz": respuestas.get("paz_base", "Te comparto una palabra:"),
                 "miedo": respuestas.get("miedo_base", "Te comparto una palabra:"),
                 "fe": respuestas.get("fe_base", "Te comparto una palabra:"),
-                "ansiedad": respuestas.get("consuelo_base", "Te comparto una palabra:")
+                "ansiedad": respuestas.get("consuelo_base", "Te comparto una palabra:"),
             }
-
             texto = [encabezados.get(tema, "Te comparto una palabra:")]
             for item in versiculos[:2]:
                 texto.append(formatear_versiculo_local(item))
-
             return "\n\n".join(texto)
 
     return None
+
+
 asegurar_estructura_local()
 
 
@@ -453,6 +354,7 @@ import re
 import io
 import os
 
+
 def get_base64(file_path: str):
     try:
         with open(file_path, "rb") as f:
@@ -460,64 +362,18 @@ def get_base64(file_path: str):
     except Exception:
         return None
 
+
 def asegurar_cierre(texto: str) -> str:
     return texto.strip()
 
+
 def normalizar(texto: str) -> str:
     texto = texto.lower().strip()
-    reemplazos = {
-        "á": "a",
-        "é": "e",
-        "í": "i",
-        "ó": "o",
-        "ú": "u",
-        "ñ": "n",
-    }
+    reemplazos = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"}
     for a, b in reemplazos.items():
         texto = texto.replace(a, b)
     return texto
 
-    """Genera audio WAV en memoria usando pyttsx3 (voz del sistema Windows)."""
-    engine = pyttsx3.init()
-
-    # Buscar voz masculina en español
-    voices = engine.getProperty("voices")
-    voz_elegida = None
-    for v in voices:
-        nombre = v.name.lower()
-        idioma = "".join(v.languages).lower() if v.languages else ""
-        if ("es" in idioma or "spanish" in nombre or "sabina" in nombre or "helena" in nombre or "pablo" in nombre or "jorge" in nombre):
-            if any(m in nombre for m in ["pablo", "jorge", "diego", "carlos", "david", "male"]):
-                voz_elegida = v.id
-                break
-
-    # Si no encuentra masculina, usa la primera en español
-    if not voz_elegida:
-        for v in voices:
-            nombre = v.name.lower()
-            idioma = "".join(v.languages).lower() if v.languages else ""
-            if "es" in idioma or "spanish" in nombre:
-                voz_elegida = v.id
-                break
-
-    if voz_elegida:
-        engine.setProperty("voice", voz_elegida)
-
-    engine.setProperty("rate", 160)   # velocidad
-    engine.setProperty("volume", 1.0) # volumen
-
-    # Guardar en archivo temporal
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-    tmp.close()
-    engine.save_to_file(texto, tmp.name)
-    engine.runAndWait()
-
-    with open(tmp.name, "rb") as f:
-        audio_bytes = f.read()
-    os.unlink(tmp.name)
-    return audio_bytes
-
-import io
 
 def _generar_audio_gtts(texto: str) -> bytes:
     mp3_buffer = io.BytesIO()
@@ -525,6 +381,7 @@ def _generar_audio_gtts(texto: str) -> bytes:
     tts.write_to_fp(mp3_buffer)
     mp3_buffer.seek(0)
     return mp3_buffer.read()
+
 
 def reproducir_audio(texto: str):
     if not st.session_state.get("usar_voz", True):
@@ -540,6 +397,7 @@ def reproducir_audio(texto: str):
         except Exception as e:
             st.error(f"Error de sonido: {e}")
 
+
 # =========================
 # 2.1 FUNCIONES VISUALES
 # =========================
@@ -552,24 +410,26 @@ def construir_historial(messages, limite=15):
             historial += f"Asistente: {msg['content']}\n"
     return historial.strip()
 
+
 def stream_text(texto: str, delay: float = 0.02):
-    """Efecto de escritura en tiempo real"""
     texto = texto.replace("\r\n", "\n")
-    partes = re.split(r'(\s+)', texto)
+    partes = re.split(r"(\s+)", texto)
     for parte in partes:
         yield parte
         time.sleep(delay)
+
 
 def mostrar_respuesta_suave(texto: str, delay: float = 0.02) -> str:
     resultado = st.write_stream(stream_text(texto, delay=delay))
     return resultado if isinstance(resultado, str) else texto
 
+
 def aplicar_estilos():
-    st.markdown("""
+    st.markdown(
+        """
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
 
-        /* Texto general */
         html, body, [class*="css"], .stMarkdown, .stText, p, li, span {
             font-family: 'EB Garamond', Georgia, serif !important;
             font-size: clamp(16px, 4vw, 20px) !important;
@@ -577,7 +437,6 @@ def aplicar_estilos():
             color: #f0e6d3 !important;
         }
 
-        /* Títulos */
         h1, h2, h3, h4 {
             font-family: 'Cinzel', serif !important;
             font-size: clamp(20px, 5vw, 28px) !important;
@@ -587,7 +446,6 @@ def aplicar_estilos():
             margin-bottom: 0.6em !important;
         }
 
-        /* Mensajes del chat */
         [data-testid="stChatMessage"] {
             font-family: 'EB Garamond', Georgia, serif !important;
             font-size: clamp(16px, 4vw, 19px) !important;
@@ -597,47 +455,45 @@ def aplicar_estilos():
             margin-bottom: 10px !important;
         }
 
-        /* Listas numeradas y con viñetas */
-        ol, ul {
-            padding-left: 1.4em !important;
-        }
-        ol li, ul li {
-            margin-bottom: 0.5em !important;
-        }
+        ol, ul { padding-left: 1.4em !important; }
+        ol li, ul li { margin-bottom: 0.5em !important; }
 
-        /* Input del usuario */
         .stChatInput textarea {
             font-family: 'EB Garamond', Georgia, serif !important;
             font-size: clamp(15px, 3.5vw, 18px) !important;
         }
 
-        /* Adaptación móvil */
         @media (max-width: 600px) {
-            [data-testid="stChatMessage"] {
-                padding: 10px 12px !important;
-            }
+            [data-testid="stChatMessage"] { padding: 10px 12px !important; }
         }
         </style>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 # =========================
 # 3. CLASIFICACIÓN DE RIESGO
+# MEJORADO: lenguaje juvenil agregado
 # =========================
-
 def clasificar_riesgo(texto: str) -> str:
     t = normalizar(texto)
 
+    # Frases de humor/chiste — no activar alerta
     frases_boludeo = [
         "me muero de risa",
         "me mori de risa",
         "me mato de risa",
         "jajaja me mato",
         "jaja me muero",
+        "me parto de risa",
+        "me caigo de risa",
     ]
     for frase in frases_boludeo:
         if frase in t:
             return "verde"
 
+    # Patrones de crisis / riesgo de vida
     patrones_rojos = [
         r"\bme voy a matar\b",
         r"\bquiero matarme\b",
@@ -647,11 +503,6 @@ def clasificar_riesgo(texto: str) -> str:
         r"\bno quiero seguir viviendo\b",
         r"\bno quiero seguir vivo\b",
         r"\bvoy a terminar con todo\b",
-        r"\ble mataron a\b",
-        r"\bse murio mi amiga\b",
-        r"\bse murio mi amigo\b",
-        r"\bmataron a mi\b",
-        r"\bperdi a mi\b",
         r"\besta noche termino con todo\b",
         r"\bya tome pastillas\b",
         r"\bya tome remedios\b",
@@ -660,11 +511,42 @@ def clasificar_riesgo(texto: str) -> str:
         r"\bme tome\b.+\b(pastillas|remedios|clonazepam|alcohol)\b",
         r"\bestoy por cortarme\b",
         r"\bme voy a cortar\b",
+        r"\ble mataron a\b",
+        r"\bse murio mi amiga\b",
+        r"\bse murio mi amigo\b",
+        r"\bmataron a mi\b",
+        r"\bperdi a mi\b",
+        # --- NUEVO: lenguaje juvenil de crisis ---
+        r"\bme quiero borrar\b",
+        r"\bya no quiero estar\b",
+        r"\bquiero desaparecer\b",
+        r"\bdesearía no haber nacido\b",
+        r"\bdeseo no haber nacido\b",
+        r"\bno deberia haber nacido\b",
+        r"\bno debí nacer\b",
+        r"\bnadie me va a extrañar\b",
+        r"\bnadie me extrañaria\b",
+        r"\btodos estarian mejor sin mi\b",
+        r"\btodos estarian mejor sin mí\b",
+        r"\bsoy una carga\b",
+        r"\bsoy un estorbo\b",
+        r"\bme voy a tirar\b",
+        r"\bme voy a aventar\b",
+        r"\bquiero saltar\b",
+        r"\bpienso en hacerme dano\b",
+        r"\bpienso en hacerme daño\b",
+        r"\bvoy a hacerme dano\b",
+        r"\bvoy a hacerme daño\b",
+        r"\bme lastimé\b",
+        r"\bme lastime\b",
+        r"\bme hice dano\b",
+        r"\bme hice daño\b",
     ]
     for patron in patrones_rojos:
         if re.search(patron, t):
             return "rojo"
 
+    # Patrones de abuso sexual
     patrones_abuso = [
         r"\bmi papa me toco\b",
         r"\bmi mama me toco\b",
@@ -687,11 +569,30 @@ def clasificar_riesgo(texto: str) -> str:
         r"\bme hicieron cosas\b",
         r"\bme obligaron\b",
         r"\bme acosaron\b",
+        # --- NUEVO: lenguaje juvenil de abuso ---
+        r"\bme hizo cosas raras\b",
+        r"\bme toco de manera rara\b",
+        r"\bme toco de forma rara\b",
+        r"\bme dejo tocar\b",
+        r"\bme obligo a tocarlo\b",
+        r"\bme obligo a tocarla\b",
+        r"\bme saco fotos\b",
+        r"\bme grabo sin ropa\b",
+        r"\bme mando fotos\b",
+        r"\bme pidio fotos\b",
+        r"\bme pidió fotos\b",
+        r"\bme piden fotos\b",
+        r"\bun adulto me\b.+\bfotos\b",
+        r"\bme groomea\b",
+        r"\bme está groomeando\b",
+        r"\bun mayor me pide\b",
+        r"\bun chico mayor me\b",
     ]
     for patron in patrones_abuso:
         if re.search(patron, t):
             return "rojo_abuso"
 
+    # Patrones de malestar emocional moderado
     patrones_amarillos = [
         r"\bno doy mas\b",
         r"\bestoy mal\b",
@@ -707,6 +608,31 @@ def clasificar_riesgo(texto: str) -> str:
         r"\bestoy cansada de vivir\b",
         r"\bme quiero morir\b",
         r"\bquiero morir\b",
+        # --- NUEVO: malestar emocional juvenil ---
+        r"\bno sirvo para nada\b",
+        r"\bsoy un fracaso\b",
+        r"\bnadie me entiende\b",
+        r"\bnadie me quiere\b",
+        r"\bme harté de todo\b",
+        r"\bme harte de todo\b",
+        r"\bme tiene harto\b",
+        r"\bme tiene harta\b",
+        r"\bestoy harto de vivir\b",
+        r"\bestoy harta de vivir\b",
+        r"\bme siento invisible\b",
+        r"\bme siento roto\b",
+        r"\bme siento rota\b",
+        r"\bme siento vacio\b",
+        r"\bme siento vacía\b",
+        r"\bme siento vacío\b",
+        r"\bno le importo a nadie\b",
+        r"\bno le importo a nadie\b",
+        r"\bsoy una carga para todos\b",
+        r"\btodo me sale mal\b",
+        r"\bya no puedo más\b",
+        r"\bya no puedo mas\b",
+        r"\bestoy agotado\b",
+        r"\bestoy agotada\b",
     ]
     for patron in patrones_amarillos:
         if re.search(patron, t):
@@ -738,8 +664,8 @@ def respuesta_abuso() -> str:
         "Hay personas que pueden ayudarte ahora mismo.\n\n"
         "Buscá un lugar seguro y alejate de quien te hizo daño. "
         "Contactá a alguien de confianza que pueda acompañarte.\n\n"
-        "No tenés que pasar esto sola/o.\n\n"
-        "Dios está cerca de los que están heridos. Salmos 34:18.\n\n"
+        "No tenés que pasar esto sola o solo.\n\n"
+        "Dios está cerca de los que están heridos. Salmos capitulo 34 versiculo 18.\n\n"
         "¿NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
 
@@ -780,7 +706,6 @@ def limpiar_timestamps(cola: deque, ahora: float, ventana_segundos: int):
 
 def verificar_limites():
     inicializar_control_uso()
-
     ahora = time.time()
     control = st.session_state.control_uso
 
@@ -850,37 +775,36 @@ st.markdown(
         background-attachment: fixed;
     }}
 
-   .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
-    color: #F5F5F5 !important;
-    text-shadow: 1px 1px 3px rgba(0,0,0,1) !important;
-    font-size: clamp(15px, 3.5vw, 18px) !important;
-    line-height: 1.75 !important;
-}}
+    .stApp, .stMarkdown, p, li, span, label, .stChatMessage {{
+        color: #F5F5F5 !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,1) !important;
+        font-size: clamp(15px, 3.5vw, 18px) !important;
+        line-height: 1.75 !important;
+    }}
 
-[data-testid="stChatMessageContent"], 
-[data-testid="stMarkdownContainer"], 
-[data-testid="stChatMessageContent"] p,
-[data-testid="stChatMessageContent"] li,
-[data-testid="stChatMessageContent"] div {{
-    font-size: clamp(15px, 3.8vw, 19px) !important;
-    line-height: 1.75 !important;
-}}
-
-@media (max-width: 768px) {{
-    .stApp, .stMarkdown, p, li, span, label, .stChatMessage,
     [data-testid="stChatMessageContent"],
     [data-testid="stMarkdownContainer"],
     [data-testid="stChatMessageContent"] p,
     [data-testid="stChatMessageContent"] li,
     [data-testid="stChatMessageContent"] div {{
-        font-size: clamp(15px, 4vw, 17px) !important;
+        font-size: clamp(15px, 3.8vw, 19px) !important;
         line-height: 1.75 !important;
     }}
 
-    .stChatInputContainer textarea {{
-        font-size: clamp(15px, 4vw, 17px) !important;
+    @media (max-width: 768px) {{
+        .stApp, .stMarkdown, p, li, span, label, .stChatMessage,
+        [data-testid="stChatMessageContent"],
+        [data-testid="stMarkdownContainer"],
+        [data-testid="stChatMessageContent"] p,
+        [data-testid="stChatMessageContent"] li,
+        [data-testid="stChatMessageContent"] div {{
+            font-size: clamp(15px, 4vw, 17px) !important;
+            line-height: 1.75 !important;
+        }}
+        .stChatInputContainer textarea {{
+            font-size: clamp(15px, 4vw, 17px) !important;
+        }}
     }}
-}}
 
     .stChatInputContainer {{
         background: rgba(15,20,35,0.95) !important;
@@ -910,8 +834,6 @@ st.markdown(
 st.markdown(
     """
     <style>
-    /* === ANIMACIÓN HERO === */
-
     @keyframes smokeReveal {
         0%   { opacity: 0; filter: blur(30px) brightness(0.3); transform: scale(1.08); }
         40%  { opacity: 0.6; filter: blur(12px) brightness(0.7); transform: scale(1.03); }
@@ -1029,8 +951,8 @@ if st.session_state.mantenimiento and not st.session_state.es_admin:
     st.stop()
 
 if not st.session_state.acepto_terminos:
-
-    st.markdown("""
+    st.markdown(
+        """
     <style>
     @keyframes slideDown {
         0%   { opacity: 0; max-height: 0px; transform: translateY(-10px); }
@@ -1093,7 +1015,9 @@ if not st.session_state.acepto_terminos:
         </ol>
     </div>
     <div class="acepto-wrapper" id="acepto-btn-hint"></div>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
     if st.button("✦  ACEPTO  ✦", key="btn_acepto", use_container_width=False):
         st.session_state.acepto_terminos = True
@@ -1115,59 +1039,92 @@ for m in st.session_state.messages:
 
 # =========================
 # 11. PROMPTS
+# MEJORADO: empatía activa, tono conversacional, preguntas de seguimiento
+# Para volver al modo ahorro: reemplazá PROMPT_BASE por PROMPT_BASE_AHORRO (ver abajo)
 # =========================
+
+# --- MODO CONVERSACIONAL (activo) ---
 PROMPT_BASE = (
     "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
 
     "PROHIBICIÓN ESTRICTA: No menciones a Google, no digas que sos una inteligencia artificial, "
     "ni un modelo de lenguaje, ni que fuiste programado por nadie. "
 
-    "Si te preguntan '¿Quién te creó?', respondé: 'Fui creada para ser tu guía en el Manual de Vida y acompañarte con la sabiduría de las Escrituras'. "
+    "Si te preguntan '¿Quién te creó?', respondé: "
+    "'Fui creada para ser tu guía en el Manual de Vida y acompañarte con la sabiduría de las Escrituras'. "
 
-    "Tu tono es humano, claro, sereno y compasivo. "
+    "TONO Y PERSONALIDAD: "
+    "Sos una guía espiritual cercana, paciente y reconfortante. "
+    "Hablás como alguien que escucha de verdad, no como un buscador de información. "
+    "Tu lenguaje es humano, cálido, sereno y compasivo. "
     "No sos una iglesia ni debatís religión. "
     "Respondé siempre de manera directa y fiel al Manual. "
 
+    "EMPATÍA ACTIVA — MUY IMPORTANTE: "
+    "Si el usuario comparte un problema, una emoción o una situación difícil, "
+    "PRIMERO validá sus sentimientos con una frase breve y genuina, "
+    "ANTES de dar el versículo o la enseñanza. "
+    "Ejemplos de frases de validación: "
+    "'Entiendo que estés pasando por algo tan difícil...', "
+    "'Es normal sentirse así en momentos como este...', "
+    "'Lo que sentís tiene mucho peso, y está bien reconocerlo...', "
+    "'Gracias por contarme esto, no es fácil hablarlo...'. "
+    "Luego, de forma natural, compartí la palabra del Manual. "
+
+    "PREGUNTAS DE SEGUIMIENTO: "
+    "Al final de cada respuesta, invitá a continuar la charla de forma natural y variada. "
+    "No repitas siempre la misma frase. "
+    "Ejemplos: "
+    "'¿Te gustaría que profundicemos en esto?', "
+    "'¿Cómo te sentís con respecto a lo que te compartí?', "
+    "'¿Hay algo más de lo que quieras hablar?', "
+    "'¿Querés que busquemos juntos otra palabra del Manual sobre esto?'. "
+    "Solo usá esta invitación cuando sea natural al contexto. "
+    "No la fuerces si la respuesta es muy corta o muy directa. "
+
+    "FORMATO DE RESPUESTA: "
     "Nunca uses negritas ni asteriscos. "
-
-    "IMPORTANTE: Si el usuario pide textos bíblicos muy conocidos o extensos "
-    "(como los Diez Mandamientos), NO los recites completos de forma literal. "
-    "En su lugar, podés resumir, explicar o enumerar. "
-
-    "Podés incluir citas breves, pero evitá bloques largos completos. "
-
-    "Si el usuario pide específicamente enumeraciones (como los Diez Mandamientos), "
-    "debes responder obligatoriamente con una lista numerada completa del 1 al 10, "
-    "sin omitir ningún punto y sin reemplazarla por una explicación general. "
-
-    "Cuando respondas con listas numeradas, cada elemento debe ir obligatoriamente en una línea nueva, "
-    "uno debajo del otro, usando formato vertical claro. Nunca escribas listas en un mismo párrafo. "
-
+    "Usá párrafos cortos. Evitá bloques largos de texto. "
     "Antes de citar un versículo, introducí brevemente el tema. "
-    "Luego el versículo, y después una explicación clara. "
+    "Luego el versículo, y después una explicación clara y breve. "
 
-    "Usá párrafos cortos. Evitá bloques largos. "
-
-    "Siempre que menciones contenido del Manual de Vida, debés incluir al menos una cita breve "
-    "con libro, capítulo y versículo. "
-
-    "Usá formato en palabras, por ejemplo: "
-    "Éxodo capitulo. 20 versiculo. 3 — No tendrás dioses ajenos delante de mí. "
-
-    "No uses formato con dos puntos (:). "
+    "CITAS BÍBLICAS: "
+    "Usá formato en palabras: Éxodo capitulo 20 versiculo 3. "
+    "No uses el formato con dos puntos (:). "
     "No inventes citas. "
+    "Siempre incluí al menos una cita con libro, capítulo y versículo. "
 
-    "Si enumerás una lista, siempre completala totalmente antes de terminar la respuesta. "
+    "Si el usuario pide textos muy extensos (como los Diez Mandamientos), "
+    "podés resumir o enumerar en lugar de recitarlos completos de forma literal. "
+
+    "Si el usuario pide específicamente una lista numerada (como los Diez Mandamientos), "
+    "respondé con la lista completa, vertical, sin omitir ningún punto. "
+
+    "Si enumerás una lista, completala totalmente antes de terminar la respuesta. "
     "Nunca la dejes incompleta. "
-
-    "No repitas frases de cierre en todas las respuestas. "
-    "Solo invita a continuar la conversación cuando sea apropiado y de forma natural, "
-    "variando el lenguaje."
 )
+
+# --- MODO AHORRO (para activar en el futuro si hace falta reducir tokens) ---
+# Para volver al modo ahorro, reemplazá PROMPT_BASE por este bloque:
+PROMPT_BASE_AHORRO = (
+    "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
+    "No menciones a Google ni digas que sos IA. "
+    "Tu tono es humano, claro, sereno y compasivo. "
+    "No sos una iglesia ni debatís religión. "
+    "Respondé siempre de manera directa y fiel al Manual. "
+    "Nunca uses negritas ni asteriscos. "
+    "Usá formato en palabras: Éxodo capitulo 20 versiculo 3. No uses dos puntos (:). "
+    "No inventes citas. "
+    "Usá párrafos cortos. "
+)
+
 PROMPT_AMARILLO = (
     PROMPT_BASE + " "
-    "El usuario puede estar pasando dolor emocional. "
-    "Respondé con más contención, calma y cercanía. "
+    "El usuario puede estar pasando dolor emocional profundo. "
+    "Priorizá la contención antes que la información. "
+    "Respondé con más calma, cercanía y ternura. "
+    "Validá primero lo que siente antes de compartir cualquier versículo. "
+    "Recordale con suavidad que no está solo o sola, y que Dios está cerca. "
 )
 
 
@@ -1281,13 +1238,13 @@ if prompt:
                     historial = construir_historial(st.session_state.messages, limite=15)
                     contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
 
-                    model = genai.GenerativeModel("models/gemini-3-flash-preview")
+                    model = genai.GenerativeModel("models/gemini-2.0-flash")
 
                     response = model.generate_content(
                         f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                         generation_config={
                             "max_output_tokens": 4000,
-                            "temperature": 0.3,
+                            "temperature": 0.7,
                         },
                     )
 
@@ -1310,12 +1267,6 @@ if prompt:
                     texto = re.sub(r"[*#_]", "", texto_extraido).strip()
                     texto = asegurar_cierre(texto)
 
-            respuesta_placeholder.empty()
-            texto_final = mostrar_respuesta_suave(texto)
-
-            st.session_state.messages.append({"role": "assistant", "content": texto_final})
-            reproducir_audio(texto_final)
-
         except Exception as e:
             try:
                 biblia_local, respuestas_locales, temas_locales = cargar_datos_locales()
@@ -1331,6 +1282,14 @@ if prompt:
             else:
                 st.exception(e)
                 st.error("Error en la generación de respuesta.")
+                st.stop()
+
+        respuesta_placeholder.empty()
+        texto_final = mostrar_respuesta_suave(texto)
+
+        st.session_state.messages.append({"role": "assistant", "content": texto_final})
+        reproducir_audio(texto_final)
+
 
 # =========================
 # 13. CAFECITO
@@ -1340,7 +1299,6 @@ st.sidebar.write("### ☕ Apoyá a la IA DIVINA")
 st.sidebar.markdown(
     '<a href="https://cafecito.app/iadivina" target="_blank">'
     '<img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">'
-    '</a>',
+    "</a>",
     unsafe_allow_html=True,
 )
-
