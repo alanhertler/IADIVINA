@@ -479,68 +479,58 @@ def normalizar(texto: str) -> str:
         texto = texto.replace(a, b)
     return texto
 
-def _generar_audio_pyttsx3(texto: str) -> bytes:
-    """Genera audio WAV en memoria usando pyttsx3 (voz del sistema Windows)."""
-    engine = pyttsx3.init()
+def generar_audio_google(texto: str):
+    try:
+        client = texttospeech.TextToSpeechClient()
 
-    # Buscar voz masculina en español
-    voices = engine.getProperty("voices")
-    voz_elegida = None
-    for v in voices:
-        nombre = v.name.lower()
-        idioma = "".join(v.languages).lower() if v.languages else ""
-        if ("es" in idioma or "spanish" in nombre or "sabina" in nombre or "helena" in nombre or "pablo" in nombre or "jorge" in nombre):
-            if any(m in nombre for m in ["pablo", "jorge", "diego", "carlos", "david", "male"]):
-                voz_elegida = v.id
-                break
+        synthesis_input = texttospeech.SynthesisInput(
+            ssml=f"""
+            <speak>
+                <prosody rate="1.08" pitch="+0st">
+                    {texto}
+                </prosody>
+            </speak>
+            """
+        )
 
-    # Si no encuentra masculina, usa la primera en español
-    if not voz_elegida:
-        for v in voices:
-            nombre = v.name.lower()
-            idioma = "".join(v.languages).lower() if v.languages else ""
-            if "es" in idioma or "spanish" in nombre:
-                voz_elegida = v.id
-                break
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="es-AR",
+            ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
+        )
 
-    if voz_elegida:
-        engine.setProperty("voice", voz_elegida)
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.MP3
+        )
 
-    engine.setProperty("rate", 160)   # velocidad
-    engine.setProperty("volume", 1.0) # volumen
+        response = client.synthesize_speech(
+            input=synthesis_input,
+            voice=voice,
+            audio_config=audio_config
+        )
 
-    # Guardar en archivo temporal
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-    tmp.close()
-    engine.save_to_file(texto, tmp.name)
-    engine.runAndWait()
+        return base64.b64encode(response.audio_content).decode("utf-8")
 
-    with open(tmp.name, "rb") as f:
-        audio_bytes = f.read()
-    os.unlink(tmp.name)
-    return audio_bytes
+    except Exception as e:
+        st.error(f"Error de sonido: {e}")
+        return None
+
 
 def reproducir_audio(texto: str):
-    """
-    Genera audio reproducible en el navegador usando pyttsx3 (voz del sistema).
-    """
     if not st.session_state.get("usar_voz", True):
         return
 
-    boton_id = f"btn_audio_{abs(hash(texto[:80]))}"
-    if st.button("🔊 Escuchar Manual", key=boton_id):
-        try:
-            audio_bytes = _generar_audio_pyttsx3(texto)
-            audio_b64 = base64.b64encode(audio_bytes).decode()
-            audio_html = f"""
-                <audio autoplay controls style="width:100%; margin-top:8px;">
-                    <source src="data:audio/wav;base64,{audio_b64}" type="audio/wav">
-                </audio>
-            """
-            st.markdown(audio_html, unsafe_allow_html=True)
-        except Exception as e:
-            st.error(f"Error de sonido: {e}")
+    audio_base64 = generar_audio_google(texto)
 
+    if audio_base64:
+        st.markdown(
+            f"""
+            <audio autoplay controls style="width:100%; margin-top:8px;">
+                <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
+            </audio>
+            """,
+            unsafe_allow_html=True,
+        )
+    
 # =========================
 # 2.1 FUNCIONES VISUALES
 # =========================
