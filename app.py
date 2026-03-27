@@ -521,7 +521,7 @@ import io
 
 def _generar_audio_gtts(texto: str) -> bytes:
     mp3_buffer = io.BytesIO()
-    tts = gTTS(text=texto, lang="es")
+    tts = gTTS(text=texto, lang="es", tld="com.ar")
     tts.write_to_fp(mp3_buffer)
     mp3_buffer.seek(0)
     return mp3_buffer.read()
