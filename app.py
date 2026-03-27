@@ -534,7 +534,8 @@ def reproducir_audio(texto: str):
 
     if st.button("🔊 Escuchar Manual", key=boton_id):
         try:
-            audio_bytes = _generar_audio_gtts(texto)
+            texto_audio = texto.replace("\n", ". ").strip()
+            audio_bytes = _generar_audio_gtts(texto_audio)
             st.audio(audio_bytes, format="audio/mp3")
         except Exception as e:
             st.error(f"Error de sonido: {e}")
