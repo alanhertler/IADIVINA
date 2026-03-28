@@ -899,16 +899,18 @@ if prompt:
                 respuesta_local = responder_local_si_aplica(prompt, biblia_local, respuestas_locales, temas_locales)
             except Exception:
                 respuesta_local = None
+        
             if respuesta_local:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 reproducir_audio(texto_final)
+                st.stop()
             else:
                 st.exception(e)
                 st.error("Error en la generación de respuesta.")
                 st.stop()
-
+        
         respuesta_placeholder.empty()
         texto_final = mostrar_respuesta_suave(texto)
         st.session_state.messages.append({"role": "assistant", "content": texto_final})
