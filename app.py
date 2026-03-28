@@ -324,7 +324,7 @@ def reproducir_audio(texto: str):
         return
     import uuid
     boton_id = f"btn_audio_{uuid.uuid4()}"
-    if st.button("🔊 Escuchar Manual", key=boton_id):
+    if st.button("🔊 Escuchar Manual"):
         try:
             audio_bytes = _generar_audio_cloud_tts(texto)
             if audio_bytes:
