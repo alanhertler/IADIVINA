@@ -1120,7 +1120,7 @@ if prompt:
                     model = genai.GenerativeModel("models/gemini-3-flash-preview")
                     response = model.generate_content(
                         f"{contexto}\n\n{historial}\nUsuario: {prompt}",
-                        generation_config={"max_output_tokens": 500, "temperature": 0.45},
+                        generation_config={"max_output_tokens": 4000, "temperature": 0.45},
                     )
                     texto_extraido, error_detalle, finish_reason = extraer_texto_seguro(response)
 
