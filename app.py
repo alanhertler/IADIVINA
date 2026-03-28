@@ -948,8 +948,10 @@ PROMPT_BASE = (
     "Si el usuario pide un salmo, capítulo o texto completo y ese contenido está en la base local, no des explicación previa ni introducción. "
     "Respondé directamente con el texto solicitado. "
     "Solo explicá si el usuario lo pide después. "
-    "Si el capítulo completo no está en la base local, no lo reconstruyas ni lo cites parcialmente. "
-    "Indicá con claridad que ese capítulo completo no está disponible todavía en la base local actual. "
+    "Si el capítulo completo está disponible en la base local, mostralo íntegro. "
+    "Si no está en la base local, podés citarlo desde tu conocimiento bíblico "
+    "siempre que sea fiel a la Reina-Valera 1909. "
+    "Nunca inventes versículos ni números que no existan. "
 
     "FORMATO BÍBLICO COMPLETO: "
     "Para capítulos completos, mostrá solo el título una vez, por ejemplo Salmos 91 o Juan 1. "
