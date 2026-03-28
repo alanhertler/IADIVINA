@@ -336,6 +336,7 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
     if consulta_norm in ["ayuda", "menu", "como funciona"]:
         return respuestas["ayuda"]
 
+    capitulo = extraer_capitulo_local(consulta)
     if capitulo:
         encontrado = buscar_capitulo_local(biblia, capitulo["libro"], capitulo["capitulo"])
         if encontrado and encontrado.count("Versiculo") >= 3:
