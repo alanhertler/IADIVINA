@@ -288,39 +288,15 @@ asegurar_estructura_local()
 # =========================
 # 2.2 VOZ — gTTS
 # =========================
-def _generar_audio_gtts(texto: str) -> bytes:
-    mp3_buffer = io.BytesIO()
-    tts = gTTS(text=texto, lang="es", tld="com.ar")
-    tts.write_to_fp(mp3_buffer)
-    mp3_buffer.seek(0)
-    return mp3_buffer.read()
-
-
 def reproducir_audio(texto: str):
     if not st.session_state.get("usar_voz", True):
         return
-    boton_id = f"btn_audio_{abs(hash(texto[:80]))}"
+    boton_id = f"btn_audio_{abs(hash(texto[:80]))}_{int(time.time() * 1000)}"
     if st.button("🔊 Escuchar Manual", key=boton_id):
         try:
             texto_audio = texto.replace("\n", ". ").strip()
             audio_bytes = _generar_audio_gtts(texto_audio)
             st.audio(audio_bytes, format="audio/mp3")
-        except Exception as e:
-            st.error(f"Error de sonido: {e}")
-
-
-def reproducir_audio(texto: str):
-    if not st.session_state.get("usar_voz", True):
-        return
-    import uuid
-    boton_id = f"btn_audio_{uuid.uuid4()}"
-    if st.button("🔊 Escuchar Manual"):
-        try:
-            audio_bytes = _generar_audio_cloud_tts(texto)
-            if audio_bytes:
-                st.audio(audio_bytes, format="audio/mp3")
-            else:
-                st.warning("La voz no está disponible en este momento.")
         except Exception as e:
             st.error(f"Error de sonido: {e}")
 
