@@ -669,7 +669,6 @@ for m in st.session_state.messages:
     with st.chat_message(m["role"], avatar=avatar):
         st.markdown(m["content"].replace("\n", "  \n"))
         if m["role"] == "assistant":
-            reproducir_audio(m["content"])
 
 
 # =========================
@@ -794,7 +793,6 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
                 st.stop()
 
             elif nivel == "rojo_abuso":
@@ -802,7 +800,6 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
                 st.stop()
 
             respuesta_directa = respuesta_filtrada(prompt)
@@ -810,7 +807,6 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_directa)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
                 st.stop()
 
             biblia_local, respuestas_locales, temas_locales = cargar_datos_locales()
@@ -820,7 +816,6 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
                 st.stop()
 
             if not API_DISPONIBLE:
@@ -832,7 +827,6 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
                 st.stop()
 
             with respuesta_placeholder.container():
@@ -871,7 +865,6 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
                 st.stop()
             else:
                 st.exception(e)
@@ -881,7 +874,7 @@ if prompt:
         respuesta_placeholder.empty()
         texto_final = mostrar_respuesta_suave(texto)
         st.session_state.messages.append({"role": "assistant", "content": texto_final})
-        reproducir_audio(texto_final)
+    
 
 
 # =========================
