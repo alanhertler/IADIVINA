@@ -1,8 +1,7 @@
 import os
+os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 def normalizar(texto):
     return texto.lower()
-os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
-
 import json
 import streamlit as st
 import google.generativeai as genai
