@@ -322,7 +322,8 @@ def _generar_audio_cloud_tts(texto: str):
 def reproducir_audio(texto: str):
     if not st.session_state.get("usar_voz", True):
         return
-    boton_id = f"btn_audio_{abs(hash(texto[:80]))}"
+    import uuid
+    boton_id = f"btn_audio_{uuid.uuid4()}"
     if st.button("🔊 Escuchar Manual", key=boton_id):
         try:
             audio_bytes = _generar_audio_cloud_tts(texto)
