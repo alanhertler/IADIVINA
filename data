@@ -1,1 +1,20 @@
-
+[
+  {
+    "libro": "Juan",
+    "capitulo": 1,
+    "versiculo": 1,
+    "texto": "En el principio era el Verbo, y el Verbo era con Dios, y el Verbo era Dios."
+  },
+  {
+    "libro": "Juan",
+    "capitulo": 1,
+    "versiculo": 2,
+    "texto": "Este era en el principio con Dios."
+  },
+  {
+    "libro": "Salmos",
+    "capitulo": 91,
+    "versiculo": 1,
+    "texto": "El que habita al abrigo del Altísimo, morará bajo la sombra del Omnipotente."
+  }
+]
