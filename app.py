@@ -926,12 +926,10 @@ PROMPT_BASE = (
     "No es obligatorio incluir versículo si no aporta. "
 
     "INTEGRIDAD DEL TEXTO: "
-    "Cuando muestres versículos o textos bíblicos, deben estar completos. "
-    "No cortes frases a la mitad. "
-    "No resumas un versículo. "
-    "No dejes ideas incompletas. "
-    "Si no podés dar el texto completo correctamente, no lo generes parcialmente. "
-
+    "Cuando muestres un versículo individual, debe estar completo. "
+    "No cortes frases ni dejes ideas incompletas. "
+    "Para capítulos completos, respondé de forma clara pero sin forzar textos largos si no podés garantizarlos. "
+    
     "VARIACIONES DEL USUARIO: "
     "Reconocé distintas formas de pedir lo mismo, por ejemplo: "
     "salmo 91, salmos 91, sal 91, salmo capitulo 91, salmos capitulo 91. "
