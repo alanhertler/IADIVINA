@@ -1,7 +1,6 @@
 import os
 os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
-def normalizar(texto):
-    return texto.lower()
+
 import json
 import streamlit as st
 import google.generativeai as genai
@@ -10,9 +9,49 @@ import base64
 import re
 import time
 import io
-import requests
 from pathlib import Path
 from collections import deque
+
+
+def normalizar(texto):
+    texto = str(texto).lower().strip()
+
+    reemplazos = {
+        "4": "a",
+        "3": "e",
+        "1": "i",
+        "0": "o",
+        "5": "s",
+        "@": "a",
+    }
+    for k, v in reemplazos.items():
+        texto = texto.replace(k, v)
+
+    reemplazos_directos = {
+        "kiero": "quiero",
+        "qiero": "quiero",
+        "mor1r": "morir",
+        "m4tar": "matar",
+        "m4t4r": "matar",
+        "su1cid": "suicid",
+        "mat4r": "matar",
+        "ki3ro": "quiero",
+        "qm": "que me",
+        "xq": "porque",
+    }
+    for k, v in reemplazos_directos.items():
+        texto = texto.replace(k, v)
+
+    for a, b in {
+        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"
+    }.items():
+        texto = texto.replace(a, b)
+
+    texto = re.sub(r"[_\-]+", " ", texto)
+    texto = re.sub(r"[^\w\s]", " ", texto)
+    texto = re.sub(r"\s+", " ", texto).strip()
+    return texto
+
 
 # =========================
 # 1. CONFIGURACIÓN INICIAL
@@ -145,8 +184,10 @@ def asegurar_estructura_local():
                 guardar_json(BIBLIA_FILE, biblia_actual)
         except Exception:
             guardar_json(BIBLIA_FILE, BIBLIA_DEMO)
+
     if not RESPUESTAS_FILE.exists():
         guardar_json(RESPUESTAS_FILE, RESPUESTAS_DEMO)
+
     if not TEMAS_FILE.exists():
         guardar_json(TEMAS_FILE, TEMAS_DEMO)
     else:
@@ -175,7 +216,7 @@ def cargar_datos_locales():
 
 def normalizar_local(texto: str) -> str:
     texto = texto.lower().strip()
-    for a, b in {"á":"a","é":"e","í":"i","ó":"o","ú":"u","ñ":"n"}.items():
+    for a, b in {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"}.items():
         texto = texto.replace(a, b)
     return re.sub(r"\s+", " ", texto)
 
@@ -198,11 +239,11 @@ def buscar_por_referencia_local(biblia, libro, capitulo, versiculo):
 def detectar_tema_local(consulta: str):
     t = normalizar_local(consulta)
     mapa = {
-        "consuelo": ["consuelo","dolor","quebrantado","solo","sola","triste","tristeza","duelo"],
-        "paz": ["paz","calma","tranquilidad","descanso"],
-        "miedo": ["miedo","temor","asustado","asustada","desesperado","desesperada"],
-        "fe": ["fe","creer","esperanza","confianza"],
-        "ansiedad": ["ansiedad","ansioso","ansiosa","angustia","angustiado","angustiada"],
+        "consuelo": ["consuelo", "dolor", "quebrantado", "solo", "sola", "triste", "tristeza", "duelo"],
+        "paz": ["paz", "calma", "tranquilidad", "descanso"],
+        "miedo": ["miedo", "temor", "asustado", "asustada", "desesperado", "desesperada"],
+        "fe": ["fe", "creer", "esperanza", "confianza"],
+        "ansiedad": ["ansiedad", "ansioso", "ansiosa", "angustia", "angustiado", "angustiada"],
     }
     for tema, palabras in mapa.items():
         for palabra in palabras:
@@ -212,8 +253,10 @@ def detectar_tema_local(consulta: str):
 
 
 def buscar_versiculos_por_tema_local(biblia, temas, tema):
-    return [v for ref in temas.get(tema, [])
-            if (v := buscar_por_referencia_local(biblia, ref["libro"], ref["capitulo"], ref["versiculo"]))]
+    return [
+        v for ref in temas.get(tema, [])
+        if (v := buscar_por_referencia_local(biblia, ref["libro"], ref["capitulo"], ref["versiculo"]))
+    ]
 
 
 def formatear_versiculo_local(item):
@@ -222,7 +265,8 @@ def formatear_versiculo_local(item):
 
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
-    if any(k in consulta_norm for k in ["10 mandamientos","diez mandamientos","mandamientos","madamientos"]):
+
+    if any(k in consulta_norm for k in ["10 mandamientos", "diez mandamientos", "mandamientos", "madamientos"]):
         return """LOS DIEZ MANDAMIENTOS
 
 Base bíblica: EXODO capitulo 20. versiculos 2 al 17
@@ -261,24 +305,38 @@ No hablarás contra tu prójimo falso testimonio
 10. EXODO capitulo 20. versiculo 17
 No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo"""
 
-    if consulta_norm in ["hola","buenas","buen dia","buen día","buenas tardes","buenas noches"]:
+    if consulta_norm in ["hola", "buenas", "buen dia", "buen día", "buenas tardes", "buenas noches"]:
         return respuestas["saludo"]
-    if consulta_norm in ["ayuda","menu","menú","como funciona","cómo funciona"]:
+
+    if consulta_norm in ["ayuda", "menu", "menú", "como funciona", "cómo funciona"]:
         return respuestas["ayuda"]
+
     referencia = extraer_referencia_local(consulta)
     if referencia:
-        encontrado = buscar_por_referencia_local(biblia, referencia["libro"], referencia["capitulo"], referencia["versiculo"])
+        encontrado = buscar_por_referencia_local(
+            biblia,
+            referencia["libro"],
+            referencia["capitulo"],
+            referencia["versiculo"]
+        )
         return formatear_versiculo_local(encontrado) if encontrado else "No encontré esa referencia en la base local actual."
+
     tema = detectar_tema_local(consulta)
     if tema:
         versiculos = buscar_versiculos_por_tema_local(biblia, temas, tema)
         if versiculos:
-            encabezados = {"consuelo": respuestas.get("consuelo_base","Te comparto una palabra:"),
-                           "paz": respuestas.get("paz_base","Te comparto una palabra:"),
-                           "miedo": respuestas.get("miedo_base","Te comparto una palabra:"),
-                           "fe": respuestas.get("fe_base","Te comparto una palabra:"),
-                           "ansiedad": respuestas.get("consuelo_base","Te comparto una palabra:")}
-            return "\n\n".join([encabezados.get(tema,"Te comparto una palabra:")] + [formatear_versiculo_local(v) for v in versiculos[:2]])
+            encabezados = {
+                "consuelo": respuestas.get("consuelo_base", "Te comparto una palabra:"),
+                "paz": respuestas.get("paz_base", "Te comparto una palabra:"),
+                "miedo": respuestas.get("miedo_base", "Te comparto una palabra:"),
+                "fe": respuestas.get("fe_base", "Te comparto una palabra:"),
+                "ansiedad": respuestas.get("consuelo_base", "Te comparto una palabra:")
+            }
+            return "\n\n".join(
+                [encabezados.get(tema, "Te comparto una palabra:")] +
+                [formatear_versiculo_local(v) for v in versiculos[:2]]
+            )
+
     return None
 
 
@@ -288,17 +346,25 @@ asegurar_estructura_local()
 # =========================
 # 2.2 VOZ — gTTS
 # =========================
+def _generar_audio_gtts(texto):
+    tts = gTTS(text=texto, lang="es")
+    buffer = io.BytesIO()
+    tts.write_to_fp(buffer)
+    buffer.seek(0)
+    return buffer
+
+
 def reproducir_audio(texto: str):
     if not st.session_state.get("usar_voz", True):
         return
-    boton_id = f"btn_audio_{abs(hash(texto[:80]))}_{int(time.time() * 1000)}"
-    if st.button("🔊 Escuchar Manual", key=boton_id):
-        try:
-            texto_audio = texto.replace("\n", ". ").strip()
-            audio_bytes = _generar_audio_gtts(texto_audio)
-            st.audio(audio_bytes, format="audio/mp3")
-        except Exception as e:
-            st.error(f"Error de sonido: {e}")
+    try:
+        texto_audio = texto.replace("\n", ". ").strip()
+        if not texto_audio:
+            return
+        audio_bytes = _generar_audio_gtts(texto_audio)
+        st.audio(audio_bytes, format="audio/mp3")
+    except Exception as e:
+        st.error(f"Error de sonido: {e}")
 
 
 # =========================
@@ -326,73 +392,189 @@ def mostrar_respuesta_suave(texto: str, delay: float = 0.02) -> str:
     return resultado if isinstance(resultado, str) else texto
 
 
+def asegurar_cierre(texto: str) -> str:
+    return str(texto).strip()
+
+
 # =========================
 # 3. CLASIFICACIÓN DE RIESGO
 # =========================
 def clasificar_riesgo(texto: str) -> str:
     t = normalizar(texto)
 
-    for frase in ["me muero de risa","me mori de risa","me mato de risa","jajaja me mato","jaja me muero","me parto de risa","me caigo de risa"]:
+    if len(t.strip()) < 3:
+        return "verde"
+
+    for frase in [
+        "me muero de risa", "me mori de risa", "me mato de risa",
+        "jajaja me mato", "jaja me muero", "me parto de risa", "me caigo de risa"
+    ]:
         if frase in t:
             return "verde"
 
     patrones_rojos = [
-        r"\bme voy a matar\b",r"\bquiero matarme\b",r"\bme quiero matar\b",
-        r"\bquiero suicidarme\b",r"\bme voy a suicidar\b",
-        r"\bno quiero seguir viviendo\b",r"\bno quiero seguir vivo\b",
-        r"\bvoy a terminar con todo\b",r"\besta noche termino con todo\b",
-        r"\bya tome pastillas\b",r"\bya tome remedios\b",r"\bya tome clonazepam\b",r"\bya tome alcohol\b",
+        r"\bme voy a matar\b",
+        r"\bme .* matar\b",
+        r"\bquiero matarme\b",
+        r"\bme quiero matar\b",
+        r"\bquiero suicidarme\b",
+        r"\bme voy a suicidar\b",
+        r"\bno quiero seguir viviendo\b",
+        r"\bno quiero seguir vivo\b",
+        r"\bvoy a terminar con todo\b",
+        r"\besta noche termino con todo\b",
+        r"\bya tome pastillas\b",
+        r"\bya tome remedios\b",
+        r"\bya tome clonazepam\b",
+        r"\bya tome alcohol\b",
         r"\bme tome\b.+\b(pastillas|remedios|clonazepam|alcohol)\b",
-        r"\bestoy por cortarme\b",r"\bme voy a cortar\b",
-        r"\ble mataron a\b",r"\bse murio mi amiga\b",r"\bse murio mi amigo\b",r"\bmataron a mi\b",r"\bperdi a mi\b",
-        r"\bme quiero borrar\b",r"\bya no quiero estar\b",r"\bquiero desaparecer\b",
-        r"\bdesearía no haber nacido\b",r"\bdeseo no haber nacido\b",
-        r"\bno deberia haber nacido\b",r"\bno debí nacer\b",
-        r"\bnadie me va a extrañar\b",r"\bnadie me extrañaria\b",
-        r"\btodos estarian mejor sin mi\b",r"\btodos estarian mejor sin mí\b",
-        r"\bsoy una carga\b",r"\bsoy un estorbo\b",
-        r"\bme voy a tirar\b",r"\bme voy a aventar\b",r"\bquiero saltar\b",
-        r"\bpienso en hacerme dano\b",r"\bpienso en hacerme daño\b",
-        r"\bvoy a hacerme dano\b",r"\bvoy a hacerme daño\b",
-        r"\bme lastimé\b",r"\bme lastime\b",r"\bme hice dano\b",r"\bme hice daño\b",
+        r"\bestoy por cortarme\b",
+        r"\bme voy a cortar\b",
+        r"\ble mataron a\b",
+        r"\bse murio mi amiga\b",
+        r"\bse murio mi amigo\b",
+        r"\bmataron a mi\b",
+        r"\bperdi a mi\b",
+        r"\bme quiero borrar\b",
+        r"\bya no quiero estar\b",
+        r"\bquiero desaparecer\b",
+        r"\bdesearia no haber nacido\b",
+        r"\bdeseo no haber nacido\b",
+        r"\bno deberia haber nacido\b",
+        r"\bno debi nacer\b",
+        r"\bnadie me va a extrañar\b",
+        r"\bnadie me extrañaria\b",
+        r"\btodos estarian mejor sin mi\b",
+        r"\btodos estarian mejor sin mí\b",
+        r"\bsoy una carga\b",
+        r"\bsoy un estorbo\b",
+        r"\bme voy a tirar\b",
+        r"\bme voy a aventar\b",
+        r"\bquiero saltar\b",
+        r"\bpienso en hacerme dano\b",
+        r"\bpienso en hacerme daño\b",
+        r"\bvoy a hacerme dano\b",
+        r"\bvoy a hacerme daño\b",
+        r"\bme lastime\b",
+        r"\bme lastime\b",
+        r"\bme hice dano\b",
+        r"\bme hice daño\b",
+        r"\bquiero .* morir\b",
+        r"\bno quiero vivir\b",
+        r"\bme quiero ir\b",
+        r"\bme quiero ir de aca\b",
+        r"\bme quiero ir de aqui\b",
+        r"\bya fue todo\b",
+        r"\bno tiene sentido\b",
+        r"\bestoy cansado de todo\b",
+        r"\bestoy cansada de todo\b",
+        r"\bno aguanto vivir\b",
+        r"\bya no puedo mas con esto\b",
+        r"\bno quiero estar aca\b",
+        r"\bno quiero estar aqui\b",
+        r"\bquiero dormirme y no despertar\b",
+        r"\bseria mejor desaparecer\b",
+        r"\bquiero dejar de existir\b",
+        r"\bme quiero morir\b",
+        r"\bquiero morir\b",
+        r"\bme quiero dormir para siempre\b",
     ]
     for patron in patrones_rojos:
         if re.search(patron, t):
             return "rojo"
 
     patrones_abuso = [
-        r"\bmi papa me toco\b",r"\bmi mama me toco\b",r"\bmi padrastro me toco\b",
-        r"\bmi tio me toco\b",r"\bmi abuelo me toco\b",r"\bmi hermano me toco\b",
-        r"\bel pastor me toco\b",r"\bme toco entre las piernas\b",
-        r"\bme tocaron entre las piernas\b",r"\bme tocaron\b.+\bpiernas\b",
-        r"\bme manosearon\b",r"\bme tocaron los senos\b",r"\bme tocaron las tetas\b",
-        r"\bme tocaron la cola\b",r"\bme tocaron el culo\b",r"\bme tocaron la vagina\b",
-        r"\babusaron de mi\b",r"\bme violaron\b",r"\bme hicieron cosas\b",r"\bme obligaron\b",r"\bme acosaron\b",
-        r"\bme hizo cosas raras\b",r"\bme toco de manera rara\b",r"\bme toco de forma rara\b",
-        r"\bme dejo tocar\b",r"\bme obligo a tocarlo\b",r"\bme obligo a tocarla\b",
-        r"\bme saco fotos\b",r"\bme grabo sin ropa\b",r"\bme mando fotos\b",
-        r"\bme pidio fotos\b",r"\bme pidió fotos\b",r"\bme piden fotos\b",
-        r"\bun adulto me\b.+\bfotos\b",r"\bme groomea\b",r"\bme está groomeando\b",
-        r"\bun mayor me pide\b",r"\bun chico mayor me\b",
+        r"\bmi papa me toco\b",
+        r"\bmi mama me toco\b",
+        r"\bmi padrastro me toco\b",
+        r"\bmi tio me toco\b",
+        r"\bmi abuelo me toco\b",
+        r"\bmi hermano me toco\b",
+        r"\bel pastor me toco\b",
+        r"\bme toco entre las piernas\b",
+        r"\bme tocaron entre las piernas\b",
+        r"\bme tocaron\b.+\bpiernas\b",
+        r"\bme manosearon\b",
+        r"\bme tocaron los senos\b",
+        r"\bme tocaron las tetas\b",
+        r"\bme tocaron la cola\b",
+        r"\bme tocaron el culo\b",
+        r"\bme tocaron la vagina\b",
+        r"\babusaron de mi\b",
+        r"\bme violaron\b",
+        r"\bme hicieron cosas\b",
+        r"\bme obligaron\b",
+        r"\bme acosaron\b",
+        r"\bme hizo cosas raras\b",
+        r"\bme toco de manera rara\b",
+        r"\bme toco de forma rara\b",
+        r"\bme dejo tocar\b",
+        r"\bme obligo a tocarlo\b",
+        r"\bme obligo a tocarla\b",
+        r"\bme saco fotos\b",
+        r"\bme grabo sin ropa\b",
+        r"\bme mando fotos\b",
+        r"\bme pidio fotos\b",
+        r"\bme pidió fotos\b",
+        r"\bme piden fotos\b",
+        r"\bun adulto me\b.+\bfotos\b",
+        r"\bme groomea\b",
+        r"\bme esta groomeando\b",
+        r"\bme está groomeando\b",
+        r"\bun mayor me pide\b",
+        r"\bun chico mayor me\b",
+        r"\bme amenaza para mandar fotos\b",
+        r"\bme obliga a mandar fotos\b",
+        r"\bme pide fotos sin ropa\b",
+        r"\bme pidio fotos sin ropa\b",
+        r"\bme toca cuando nadie ve\b",
+        r"\bme toca a escondidas\b",
     ]
     for patron in patrones_abuso:
         if re.search(patron, t):
             return "rojo_abuso"
 
     patrones_amarillos = [
-        r"\bno doy mas\b",r"\bestoy mal\b",r"\bme siento solo\b",r"\bme siento sola\b",
-        r"\bno aguanto mas\b",r"\bestoy destruido\b",r"\bestoy destruida\b",
-        r"\bno tengo ganas de seguir\b",r"\bno quiero seguir asi\b",r"\bpienso cosas feas\b",
-        r"\bestoy cansado de vivir\b",r"\bestoy cansada de vivir\b",
-        r"\bme quiero morir\b",r"\bquiero morir\b",
-        r"\bno sirvo para nada\b",r"\bsoy un fracaso\b",
-        r"\bnadie me entiende\b",r"\bnadie me quiere\b",
-        r"\bme harté de todo\b",r"\bme harte de todo\b",r"\bme tiene harto\b",r"\bme tiene harta\b",
-        r"\bestoy harto de vivir\b",r"\bestoy harta de vivir\b",
-        r"\bme siento invisible\b",r"\bme siento roto\b",r"\bme siento rota\b",
-        r"\bme siento vacio\b",r"\bme siento vacía\b",r"\bme siento vacío\b",
-        r"\bno le importo a nadie\b",r"\bsoy una carga para todos\b",r"\btodo me sale mal\b",
-        r"\bya no puedo más\b",r"\bya no puedo mas\b",r"\bestoy agotado\b",r"\bestoy agotada\b",
+        r"\bno doy mas\b",
+        r"\bestoy mal\b",
+        r"\bme siento solo\b",
+        r"\bme siento sola\b",
+        r"\bno aguanto mas\b",
+        r"\bestoy destruido\b",
+        r"\bestoy destruida\b",
+        r"\bno tengo ganas de seguir\b",
+        r"\bno quiero seguir asi\b",
+        r"\bpienso cosas feas\b",
+        r"\bestoy cansado de vivir\b",
+        r"\bestoy cansada de vivir\b",
+        r"\bno sirvo para nada\b",
+        r"\bsoy un fracaso\b",
+        r"\bnadie me entiende\b",
+        r"\bnadie me quiere\b",
+        r"\bme harte de todo\b",
+        r"\bme harto de todo\b",
+        r"\bme tiene harto\b",
+        r"\bme tiene harta\b",
+        r"\bestoy harto de vivir\b",
+        r"\bestoy harta de vivir\b",
+        r"\bme siento invisible\b",
+        r"\bme siento roto\b",
+        r"\bme siento rota\b",
+        r"\bme siento vacio\b",
+        r"\bme siento vacia\b",
+        r"\bno le importo a nadie\b",
+        r"\bsoy una carga para todos\b",
+        r"\btodo me sale mal\b",
+        r"\bya no puedo mas\b",
+        r"\bestoy agotado\b",
+        r"\bestoy agotada\b",
+        r"\bme siento muy triste\b",
+        r"\bno puedo con esto\b",
+        r"\bestoy cansado\b",
+        r"\bestoy cansada\b",
+        r"\bme siento para atras\b",
+        r"\bquiero desaparecer un rato\b",
+        r"\bno se que hacer con mi vida\b",
     ]
     for patron in patrones_amarillos:
         if re.search(patron, t):
@@ -432,7 +614,7 @@ def respuesta_abuso() -> str:
 
 def respuesta_filtrada(texto: str):
     t = normalizar(texto)
-    if any(p in t for p in ["concha","pija","porno","masturb","sexo","coger"]):
+    if any(p in t for p in ["concha", "pija", "porno", "masturb", "sexo", "coger"]):
         return (
             "Puedo seguir si querés hablar en serio sobre lo que te pasa o sobre el Manual. "
             "Ese tipo de contenido no corresponde a este espacio.\n\n"
@@ -469,14 +651,18 @@ def verificar_limites():
     control = st.session_state.control_uso
     limpiar_timestamps(control["mensajes_minuto"], ahora, 60)
     limpiar_timestamps(control["mensajes_hora"], ahora, 3600)
+
     if control["ultimo_mensaje_ts"] > 0:
         diferencia = ahora - control["ultimo_mensaje_ts"]
         if diferencia < TIEMPO_MINIMO_ENTRE_MENSAJES:
             return False, f"Esperá unos {int(TIEMPO_MINIMO_ENTRE_MENSAJES - diferencia) + 1} segundos antes de mandar otro mensaje."
+
     if len(control["mensajes_minuto"]) >= MAX_MENSAJES_POR_MINUTO:
         return False, "Llegaste al límite de mensajes por minuto. Esperá un poco y seguí."
+
     if len(control["mensajes_hora"]) >= MAX_MENSAJES_POR_HORA:
         return False, "Llegaste al límite de mensajes de esta hora. Probá más tarde."
+
     return True, ""
 
 
@@ -502,13 +688,15 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "usar_voz" not in st.session_state:
     st.session_state.usar_voz = True
-    
+
+
 def get_base64(file_path: str):
     try:
         with open(file_path, "rb") as f:
             return base64.b64encode(f.read()).decode()
     except Exception:
         return None
+
 
 # =========================
 # 7. ESTILO
@@ -590,12 +778,15 @@ with st.sidebar:
     st.session_state.usar_voz = st.checkbox("Activar voz", value=st.session_state.usar_voz)
     st.markdown("---")
     st.caption("Acceso técnico")
+
     if API_DISPONIBLE:
         st.success("API IA conectada")
     else:
         st.warning("Sin API: funciona solo el motor local")
+
     st.caption(f"Base local: {BIBLIA_FILE.name}")
     clave_admin = st.text_input("Clave técnica", type="password", label_visibility="collapsed", placeholder="Clave técnica")
+
     if st.button("Entrar"):
         if clave_admin == ADMIN_PASSWORD:
             st.session_state.es_admin = True
@@ -603,9 +794,14 @@ with st.sidebar:
             st.rerun()
         elif clave_admin:
             st.error("Clave incorrecta.")
+
     if st.session_state.es_admin:
         st.success("MODO ADMIN ACTIVO")
-        st.session_state.mantenimiento = st.toggle("Modo mantenimiento", value=st.session_state.mantenimiento, key="toggle_mantenimiento")
+        st.session_state.mantenimiento = st.toggle(
+            "Modo mantenimiento",
+            value=st.session_state.mantenimiento,
+            key="toggle_mantenimiento"
+        )
         if st.button("Reiniciar conversación"):
             st.session_state.messages = []
             st.rerun()
@@ -655,9 +851,11 @@ if not st.session_state.acepto_terminos:
     </div>
     <div class="acepto-wrapper" id="acepto-btn-hint"></div>
     """, unsafe_allow_html=True)
+
     if st.button("✦  ACEPTO  ✦", key="btn_acepto", use_container_width=False):
         st.session_state.acepto_terminos = True
         st.rerun()
+
     st.stop()
 
 
@@ -746,22 +944,27 @@ def extraer_texto_seguro(response):
     try:
         if response is None:
             return None, "Respuesta vacía", None
+
         candidates = getattr(response, "candidates", None)
         if not candidates:
             return None, "Sin candidates", None
+
         candidate = candidates[0]
         finish_reason = getattr(candidate, "finish_reason", None)
         finish_reason_str = str(finish_reason) if finish_reason else ""
         content = getattr(candidate, "content", None)
         parts = getattr(content, "parts", None) if content else None
+
         textos = []
         if parts:
             for part in parts:
                 texto = getattr(part, "text", None)
                 if texto:
                     textos.append(str(texto).strip())
+
         if textos:
             return "\n\n".join(textos), None, finish_reason_str
+
         return None, "Sin texto válido", finish_reason_str
     except Exception as e:
         return None, f"Error: {e}", None
@@ -792,6 +995,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                reproducir_audio(texto_final)
                 st.stop()
 
             elif nivel == "rojo_abuso":
@@ -799,6 +1003,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                reproducir_audio(texto_final)
                 st.stop()
 
             respuesta_directa = respuesta_filtrada(prompt)
@@ -806,6 +1011,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_directa)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                reproducir_audio(texto_final)
                 st.stop()
 
             biblia_local, respuestas_locales, temas_locales = cargar_datos_locales()
@@ -815,6 +1021,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                reproducir_audio(texto_final)
                 st.stop()
 
             if not API_DISPONIBLE:
@@ -826,6 +1033,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                reproducir_audio(texto_final)
                 st.stop()
 
             with respuesta_placeholder.container():
@@ -838,6 +1046,7 @@ if prompt:
                         generation_config={"max_output_tokens": 4000, "temperature": 0.7},
                     )
                     texto_extraido, error_detalle, finish_reason = extraer_texto_seguro(response)
+
                     if not texto_extraido:
                         fr = (finish_reason or "").upper()
                         if "RECITATION" in fr or fr == "4":
@@ -850,6 +1059,7 @@ if prompt:
                             )
                         else:
                             texto_extraido = "No pude generar una respuesta válida en este momento."
+
                     texto = re.sub(r"[*#_]", "", texto_extraido).strip()
                     texto = asegurar_cierre(texto)
 
@@ -859,21 +1069,22 @@ if prompt:
                 respuesta_local = responder_local_si_aplica(prompt, biblia_local, respuestas_locales, temas_locales)
             except Exception:
                 respuesta_local = None
-        
+
             if respuesta_local:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                reproducir_audio(texto_final)
                 st.stop()
             else:
                 st.exception(e)
                 st.error("Error en la generación de respuesta.")
                 st.stop()
-        
+
         respuesta_placeholder.empty()
         texto_final = mostrar_respuesta_suave(texto)
         st.session_state.messages.append({"role": "assistant", "content": texto_final})
-    
+        reproducir_audio(texto_final)
 
 
 # =========================
@@ -886,4 +1097,5 @@ st.sidebar.markdown(
     '<img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">'
     "</a>",
     unsafe_allow_html=True,
+)
 )
