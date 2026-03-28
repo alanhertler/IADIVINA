@@ -285,55 +285,37 @@ asegurar_estructura_local()
 
 
 # =========================
-# 2. FUNCIONES AUXILIARES
+# 2.2 VOZ — Google Cloud TTS Neural2
 # =========================
-def get_base64(file_path: str):
-    try:
-        with open(file_path, "rb") as f:
-            return base64.b64encode(f.read()).decode()
-    except Exception:
+def _generar_audio_cloud_tts(texto: str):
+    if not API_KEY or API_KEY == "TU_API_KEY_ACA":
         return None
 
+    url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={API_KEY}"
+    texto_audio = texto[:4500].replace("\n", ". ").strip()
 
-def asegurar_cierre(texto: str) -> str:
-    return texto.strip()
+    payload = {
+        "input": {"text": texto_audio},
+        "voice": {
+            "languageCode": "es-US",
+            "name": "es-US-Neural2-B",
+            "ssmlGender": "MALE",
+        },
+        "audioConfig": {
+            "audioEncoding": "MP3",
+            "speakingRate": 1.0,
+            "pitch": 0.0,
+        }
+    }
 
-
-def normalizar(texto: str) -> str:
-    texto = texto.lower().strip()
-    for a, b in {"á":"a","é":"e","í":"i","ó":"o","ú":"u","ñ":"n"}.items():
-        texto = texto.replace(a, b)
-    return texto
-
-
-# =========================
-# 2.2 VOZ — Google Cloud TTS Neural2
-# Voz masculina español latino — es-US-Neural2-B
-# Usa la misma GOOGLE_API_KEY del proyecto Gemini
-# Si falla, cae silenciosamente sin romper la app
-# Alternativas masculinas:
-#   es-US-Neural2-C (tono más suave)
-#   es-ES-Neural2-B (español España)
-# =========================
-def reproducir_audio(texto: str):
-    if not st.session_state.get("usar_voz", True):
-        return
-    boton_id = f"btn_audio_{abs(hash(texto[:80]))}"
-    if st.button("🔊 Escuchar Manual", key=boton_id):
-        try:
-            audio_bytes = _generar_audio_cloud_tts(texto)
-            if audio_bytes:
-                st.audio(audio_bytes, format="audio/mp3")
-            else:
-                url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={API_KEY}"
-                resp = requests.post(url, json={
-                    "input": {"text": "prueba"},
-                    "voice": {"languageCode": "es-US", "name": "es-US-Neural2-B", "ssmlGender": "MALE"},
-                    "audioConfig": {"audioEncoding": "MP3"}
-                }, timeout=15)
-                st.error(f"Error {resp.status_code}: {resp.text}")
-        except Exception as e:
-            st.error(f"Excepción: {e}")
+    try:
+        resp = requests.post(url, json=payload, timeout=15)
+        if resp.status_code == 200:
+            audio_b64 = resp.json().get("audioContent", "")
+            if audio_b64:
+                return base64.b64decode(audio_b64)
+        return None
+    except Exception:
         return None
 
 
