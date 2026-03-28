@@ -339,7 +339,7 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
     capitulo = extraer_capitulo_local(consulta)
     if capitulo:
         encontrado = buscar_capitulo_local(biblia, capitulo["libro"], capitulo["capitulo"])
-        if encontrado:
+        if encontrado and encontrado.count("Versiculo") >= 3:
             return encontrado
         return (
             f"No tengo cargado todavía {capitulo['libro']} {capitulo['capitulo']} en la base local.\n\n"
