@@ -315,35 +315,25 @@ def normalizar(texto: str) -> str:
 #   es-US-Neural2-C (tono más suave)
 #   es-ES-Neural2-B (español España)
 # =========================
-def _generar_audio_cloud_tts(texto: str):
-    if not API_KEY or API_KEY == "TU_API_KEY_ACA":
-        return None
-
-    url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={API_KEY}"
-    texto_audio = texto[:4500].replace("\n", ". ").strip()
-
-    payload = {
-        "input": {"text": texto_audio},
-        "voice": {
-            "languageCode": "es-US",
-            "name": "es-US-Neural2-B",
-            "ssmlGender": "MALE",
-        },
-        "audioConfig": {
-            "audioEncoding": "MP3",
-            "speakingRate": 1.0,
-            "pitch": 0.0,
-        }
-    }
-
-    try:
-        resp = requests.post(url, json=payload, timeout=15)
-        if resp.status_code == 200:
-            audio_b64 = resp.json().get("audioContent", "")
-            if audio_b64:
-                return base64.b64decode(audio_b64)
-        return None
-    except Exception:
+def reproducir_audio(texto: str):
+    if not st.session_state.get("usar_voz", True):
+        return
+    boton_id = f"btn_audio_{abs(hash(texto[:80]))}"
+    if st.button("🔊 Escuchar Manual", key=boton_id):
+        try:
+            audio_bytes = _generar_audio_cloud_tts(texto)
+            if audio_bytes:
+                st.audio(audio_bytes, format="audio/mp3")
+            else:
+                url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={API_KEY}"
+                resp = requests.post(url, json={
+                    "input": {"text": "prueba"},
+                    "voice": {"languageCode": "es-US", "name": "es-US-Neural2-B", "ssmlGender": "MALE"},
+                    "audioConfig": {"audioEncoding": "MP3"}
+                }, timeout=15)
+                st.error(f"Error {resp.status_code}: {resp.text}")
+        except Exception as e:
+            st.error(f"Excepción: {e}")
         return None
 
 
