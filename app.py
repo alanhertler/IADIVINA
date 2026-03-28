@@ -1,4 +1,6 @@
 import os
+def normalizar(texto):
+    return texto.lower()
 os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 
 import json
