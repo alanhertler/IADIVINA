@@ -5,6 +5,7 @@ def normalizar(texto):
 import json
 import streamlit as st
 import google.generativeai as genai
+from gtts import gTTS
 import base64
 import re
 import time
@@ -12,7 +13,6 @@ import io
 import requests
 from pathlib import Path
 from collections import deque
-
 
 # =========================
 # 1. CONFIGURACIÓN INICIAL
