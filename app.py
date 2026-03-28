@@ -668,7 +668,6 @@ for m in st.session_state.messages:
     avatar = "✝️" if m["role"] == "assistant" else "❤️"
     with st.chat_message(m["role"], avatar=avatar):
         st.markdown(m["content"].replace("\n", "  \n"))
-        if m["role"] == "assistant":
 
 
 # =========================
