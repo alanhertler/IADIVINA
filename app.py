@@ -318,7 +318,7 @@ def normalizar(texto: str) -> str:
 def _generar_audio_cloud_tts(texto: str):
     if not API_KEY or API_KEY == "TU_API_KEY_ACA":
         return None
-    url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={API_KEY}"
+    url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={st.secrets['GOOGLE_API_KEY']}"
     texto_audio = texto[:4500].replace("\n", ". ").strip()
     payload = {
         "input": {"text": texto_audio},
