@@ -760,7 +760,7 @@ st.markdown(f"""
         [data-testid="stChatMessageContent"] div {{
             font-size: clamp(15px, 4vw, 19px) !important;
         }}
-        .stChatInputContainer textarea {{ font-size: clamp(15px, 4vw, 17px) !important; }}
+        .stChatInputContainer textarea {{ font-size: clamp(16px, 4vw, 18px) !important; }}
     }}
     .stChatInputContainer {{
         background: rgba(15,20,35,0.95) !important; border-radius: 30px !important;
