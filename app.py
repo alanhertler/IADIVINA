@@ -286,38 +286,27 @@ asegurar_estructura_local()
 
 
 # =========================
-# 2.2 VOZ — Google Cloud TTS Neural2
+# 2.2 VOZ — gTTS
 # =========================
-def _generar_audio_cloud_tts(texto: str):
-    if not API_KEY or API_KEY == "TU_API_KEY_ACA":
-        return None
+def _generar_audio_gtts(texto: str) -> bytes:
+    mp3_buffer = io.BytesIO()
+    tts = gTTS(text=texto, lang="es", tld="com.ar")
+    tts.write_to_fp(mp3_buffer)
+    mp3_buffer.seek(0)
+    return mp3_buffer.read()
 
-    url = f"https://texttospeech.googleapis.com/v1/text:synthesize?key={API_KEY}"
-    texto_audio = texto[:4500].replace("\n", ". ").strip()
 
-    payload = {
-        "input": {"text": texto_audio},
-        "voice": {
-            "languageCode": "es-US",
-            "name": "es-US-Neural2-B",
-            "ssmlGender": "MALE",
-        },
-        "audioConfig": {
-            "audioEncoding": "MP3",
-            "speakingRate": 1.0,
-            "pitch": 0.0,
-        }
-    }
-
-    try:
-        resp = requests.post(url, json=payload, timeout=15)
-        if resp.status_code == 200:
-            audio_b64 = resp.json().get("audioContent", "")
-            if audio_b64:
-                return base64.b64decode(audio_b64)
-        return None
-    except Exception:
-        return None
+def reproducir_audio(texto: str):
+    if not st.session_state.get("usar_voz", True):
+        return
+    boton_id = f"btn_audio_{abs(hash(texto[:80]))}"
+    if st.button("🔊 Escuchar Manual", key=boton_id):
+        try:
+            texto_audio = texto.replace("\n", ". ").strip()
+            audio_bytes = _generar_audio_gtts(texto_audio)
+            st.audio(audio_bytes, format="audio/mp3")
+        except Exception as e:
+            st.error(f"Error de sonido: {e}")
 
 
 def reproducir_audio(texto: str):
