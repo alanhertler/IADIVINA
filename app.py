@@ -325,7 +325,7 @@ def _generar_audio_cloud_tts(texto: str):
         "voice": {
             "languageCode": "es-US",
             "name": "es-US-Neural2-C"
-            "ssmlGender": "MALE"
+            "ssmlGender": "MALE",
         },
         "audioConfig": {
             "audioEncoding": "MP3",
