@@ -535,7 +535,13 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 if "usar_voz" not in st.session_state:
     st.session_state.usar_voz = True
-
+    
+def get_base64(file_path: str):
+    try:
+        with open(file_path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except Exception:
+        return None
 
 # =========================
 # 7. ESTILO
