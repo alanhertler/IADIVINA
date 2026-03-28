@@ -253,13 +253,12 @@ def buscar_capitulo_local(biblia, libro, capitulo):
 
     partes = [f"{libro} {capitulo}", ""]
     for v in versiculos:
-        partes.append(f'Versiculo {v["versiculo"]}')
-        partes.append(v["texto"])
+        partes.append(f'Versiculo {v["versiculo"]}\n{v["texto"]}')
         partes.append("")
     return "\n".join(partes).strip()
 
 
-def detectar_tema_local(consulta: str):
+def detectar_tema_local(consulta: str):    
     t = normalizar_local(consulta)
     mapa = {
         "consuelo": ["consuelo", "dolor", "quebrantado", "solo", "sola", "triste", "tristeza", "duelo"],
