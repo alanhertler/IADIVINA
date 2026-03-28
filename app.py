@@ -343,20 +343,25 @@ def _generar_audio_gtts(texto):
 def reproducir_audio(texto: str):
     if not st.session_state.get("usar_voz", True):
         return
+
     try:
         texto_audio = texto.replace("\n", ". ").strip()
         if not texto_audio:
             return
+
         audio_bytes = _generar_audio_gtts(texto_audio)
         st.audio(audio_bytes, format="audio/mp3")
     except Exception as e:
         st.error(f"Error de sonido: {e}")
 
 
-def mostrar_boton_audio(texto: str):
+def mostrar_boton_audio(texto: str, clave_extra: str = ""):
     if not st.session_state.get("usar_voz", True):
         return
-    clave_audio = f"audio_{len(st.session_state.messages)}_{abs(hash(texto[:120]))}"
+
+    clave_base = re.sub(r"[^a-zA-Z0-9_]+", "_", texto[:40])
+    clave_audio = f"audio_{clave_extra}_{clave_base}"
+
     if st.button("🔊 Escuchar", key=clave_audio):
         reproducir_audio(texto)
 
@@ -849,10 +854,13 @@ if not st.session_state.acepto_terminos:
 # =========================
 # 10. HISTORIAL
 # =========================
-for m in st.session_state.messages:
+for i, m in enumerate(st.session_state.messages):
     avatar = "✝️" if m["role"] == "assistant" else "❤️"
     with st.chat_message(m["role"], avatar=avatar):
         st.markdown(m["content"].replace("\n", "  \n"))
+
+        if m["role"] == "assistant":
+            mostrar_boton_audio(m["content"], clave_extra=f"hist_{i}")
 
 
 # =========================
@@ -973,7 +981,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                mostrar_boton_audio(texto_final)
+                mostrar_boton_audio(texto_final, clave_extra="nuevo_rojo")
                 st.stop()
 
             elif nivel == "rojo_abuso":
@@ -981,7 +989,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                mostrar_boton_audio(texto_final)
+                mostrar_boton_audio(texto_final, clave_extra="nuevo_abuso")
                 st.stop()
 
             respuesta_directa = respuesta_filtrada(prompt)
@@ -989,7 +997,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_directa)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                mostrar_boton_audio(texto_final)
+                mostrar_boton_audio(texto_final, clave_extra="nuevo_filtrado")
                 st.stop()
 
             biblia_local, respuestas_locales, temas_locales = cargar_datos_locales()
@@ -999,7 +1007,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                mostrar_boton_audio(texto_final)
+                mostrar_boton_audio(texto_final, clave_extra="nuevo_local")
                 st.stop()
 
             if not API_DISPONIBLE:
@@ -1011,7 +1019,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                mostrar_boton_audio(texto_final)
+                mostrar_boton_audio(texto_final, clave_extra="nuevo_sin_api")
                 st.stop()
 
             with respuesta_placeholder.container():
@@ -1052,7 +1060,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                mostrar_boton_audio(texto_final)
+                mostrar_boton_audio(texto_final, clave_extra="nuevo_fallback")
                 st.stop()
             else:
                 st.exception(e)
@@ -1062,7 +1070,7 @@ if prompt:
         respuesta_placeholder.empty()
         texto_final = mostrar_respuesta_suave(texto)
         st.session_state.messages.append({"role": "assistant", "content": texto_final})
-        mostrar_boton_audio(texto_final)
+        mostrar_boton_audio(texto_final, clave_extra="nuevo_modelo")
 
 
 # =========================
