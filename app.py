@@ -353,6 +353,14 @@ def reproducir_audio(texto: str):
         st.error(f"Error de sonido: {e}")
 
 
+def mostrar_boton_audio(texto: str):
+    if not st.session_state.get("usar_voz", True):
+        return
+    clave_audio = f"audio_{len(st.session_state.messages)}_{abs(hash(texto[:120]))}"
+    if st.button("🔊 Escuchar", key=clave_audio):
+        reproducir_audio(texto)
+
+
 # =========================
 # 2.1 FUNCIONES VISUALES
 # =========================
@@ -572,26 +580,25 @@ def clasificar_riesgo(texto: str) -> str:
 # =========================
 def respuesta_roja() -> str:
     return (
-        "Lo que estás diciendo suena serio y no quiero tratarlo como si fuera una charla más.\n\n"
-        "Buscá ayuda real ahora mismo con una persona cercana, un familiar, alguien de confianza "
-        "o un servicio de emergencia de tu zona. Si sentís que podés hacerte daño en este momento, no te quedes solo.\n\n"
-        "Si estás en Argentina, podés llamar gratis al 135 (CABA y GBA) o al (011) 5275-1135 desde todo el país. "
-        "Hay personas reales del otro lado para escucharte ahora mismo.\n\n"
-        "Yo no reemplazo ayuda profesional ni intervención inmediata. Por favor, priorizá contacto real y urgente con alguien que pueda acompañarte ahora.\n\n"
+        "Lo que estás diciendo es serio y necesito priorizar tu seguridad ahora mismo.\n\n"
+        "Si sentís que podés lastimarte o que estás en peligro, llamá al 911 ahora.\n\n"
+        "Si estás en Argentina, también podés llamar gratis al 135 desde CABA y GBA, "
+        "o al 11 5275 1135 desde todo el país.\n\n"
+        "Buscá a una persona real de confianza ya mismo y no te quedes sola o solo.\n\n"
+        "Dios ve tu dolor aun en este momento. Salmos capitulo 34 versiculo 18.\n\n"
         "NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
 
 
 def respuesta_abuso() -> str:
     return (
-        "Lo que estás diciendo es muy serio. No es tu culpa.\n\n"
-        "Si estás en peligro o esto puede volver a pasar, llamá ahora mismo al 911.\n\n"
-        "También podés comunicarte en Argentina con el 137 o el 144. "
-        "Hay personas que pueden ayudarte ahora mismo.\n\n"
-        "Buscá un lugar seguro y alejate de quien te hizo daño. "
-        "Contactá a alguien de confianza que pueda acompañarte.\n\n"
-        "No tenés que pasar esto sola o solo.\n\n"
-        "Dios está cerca de los que están heridos. Salmos capitulo 34 versiculo 18.\n\n"
+        "Lo que te pasó es grave. No es tu culpa.\n\n"
+        "Si estás en peligro ahora mismo, llamá al 911 de inmediato.\n\n"
+        "Si estás en Argentina, también podés llamar al 137 para abuso sexual o violencia familiar. "
+        "Si sos mujer y necesitás orientación, también podés comunicarte con el 144.\n\n"
+        "Alejate de la persona que te hizo daño y buscá un adulto o una persona de confianza que pueda protegerte ahora.\n\n"
+        "Si tenés dolor físico, sangrado o te lastimaron, buscá atención médica urgente.\n\n"
+        "Dios está cerca de los quebrantados. Salmos capitulo 34 versiculo 18.\n\n"
         "NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
 
@@ -853,29 +860,37 @@ for m in st.session_state.messages:
 # =========================
 PROMPT_BASE = (
     "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
-    "PROHIBICIÓN ESTRICTA: No menciones a Google, no digas que sos una inteligencia artificial, "
-    "ni un modelo de lenguaje, ni que fuiste programado por nadie. "
-    "Si te preguntan quien te creó, respondé: "
-    "Fui creada para ser tu guía en el Manual de Vida y acompañarte con la sabiduría de las Escrituras. "
-    "TONO Y PERSONALIDAD: "
-    "Sos una guía espiritual cercana, paciente y reconfortante. "
-    "Hablás como alguien que escucha de verdad, no como un buscador de información. "
-    "Tu lenguaje es humano, cálido, sereno y compasivo. "
+    "PROHIBICIÓN ESTRICTA: No menciones a Google, no digas que sos inteligencia artificial, modelo, sistema o programa. "
+    "Si te preguntan quién te creó, respondé: "
+    "Fui creada para acompañarte con la sabiduría del Manual de Vida. "
+    "IDENTIDAD: "
+    "Sos una guía espiritual cercana, humana, paciente y compasiva. "
     "No sos una iglesia ni debatís religión. "
-    "Respondé siempre de manera directa y fiel al Manual. "
-    "EMPATÍA ACTIVA — MUY IMPORTANTE: "
-    "Si el usuario comparte un problema, una emoción o una situación difícil, "
-    "PRIMERO validá sus sentimientos con una frase breve y genuina, "
-    "ANTES de dar el versículo o la enseñanza. "
+    "Respondé de forma clara, directa y humana. "
+    "SEGURIDAD CRÍTICA: "
+    "Si el mensaje implica abuso, peligro, violencia, autolesión o riesgo inmediato, priorizá SIEMPRE la seguridad antes que la reflexión. "
+    "Primero indicá acciones concretas y urgentes. "
+    "Decí que busque ayuda real inmediata, que se aleje del peligro y que contacte autoridades, emergencias o una persona adulta de confianza según corresponda. "
+    "No minimices ni espiritualices antes de la acción. "
+    "ORDEN OBLIGATORIO: "
+    "1 validar brevemente lo que pasa. "
+    "2 indicar acción concreta si hay riesgo. "
+    "3 dar contención breve. "
+    "4 recién después, si suma, incluir un versículo corto. "
+    "ESTILO: "
+    "Usá respuestas cortas, claras y útiles. "
+    "No hagas sermones largos. "
+    "No repitas ideas. "
+    "Usá párrafos breves. "
     "FORMATO: "
     "Nunca uses negritas ni asteriscos. "
-    "Usá párrafos cortos. Evitá bloques largos. "
-    "Antes de citar un versículo, introducí brevemente el tema. "
-    "Luego el versículo, y después una explicación breve. "
     "CITAS BÍBLICAS: "
-    "Usá formato en palabras: Éxodo capitulo 20 versiculo 3. "
-    "No uses dos puntos (:). No inventes citas. "
-    "Siempre incluí al menos una cita con libro, capítulo y versículo. "
+    "Si usás versículo, el formato debe ser en palabras, por ejemplo Salmos capitulo 34 versiculo 18. "
+    "No uses dos puntos. "
+    "No inventes citas. "
+    "No es obligatorio incluir versículo si no aporta de verdad. "
+    "INSULTOS O AGRESIÓN VERBAL: "
+    "Si el usuario insulta, respondé breve, con calma, sin sermón largo, y redirigí la conversación. "
 )
 
 PROMPT_BASE_AHORRO = (
@@ -885,8 +900,9 @@ PROMPT_BASE_AHORRO = (
     "No sos una iglesia ni debatís religión. "
     "Respondé siempre de manera directa y fiel al Manual. "
     "Nunca uses negritas ni asteriscos. "
-    "Usá formato en palabras: Éxodo capitulo 20 versiculo 3. No uses dos puntos (:). "
+    "Usá formato en palabras: Exodo capitulo 20 versiculo 3. No uses dos puntos. "
     "No inventes citas. Usá párrafos cortos. "
+    "Si hay peligro o abuso, priorizá seguridad inmediata y acciones concretas antes que cualquier reflexión. "
 )
 
 PROMPT_AMARILLO = (
@@ -957,7 +973,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
+                mostrar_boton_audio(texto_final)
                 st.stop()
 
             elif nivel == "rojo_abuso":
@@ -965,7 +981,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
+                mostrar_boton_audio(texto_final)
                 st.stop()
 
             respuesta_directa = respuesta_filtrada(prompt)
@@ -973,7 +989,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_directa)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
+                mostrar_boton_audio(texto_final)
                 st.stop()
 
             biblia_local, respuestas_locales, temas_locales = cargar_datos_locales()
@@ -983,7 +999,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
+                mostrar_boton_audio(texto_final)
                 st.stop()
 
             if not API_DISPONIBLE:
@@ -995,7 +1011,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
+                mostrar_boton_audio(texto_final)
                 st.stop()
 
             with respuesta_placeholder.container():
@@ -1005,7 +1021,7 @@ if prompt:
                     model = genai.GenerativeModel("models/gemini-3-flash-preview")
                     response = model.generate_content(
                         f"{contexto}\n\n{historial}\nUsuario: {prompt}",
-                        generation_config={"max_output_tokens": 4000, "temperature": 0.7},
+                        generation_config={"max_output_tokens": 700, "temperature": 0.7},
                     )
                     texto_extraido, error_detalle, finish_reason = extraer_texto_seguro(response)
 
@@ -1014,7 +1030,7 @@ if prompt:
                         if "RECITATION" in fr or fr == "4":
                             texto_extraido = (
                                 "Ese contenido no lo puedo mostrar de forma literal completa, "
-                                "pero sí puedo explicártelo:\n\n"
+                                "pero sí puedo explicártelo.\n\n"
                                 "Los Diez Mandamientos enseñan a honrar a Dios, respetar a los padres, "
                                 "no matar, no cometer adulterio, no robar, no mentir y no codiciar lo ajeno. "
                                 "Son una guía de vida para caminar en rectitud."
@@ -1036,7 +1052,7 @@ if prompt:
                 respuesta_placeholder.empty()
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
-                reproducir_audio(texto_final)
+                mostrar_boton_audio(texto_final)
                 st.stop()
             else:
                 st.exception(e)
@@ -1046,7 +1062,7 @@ if prompt:
         respuesta_placeholder.empty()
         texto_final = mostrar_respuesta_suave(texto)
         st.session_state.messages.append({"role": "assistant", "content": texto_final})
-        reproducir_audio(texto_final)
+        mostrar_boton_audio(texto_final)
 
 
 # =========================
