@@ -78,47 +78,15 @@ if API_DISPONIBLE:
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 
-BIBLIA_FILE = DATA_DIR / "biblia_rv1909_demo.json"
+BIBLIA_FILE = DATA_DIR / "biblia_subset_rv1909.json"
 RESPUESTAS_FILE = DATA_DIR / "respuestas.json"
 TEMAS_FILE = DATA_DIR / "temas.json"
 
-BIBLIA_DEMO = [
-    {"libro": "Salmos", "capitulo": 34, "versiculo": 18,
-     "texto": "Cercano está Jehová á los quebrantados de corazón; y salvará á los contritos de espíritu."},
-    {"libro": "Salmos", "capitulo": 23, "versiculo": 1,
-     "texto": "Jehová es mi pastor; nada me faltará."},
-    {"libro": "Juan", "capitulo": 3, "versiculo": 16,
-     "texto": "Porque de tal manera amó Dios al mundo, que ha dado á su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna."},
-    {"libro": "Mateo", "capitulo": 11, "versiculo": 28,
-     "texto": "Venid á mí todos los que estáis trabajados y cargados, que yo os haré descansar."},
-    {"libro": "Filipenses", "capitulo": 4, "versiculo": 7,
-     "texto": "Y la paz de Dios, que sobrepuja todo entendimiento, guardará vuestros corazones y vuestros entendimientos en Cristo Jesús."},
-    {"libro": "Isaías", "capitulo": 41, "versiculo": 10,
-     "texto": "No temas, porque yo soy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia."},
-    {"libro": "Romanos", "capitulo": 8, "versiculo": 28,
-     "texto": "Y sabemos que á los que á Dios aman, todas las cosas les ayudan á bien, es á saber, á los que conforme al propósito son llamados."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 3, "texto": "No tendrás dioses ajenos delante de mí."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 4,
-     "texto": "No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, ni abajo en la tierra, ni en las aguas debajo de la tierra."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 5,
-     "texto": "No te inclinarás á ellas, ni las honrarás; porque yo soy Jehová tu Dios, fuerte, celoso."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 7,
-     "texto": "No tomarás el nombre de Jehová tu Dios en vano; porque no dará por inocente Jehová al que tomare su nombre en vano."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 8,
-     "texto": "Acordarte has del día del reposo, para santificarlo."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 12,
-     "texto": "Honra á tu padre y á tu madre, porque tus días se alarguen en la tierra que Jehová tu Dios te da."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 13, "texto": "No matarás."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 14, "texto": "No adulterarás."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 15, "texto": "No hurtarás."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 16, "texto": "No hablarás contra tu prójimo falso testimonio."},
-    {"libro": "Exodo", "capitulo": 20, "versiculo": 17,
-     "texto": "No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo."},
-]
+BIBLIA_DEMO = []
 
 RESPUESTAS_DEMO = {
-    "saludo": "Estoy acá para escucharte. Si querés, podés contarme qué te pasa o pedirme un versículo por tema o referencia.",
-    "ayuda": "Podés escribir cosas como: 'Juan 3:16', 'dame un versículo sobre paz', 'estoy triste', 'tengo miedo'.",
+    "saludo": "Estoy acá para escucharte. Podés contarme qué te pasa, pedir un versículo o escribir un capítulo como Juan 1 o Salmo 91.",
+    "ayuda": "Podés escribir cosas como Juan capitulo 3 versiculo 16, Salmo 91, Marcos 1 o dame un versículo sobre paz.",
     "fallback": "No encontré una respuesta local exacta.",
     "consuelo_base": "Te comparto una palabra que puede traer consuelo:",
     "paz_base": "Te comparto una palabra sobre la paz:",
@@ -135,7 +103,7 @@ TEMAS_DEMO = {
         {"libro": "Filipenses", "capitulo": 4, "versiculo": 7},
         {"libro": "Salmos", "capitulo": 23, "versiculo": 1},
     ],
-    "miedo": [{"libro": "Isaías", "capitulo": 41, "versiculo": 10}],
+    "miedo": [{"libro": "Isaias", "capitulo": 41, "versiculo": 10}],
     "fe": [
         {"libro": "Juan", "capitulo": 3, "versiculo": 16},
         {"libro": "Romanos", "capitulo": 8, "versiculo": 28},
@@ -146,7 +114,7 @@ TEMAS_DEMO = {
     ],
     "ansiedad": [
         {"libro": "Filipenses", "capitulo": 4, "versiculo": 7},
-        {"libro": "Isaías", "capitulo": 41, "versiculo": 10},
+        {"libro": "Isaias", "capitulo": 41, "versiculo": 10},
     ],
 }
 
@@ -163,50 +131,15 @@ def cargar_json(ruta: Path):
 
 def asegurar_estructura_local():
     DATA_DIR.mkdir(exist_ok=True)
-    if not BIBLIA_FILE.exists():
-        guardar_json(BIBLIA_FILE, BIBLIA_DEMO)
-    else:
-        try:
-            biblia_actual = cargar_json(BIBLIA_FILE)
-            claves = {
-                (str(x.get("libro", "")).lower(), x.get("capitulo"), x.get("versiculo"))
-                for x in biblia_actual if isinstance(x, dict)
-            }
-            agregados = 0
-            for item in BIBLIA_DEMO:
-                clave = (str(item.get("libro", "")).lower(), item.get("capitulo"), item.get("versiculo"))
-                if clave not in claves:
-                    biblia_actual.append(item)
-                    claves.add(clave)
-                    agregados += 1
-            if agregados:
-                guardar_json(BIBLIA_FILE, biblia_actual)
-        except Exception:
-            guardar_json(BIBLIA_FILE, BIBLIA_DEMO)
 
     if not RESPUESTAS_FILE.exists():
         guardar_json(RESPUESTAS_FILE, RESPUESTAS_DEMO)
 
     if not TEMAS_FILE.exists():
         guardar_json(TEMAS_FILE, TEMAS_DEMO)
-    else:
-        try:
-            temas_actuales = cargar_json(TEMAS_FILE)
-            cambios = False
-            alias_mandamientos = {
-                "10 mandamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": i} for i in range(2, 18)],
-                "diez mandamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": 2}],
-                "mandamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": 2}],
-                "madamientos": [{"libro": "Exodo", "capitulo": 20, "versiculo": 2}],
-            }
-            for clave, valor in alias_mandamientos.items():
-                if clave not in temas_actuales:
-                    temas_actuales[clave] = valor
-                    cambios = True
-            if cambios:
-                guardar_json(TEMAS_FILE, temas_actuales)
-        except Exception:
-            guardar_json(TEMAS_FILE, TEMAS_DEMO)
+
+    if not BIBLIA_FILE.exists():
+        guardar_json(BIBLIA_FILE, BIBLIA_DEMO)
 
 
 def cargar_datos_locales():
@@ -214,25 +147,116 @@ def cargar_datos_locales():
 
 
 def normalizar_local(texto: str) -> str:
-    texto = texto.lower().strip()
-    for a, b in {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"}.items():
+    texto = str(texto).lower().strip()
+    reemplazos = {
+        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ñ": "n"
+    }
+    for a, b in reemplazos.items():
         texto = texto.replace(a, b)
-    return re.sub(r"\s+", " ", texto)
+    texto = re.sub(r"[^\w\s]", " ", texto)
+    texto = re.sub(r"\s+", " ", texto).strip()
+    return texto
+
+
+def canon_libro(nombre: str):
+    n = normalizar_local(nombre)
+    alias = {
+        "salmo": "Salmos",
+        "salmos": "Salmos",
+        "sal": "Salmos",
+        "psalmo": "Salmos",
+        "mateo": "Mateo",
+        "san mateo": "Mateo",
+        "evangelio de mateo": "Mateo",
+        "marcos": "Marcos",
+        "san marcos": "Marcos",
+        "evangelio de marcos": "Marcos",
+        "lucas": "Lucas",
+        "san lucas": "Lucas",
+        "san luca": "Lucas",
+        "evangelio de lucas": "Lucas",
+        "juan": "Juan",
+        "san juan": "Juan",
+        "evangelio de juan": "Juan",
+        "romanos": "Romanos",
+        "filipenses": "Filipenses",
+        "isaias": "Isaias",
+        "isaias": "Isaias",
+        "exodo": "Exodo",
+    }
+    return alias.get(n)
 
 
 def extraer_referencia_local(consulta: str):
-    match = re.match(r"^\s*([A-Za-zÁÉÍÓÚáéíóúÑñ]+)\s+(\d+)\s*:\s*(\d+)\s*$", consulta.strip())
-    if not match:
-        return None
-    return {"libro": match.group(1), "capitulo": int(match.group(2)), "versiculo": int(match.group(3))}
+    q = normalizar_local(consulta)
+    patrones = [
+        r"^([a-z\s]+?)\s+capitulo\s+(\d+)\s+versiculo\s+(\d+)$",
+        r"^([a-z\s]+?)\s+(\d+)\s+(\d+)$",
+        r"^([a-z\s]+?)\s+(\d+)[:](\d+)$",
+    ]
+
+    for patron in patrones:
+        m = re.match(patron, q)
+        if m:
+            libro = canon_libro(m.group(1))
+            if libro:
+                return {
+                    "libro": libro,
+                    "capitulo": int(m.group(2)),
+                    "versiculo": int(m.group(3)),
+                }
+    return None
+
+
+def extraer_capitulo_local(consulta: str):
+    q = normalizar_local(consulta)
+    patrones = [
+        r"^([a-z\s]+?)\s+capitulo\s+(\d+)$",
+        r"^([a-z\s]+?)\s+(\d+)$",
+    ]
+
+    for patron in patrones:
+        m = re.match(patron, q)
+        if m:
+            libro = canon_libro(m.group(1))
+            if libro:
+                return {
+                    "libro": libro,
+                    "capitulo": int(m.group(2)),
+                }
+    return None
 
 
 def buscar_por_referencia_local(biblia, libro, capitulo, versiculo):
     libro_norm = normalizar_local(libro)
     for item in biblia:
-        if normalizar_local(item["libro"]) == libro_norm and item["capitulo"] == capitulo and item["versiculo"] == versiculo:
+        if (
+            normalizar_local(item.get("libro", "")) == libro_norm
+            and item.get("capitulo") == capitulo
+            and item.get("versiculo") == versiculo
+        ):
             return item
     return None
+
+
+def buscar_capitulo_local(biblia, libro, capitulo):
+    libro_norm = normalizar_local(libro)
+    versiculos = [
+        item for item in biblia
+        if normalizar_local(item.get("libro", "")) == libro_norm and item.get("capitulo") == capitulo
+    ]
+
+    if not versiculos:
+        return None
+
+    versiculos.sort(key=lambda x: x.get("versiculo", 0))
+
+    partes = [f"{libro} {capitulo}", ""]
+    for v in versiculos:
+        partes.append(f'Versiculo {v["versiculo"]}')
+        partes.append(v["texto"])
+        partes.append("")
+    return "\n".join(partes).strip()
 
 
 def detectar_tema_local(consulta: str):
@@ -252,59 +276,75 @@ def detectar_tema_local(consulta: str):
 
 
 def buscar_versiculos_por_tema_local(biblia, temas, tema):
-    return [v for ref in temas.get(tema, [])
-            if (v := buscar_por_referencia_local(biblia, ref["libro"], ref["capitulo"], ref["versiculo"]))]
+    resultado = []
+    for ref in temas.get(tema, []):
+        v = buscar_por_referencia_local(biblia, ref["libro"], ref["capitulo"], ref["versiculo"])
+        if v:
+            resultado.append(v)
+    return resultado
 
 
 def formatear_versiculo_local(item):
-    return f'{item["libro"]} {item["capitulo"]}:{item["versiculo"]} — {item["texto"]}'
+    return (
+        f'{item["libro"]} capitulo {item["capitulo"]} versiculo {item["versiculo"]}\n'
+        f'{item["texto"]}'
+    )
 
 
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
+
     if any(k in consulta_norm for k in ["10 mandamientos", "diez mandamientos", "mandamientos", "madamientos"]):
         return """LOS DIEZ MANDAMIENTOS
 
-Base bíblica: EXODO capitulo 20. versiculos 2 al 17
+Base bíblica: EXODO capitulo 20 versiculos 3 al 17
 Versión: Reina-Valera 1909
 
-EXODO capitulo 20. versiculo 2
-Yo soy Jehová tu Dios, que te saqué de la tierra de Egipto, de casa de siervos
-
-1. EXODO capitulo 20. versiculo 3
+1. EXODO capitulo 20 versiculo 3
 No tendrás dioses ajenos delante de mí
 
-2. EXODO capitulo 20. versiculos 4 al 5
+2. EXODO capitulo 20 versiculos 4 al 5
 No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, ni abajo en la tierra, ni en las aguas debajo de la tierra. No te inclinarás á ellas, ni las honrarás
 
-3. EXODO capitulo 20. versiculo 7
+3. EXODO capitulo 20 versiculo 7
 No tomarás el nombre de Jehová tu Dios en vano
 
-4. EXODO capitulo 20. versiculos 8 al 11
+4. EXODO capitulo 20 versiculos 8 al 11
 Acordarte has del día del reposo, para santificarlo
 
-5. EXODO capitulo 20. versiculo 12
+5. EXODO capitulo 20 versiculo 12
 Honra á tu padre y á tu madre
 
-6. EXODO capitulo 20. versiculo 13
+6. EXODO capitulo 20 versiculo 13
 No matarás
 
-7. EXODO capitulo 20. versiculo 14
+7. EXODO capitulo 20 versiculo 14
 No adulterarás
 
-8. EXODO capitulo 20. versiculo 15
+8. EXODO capitulo 20 versiculo 15
 No hurtarás
 
-9. EXODO capitulo 20. versiculo 16
+9. EXODO capitulo 20 versiculo 16
 No hablarás contra tu prójimo falso testimonio
 
-10. EXODO capitulo 20. versiculo 17
+10. EXODO capitulo 20 versiculo 17
 No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo"""
 
-    if consulta_norm in ["hola", "buenas", "buen dia", "buen día", "buenas tardes", "buenas noches"]:
+    if consulta_norm in ["hola", "buenas", "buen dia", "buenas tardes", "buenas noches"]:
         return respuestas["saludo"]
-    if consulta_norm in ["ayuda", "menu", "menú", "como funciona", "cómo funciona"]:
+
+    if consulta_norm in ["ayuda", "menu", "como funciona"]:
         return respuestas["ayuda"]
+
+    capitulo = extraer_capitulo_local(consulta)
+    if capitulo:
+        encontrado = buscar_capitulo_local(biblia, capitulo["libro"], capitulo["capitulo"])
+        if encontrado:
+            return encontrado
+        return (
+            f"No tengo cargado todavía {capitulo['libro']} {capitulo['capitulo']} en la base local.\n\n"
+            "Por ahora puedo mostrar completo solo lo que ya esté cargado en JSON."
+        )
 
     referencia = extraer_referencia_local(consulta)
     if referencia:
@@ -320,15 +360,18 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
                 "paz": respuestas.get("paz_base", "Te comparto una palabra:"),
                 "miedo": respuestas.get("miedo_base", "Te comparto una palabra:"),
                 "fe": respuestas.get("fe_base", "Te comparto una palabra:"),
-                "ansiedad": respuestas.get("consuelo_base", "Te comparto una palabra:")
+                "ansiedad": respuestas.get("consuelo_base", "Te comparto una palabra:"),
             }
-            return "\n\n".join([encabezados.get(tema, "Te comparto una palabra:")] + [formatear_versiculo_local(v) for v in versiculos[:2]])
+            partes = [encabezados.get(tema, "Te comparto una palabra:")]
+            for v in versiculos[:2]:
+                partes.append("")
+                partes.append(formatear_versiculo_local(v))
+            return "\n".join(partes)
+
     return None
 
 
 asegurar_estructura_local()
-
-
 # =========================
 # 2.2 VOZ — gTTS
 # =========================
@@ -902,19 +945,20 @@ PROMPT_BASE = (
     "No uses símbolos innecesarios. "
 
     "CONSULTAS BÍBLICAS DIRECTAS: "
-    "Si el usuario pide un salmo, capítulo o texto completo, no des explicación previa ni introducción. "
-    "No agregues frases como 'este salmo trata sobre' o similares. "
+    "Si el usuario pide un salmo, capítulo o texto completo y ese contenido está en la base local, no des explicación previa ni introducción. "
     "Respondé directamente con el texto solicitado. "
     "Solo explicá si el usuario lo pide después. "
+    "Si el capítulo completo no está en la base local, no lo reconstruyas ni lo cites parcialmente. "
+    "Indicá con claridad que ese capítulo completo no está disponible todavía en la base local actual. "
 
     "FORMATO BÍBLICO COMPLETO: "
-    "Para capítulos completos, mostrá solo el título una vez, por ejemplo Salmo 91. "
+    "Para capítulos completos, mostrá solo el título una vez, por ejemplo Salmos 91 o Juan 1. "
     "Luego escribí los versículos como Versiculo 1, Versiculo 2, Versiculo 3. "
     "No repitas el nombre del libro en cada línea. "
     "No mezcles formatos. "
 
     "FORMATO COMPATIBLE CON VOZ: "
-    "Nunca uses dos puntos en referencias bíblicas. "
+    "Nunca uses dos puntos en referencias bíblicas cuando redactes. "
     "No uses formatos como Juan 3:16. "
     "Siempre escribí las referencias en palabras, por ejemplo Juan capitulo 3 versiculo 16. "
 
@@ -928,12 +972,12 @@ PROMPT_BASE = (
     "INTEGRIDAD DEL TEXTO: "
     "Cuando muestres un versículo individual, debe estar completo. "
     "No cortes frases ni dejes ideas incompletas. "
-    "Para capítulos completos, respondé de forma clara pero sin forzar textos largos si no podés garantizarlos. "
-    
+    "No resumas un versículo. "
+    "No inventes el resto de un versículo. "
+
     "VARIACIONES DEL USUARIO: "
-    "Reconocé distintas formas de pedir lo mismo, por ejemplo: "
-    "salmo 91, salmos 91, sal 91, salmo capitulo 91, salmos capitulo 91. "
-    "También Juan 3 16, juan capitulo 3 versiculo 16. "
+    "Reconocé distintas formas de pedir lo mismo. "
+    "Ejemplos válidos: salmo 91, salmos 91, sal 91, san juan 1, juan 1, san lucas 1, marcos 1, mateo 5, juan capitulo 3 versiculo 16, juan 3 16. "
     "Interpretá correctamente aunque esté mal escrito. "
 
     "INSULTOS O AGRESIÓN VERBAL: "
@@ -1076,7 +1120,7 @@ if prompt:
                     model = genai.GenerativeModel("models/gemini-3-flash-preview")
                     response = model.generate_content(
                         f"{contexto}\n\n{historial}\nUsuario: {prompt}",
-                        generation_config={"max_output_tokens": 700, "temperature": 0.7},
+                        generation_config={"max_output_tokens": 500, "temperature": 0.45},
                     )
                     texto_extraido, error_detalle, finish_reason = extraer_texto_seguro(response)
 
