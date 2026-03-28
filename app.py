@@ -36,7 +36,6 @@ def normalizar(texto):
         "su1cid": "suicid",
         "mat4r": "matar",
         "ki3ro": "quiero",
-        "qm": "que me",
         "xq": "porque",
     }
     for k, v in reemplazos_directos.items():
@@ -253,10 +252,8 @@ def detectar_tema_local(consulta: str):
 
 
 def buscar_versiculos_por_tema_local(biblia, temas, tema):
-    return [
-        v for ref in temas.get(tema, [])
-        if (v := buscar_por_referencia_local(biblia, ref["libro"], ref["capitulo"], ref["versiculo"]))
-    ]
+    return [v for ref in temas.get(tema, [])
+            if (v := buscar_por_referencia_local(biblia, ref["libro"], ref["capitulo"], ref["versiculo"]))]
 
 
 def formatear_versiculo_local(item):
@@ -265,7 +262,6 @@ def formatear_versiculo_local(item):
 
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
-
     if any(k in consulta_norm for k in ["10 mandamientos", "diez mandamientos", "mandamientos", "madamientos"]):
         return """LOS DIEZ MANDAMIENTOS
 
@@ -307,18 +303,12 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
 
     if consulta_norm in ["hola", "buenas", "buen dia", "buen día", "buenas tardes", "buenas noches"]:
         return respuestas["saludo"]
-
     if consulta_norm in ["ayuda", "menu", "menú", "como funciona", "cómo funciona"]:
         return respuestas["ayuda"]
 
     referencia = extraer_referencia_local(consulta)
     if referencia:
-        encontrado = buscar_por_referencia_local(
-            biblia,
-            referencia["libro"],
-            referencia["capitulo"],
-            referencia["versiculo"]
-        )
+        encontrado = buscar_por_referencia_local(biblia, referencia["libro"], referencia["capitulo"], referencia["versiculo"])
         return formatear_versiculo_local(encontrado) if encontrado else "No encontré esa referencia en la base local actual."
 
     tema = detectar_tema_local(consulta)
@@ -332,11 +322,7 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
                 "fe": respuestas.get("fe_base", "Te comparto una palabra:"),
                 "ansiedad": respuestas.get("consuelo_base", "Te comparto una palabra:")
             }
-            return "\n\n".join(
-                [encabezados.get(tema, "Te comparto una palabra:")] +
-                [formatear_versiculo_local(v) for v in versiculos[:2]]
-            )
-
+            return "\n\n".join([encabezados.get(tema, "Te comparto una palabra:")] + [formatear_versiculo_local(v) for v in versiculos[:2]])
     return None
 
 
@@ -456,7 +442,6 @@ def clasificar_riesgo(texto: str) -> str:
         r"\bvoy a hacerme dano\b",
         r"\bvoy a hacerme daño\b",
         r"\bme lastime\b",
-        r"\bme lastime\b",
         r"\bme hice dano\b",
         r"\bme hice daño\b",
         r"\bquiero .* morir\b",
@@ -552,7 +537,6 @@ def clasificar_riesgo(texto: str) -> str:
         r"\bnadie me entiende\b",
         r"\bnadie me quiere\b",
         r"\bme harte de todo\b",
-        r"\bme harto de todo\b",
         r"\bme tiene harto\b",
         r"\bme tiene harta\b",
         r"\bestoy harto de vivir\b",
@@ -797,11 +781,7 @@ with st.sidebar:
 
     if st.session_state.es_admin:
         st.success("MODO ADMIN ACTIVO")
-        st.session_state.mantenimiento = st.toggle(
-            "Modo mantenimiento",
-            value=st.session_state.mantenimiento,
-            key="toggle_mantenimiento"
-        )
+        st.session_state.mantenimiento = st.toggle("Modo mantenimiento", value=st.session_state.mantenimiento, key="toggle_mantenimiento")
         if st.button("Reiniciar conversación"):
             st.session_state.messages = []
             st.rerun()
@@ -870,7 +850,6 @@ for m in st.session_state.messages:
 
 # =========================
 # 11. PROMPTS
-# Para volver al modo ahorro: reemplazá PROMPT_BASE por PROMPT_BASE_AHORRO
 # =========================
 PROMPT_BASE = (
     "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
@@ -888,20 +867,6 @@ PROMPT_BASE = (
     "Si el usuario comparte un problema, una emoción o una situación difícil, "
     "PRIMERO validá sus sentimientos con una frase breve y genuina, "
     "ANTES de dar el versículo o la enseñanza. "
-    "Ejemplos de frases de validación: "
-    "Entiendo que estés pasando por algo tan difícil... "
-    "Es normal sentirse así en momentos como este... "
-    "Lo que sentís tiene mucho peso, y está bien reconocerlo... "
-    "Gracias por contarme esto, no es fácil hablarlo... "
-    "Luego, de forma natural, compartí la palabra del Manual. "
-    "PREGUNTAS DE SEGUIMIENTO: "
-    "Al final de cada respuesta, invitá a continuar la charla de forma natural y variada. "
-    "No repitas siempre la misma frase. Usá preguntas como: "
-    "Te gustaría que profundicemos en esto? "
-    "Cómo te sentís con respecto a lo que te compartí? "
-    "Hay algo más de lo que quieras hablar? "
-    "Querés que busquemos juntos otra palabra del Manual sobre esto? "
-    "Solo usá esta invitación cuando sea natural. No la fuerces en respuestas muy cortas. "
     "FORMATO: "
     "Nunca uses negritas ni asteriscos. "
     "Usá párrafos cortos. Evitá bloques largos. "
@@ -911,9 +876,6 @@ PROMPT_BASE = (
     "Usá formato en palabras: Éxodo capitulo 20 versiculo 3. "
     "No uses dos puntos (:). No inventes citas. "
     "Siempre incluí al menos una cita con libro, capítulo y versículo. "
-    "Si el usuario pide textos muy extensos, podés resumir o enumerar. "
-    "Si pide una lista numerada completa, respondé con la lista completa, vertical, sin omitir nada. "
-    "Si enumerás una lista, completala totalmente antes de terminar la respuesta. "
 )
 
 PROMPT_BASE_AHORRO = (
@@ -1093,9 +1055,6 @@ if prompt:
 st.sidebar.markdown("---")
 st.sidebar.write("### ☕ Apoyá a la IA DIVINA")
 st.sidebar.markdown(
-    '<a href="https://cafecito.app/iadivina" target="_blank">'
-    '<img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café">'
-    "</a>",
-    unsafe_allow_html=True,
-)
+    '<a href="https://cafecito.app/iadivina" target="_blank"><img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café"></a>',
+    unsafe_allow_html=True
 )
