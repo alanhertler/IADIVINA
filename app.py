@@ -581,8 +581,13 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
 
     referencia = extraer_referencia_local(consulta)
     if referencia:
-        encontrado = buscar_por_referencia_local(biblia, referencia["libro"], referencia["capitulo"], referencia["versiculo"])
-        return formatear_versiculo_local(encontrado) if encontrado else "No encontré esa referencia en la base local actual."
+        encontrado = buscar_por_referencia_local(
+            biblia,
+            referencia["libro"],
+            referencia["capitulo"],
+            referencia["versiculo"]
+        )
+        return encontrado if encontrado else "No encontré esa referencia en la base local actual."
 
     tema = detectar_tema_local(consulta)
     if tema:
