@@ -567,41 +567,32 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
         "los 10", "dame los 10", "cuales son los 10",
         "decalogo", "décalogo"
     ]):
-        return """LOS DIEZ MANDAMIENTOS
-
-Base bíblica: EXODO capitulo 20 versiculos 3 al 17
-Versión: Reina-Valera 1909
-
-1. EXODO capitulo 20 versiculo 3
-No tendrás dioses ajenos delante de mí
-
-2. EXODO capitulo 20 versiculos 4 al 5
-No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, ni abajo en la tierra, ni en las aguas debajo de la tierra. No te inclinarás á ellas, ni las honrarás
-
-3. EXODO capitulo 20 versiculo 7
-No tomarás el nombre de Jehová tu Dios en vano
-
-4. EXODO capitulo 20 versiculos 8 al 11
-Acordarte has del día del reposo, para santificarlo
-
-5. EXODO capitulo 20 versiculo 12
-Honra á tu padre y á tu madre
-
-6. EXODO capitulo 20 versiculo 13
-No matarás
-
-7. EXODO capitulo 20 versiculo 14
-No adulterarás
-
-8. EXODO capitulo 20 versiculo 15
-No hurtarás
-
-9. EXODO capitulo 20 versiculo 16
-No hablarás contra tu prójimo falso testimonio
-
-10. EXODO capitulo 20 versiculo 17
-No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo"""
-
+        return (
+            "LOS DIEZ MANDAMIENTOS\n\n"
+            "Base bíblica: EXODO capitulo 20 versiculos 3 al 17\n"
+            "Versión: Reina-Valera 1909\n\n"
+            "1. EXODO capitulo 20 versiculo 3\n"
+            "No tendrás dioses ajenos delante de mí\n\n"
+            "2. EXODO capitulo 20 versiculos 4 al 5\n"
+            "No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, ni abajo en la tierra, ni en las aguas debajo de la tierra. No te inclinarás á ellas, ni las honrarás\n\n"
+            "3. EXODO capitulo 20 versiculo 7\n"
+            "No tomarás el nombre de Jehová tu Dios en vano\n\n"
+            "4. EXODO capitulo 20 versiculos 8 al 11\n"
+            "Acordarte has del día del reposo, para santificarlo\n\n"
+            "5. EXODO capitulo 20 versiculo 12\n"
+            "Honra á tu padre y á tu madre\n\n"
+            "6. EXODO capitulo 20 versiculo 13\n"
+            "No matarás\n\n"
+            "7. EXODO capitulo 20 versiculo 14\n"
+            "No adulterarás\n\n"
+            "8. EXODO capitulo 20 versiculo 15\n"
+            "No hurtarás\n\n"
+            "9. EXODO capitulo 20 versiculo 16\n"
+            "No hablarás contra tu prójimo falso testimonio\n\n"
+            "10. EXODO capitulo 20 versiculo 17\n"
+            "No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, "
+            "ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo"
+        )
     if consulta_norm in ["hola", "buenas", "buen dia", "buenas tardes", "buenas noches"]:
         return respuestas["saludo"]
 
