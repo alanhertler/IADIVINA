@@ -754,7 +754,6 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
         "quien es tu padre", "quien fue tu padre"
     ]):
         return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
-    #    consulta_conteo = extraer_consulta_conteo_versiculos(consulta)
     if consulta_conteo:
         cantidad = contar_versiculos_capitulo_local(
             biblia,
