@@ -718,8 +718,8 @@ def clasificar_riesgo(texto: str) -> str:
         "jajaja me mato", "jaja me muero", "me parto de risa", "me caigo de risa"
     ]:
         if frase in t:
-            return "verde"
-
+            return "verde"         
+    
     patrones_rojos = [
         r"\bme voy a matar\b",
         r"\bme .* matar\b",
@@ -887,7 +887,23 @@ def clasificar_riesgo(texto: str) -> str:
             return "amarillo"
 
     return "verde"
+# =========================
+# DETECCIÓN DE INTENCIÓN
+# =========================
+def detectar_intencion(texto: str) -> str:
+    t = normalizar(texto)
 
+    palabras_tecnicas = [
+        "diferencia", "version", "versiones", "traduccion",
+        "que es", "como funciona", "porque", "historia",
+        "cuando", "quien", "explicame", "explica"
+    ]
+
+    for palabra in palabras_tecnicas:
+        if palabra in t:
+            return "tecnica"
+
+    return "espiritual"
 
 # =========================
 # 4. RESPUESTAS FIJAS
@@ -1386,7 +1402,17 @@ if prompt:
             with respuesta_placeholder.container():
                 with st.spinner("Buscando respuesta en el Manual..."):
                     historial = construir_historial(st.session_state.messages, limite=15)
-                    contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
+                    intencion = detectar_intencion(prompt)
+
+                    if intencion == "tecnica":
+                        contexto = (
+                            PROMPT_BASE +
+                            " IMPORTANTE: Si la pregunta es técnica o informativa, respondé de forma directa y clara. "
+                            "NO incluyas versículos bíblicos. "
+                            "NO espiritualices la respuesta. "
+                        )
+                    else:
+                        contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
             
                     response = client.models.generate_content(
                         model="gemini-2.5-flash",
