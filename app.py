@@ -562,10 +562,8 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
 
     if any(k in consulta_norm for k in [
-        "mandamiento", "mandamientos", "madamiento", "madamientos",
-        "10 mandamiento", "diez mandamiento",
-        "los 10", "dame los 10", "cuales son los 10",
-        "decalogo", "décalogo"
+    "mandamiento", "mandamientos", "madamiento", "madamientos",
+    "decalogo", "decalogo"
     ]):
         print("ENTRO AL BLOQUE FIJO DE MANDAMIENTOS")
         return (
