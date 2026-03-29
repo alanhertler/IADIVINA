@@ -745,6 +745,14 @@ def responder_hora_fecha(consulta: str):
 
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
+def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
+    consulta_norm = normalizar_local(consulta)
+
+    if any(k in consulta_norm for k in [
+        "10 mandamientos", "diez mandamientos", "mandamientos", "madamientos",
+        "los 10", "los diez", "cuales son los mandamientos", "decime los mandamientos"
+    ]):
+        return "Exodo capitulo 20 versiculos 3 al 17."
 
     # ─── IDENTIDAD / CREADOR ─────────────────────────────
     if any(k in consulta_norm for k in [
