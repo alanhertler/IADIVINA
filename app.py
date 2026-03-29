@@ -1203,4 +1203,4 @@ st.sidebar.markdown(
     '<a href="https://cafecito.app/iadivina" target="_blank"><img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café"></a>',
     unsafe_allow_html=True
 )
-    st.write(buscar_versiculo("Genesis", 1, 1))
+ st.write(buscar_versiculo("Genesis", 1, 1))
