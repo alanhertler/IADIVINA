@@ -1118,7 +1118,7 @@ if prompt:
                     contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
             
                     response = client.models.generate_content(
-                        model="gemini-2.0-flash",
+                        model="gemini-2.5-flash",
                         contents=f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                         config={
                             "max_output_tokens": 4000,
