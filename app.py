@@ -1203,6 +1203,6 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-st.write(buscar_versiculo("Genesis", 1, 1))
+st.write(biblia is not None)
 
 
