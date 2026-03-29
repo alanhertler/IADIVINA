@@ -203,7 +203,7 @@ if API_DISPONIBLE:
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 
-BIBLIA_FILE = DATA_DIR / "biblia_subset_rv1909.json"
+BIBLIA_FILE = DATA_DIR / "biblia_rv1909_completa.json"
 RESPUESTAS_FILE = DATA_DIR / "respuestas.json"
 TEMAS_FILE = DATA_DIR / "temas.json"
 
