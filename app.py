@@ -803,42 +803,41 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     # ─── LOS DIEZ MANDAMIENTOS (FIJO) ────────────────────
         consulta_norm = normalizar_local(consulta)
     
-        if any(k in consulta_norm for k in ["10 mandamientos", "diez mandamientos", "mandamientos", "madamientos"]):
-            return """LOS DIEZ MANDAMIENTOS
-    
-    Base bíblica: EXODO capitulo 20 versiculos 3 al 17
-    Versión: Reina-Valera 1909
-    
-    1. EXODO capitulo 20 versiculo 3
-    No tendrás dioses ajenos delante de mí
-    
-    2. EXODO capitulo 20 versiculos 4 al 5
-    No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, ni abajo en la tierra, ni en las aguas debajo de la tierra. No te inclinarás á ellas, ni las honrarás
-    
-    3. EXODO capitulo 20 versiculo 7
-    No tomarás el nombre de Jehová tu Dios en vano
-    
-    4. EXODO capitulo 20 versiculos 8 al 11
-    Acordarte has del día del reposo, para santificarlo
-    
-    5. EXODO capitulo 20 versiculo 12
-    Honra á tu padre y á tu madre
-    
-    6. EXODO capitulo 20 versiculo 13
-    No matarás
-    
-    7. EXODO capitulo 20 versiculo 14
-    No adulterarás
-    
-    8. EXODO capitulo 20 versiculo 15
-    No hurtarás
-    
-    9. EXODO capitulo 20 versiculo 16
-    No hablarás contra tu prójimo falso testimonio
-    
-    10. EXODO capitulo 20 versiculo 17
-    No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo"""
+            if any(k in consulta_norm for k in ["10 mandamientos", "diez mandamientos", "mandamientos", "madamientos"]):
+        return """LOS DIEZ MANDAMIENTOS
 
+        Base bíblica: EXODO capitulo 20 versiculos 3 al 17
+        Versión: Reina-Valera 1909
+        
+        1. EXODO capitulo 20 versiculo 3
+        No tendrás dioses ajenos delante de mí
+        
+        2. EXODO capitulo 20 versiculos 4 al 5
+        No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, ni abajo en la tierra, ni en las aguas debajo de la tierra. No te inclinarás á ellas, ni las honrarás
+        
+        3. EXODO capitulo 20 versiculo 7
+        No tomarás el nombre de Jehová tu Dios en vano
+        
+        4. EXODO capitulo 20 versiculos 8 al 11
+        Acordarte has del día del reposo, para santificarlo
+        
+        5. EXODO capitulo 20 versiculo 12
+        Honra á tu padre y á tu madre
+        
+        6. EXODO capitulo 20 versiculo 13
+        No matarás
+        
+        7. EXODO capitulo 20 versiculo 14
+        No adulterarás
+        
+        8. EXODO capitulo 20 versiculo 15
+        No hurtarás
+        
+        9. EXODO capitulo 20 versiculo 16
+        No hablarás contra tu prójimo falso testimonio
+        
+        10. EXODO capitulo 20 versiculo 17
+        No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo"""
 
     if consulta_norm in ["hola", "buenas", "buen dia", "buenas tardes", "buenas noches"]:
         return respuestas["saludo"]
