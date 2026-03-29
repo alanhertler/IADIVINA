@@ -1121,7 +1121,7 @@ if prompt:
                         model="gemini-2.5-flash",
                         contents=f"{contexto}\n\n{historial}\nUsuario: {prompt}",
                         config={
-                            "max_output_tokens": 4000,
+                            "max_output_tokens": 2000,
                             "temperature": 0.45,
                         },
                     )
