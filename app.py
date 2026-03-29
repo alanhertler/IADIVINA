@@ -516,17 +516,6 @@ def buscar_capitulo_local(biblia, libro, capitulo):
 
     return None
 
-    if not versiculos:
-        return None
-
-    versiculos.sort(key=lambda x: x.get("versiculo", 0))
-
-    partes = [f"{libro} {capitulo}", ""]
-    for v in versiculos:
-        partes.append(f'Versiculo {v["versiculo"]}\n{v["texto"]}')
-        partes.append("")
-    return "\n".join(partes).strip()
-
 
 def detectar_tema_local(consulta: str):    
     t = normalizar_local(consulta)
@@ -766,77 +755,6 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     ]):
         return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
     # ─────────────────────────────────────────────────────
-
-    if any(k in consulta_norm for k in [
-        "en que capitulo estan los 10 mandamientos",
-        "en que capitulo estan los diez mandamientos",
-        "en que capitulo estan los mandamientos",
-        "donde estan los 10 mandamientos",
-        "donde estan los diez mandamientos",
-        "donde estan los mandamientos",
-        "en que parte estan los 10 mandamientos",
-        "en que parte estan los diez mandamientos"
-    ]):
-        return "Los Diez Mandamientos están en EXODO capitulo 20 versiculos 3 al 17."
-
-    consulta_conteo = extraer_consulta_conteo_versiculos(consulta)
-    if consulta_conteo:
-        cantidad = contar_versiculos_capitulo_local(
-            biblia,
-            consulta_conteo["libro"],
-            consulta_conteo["capitulo"]
-        )
-        if cantidad is not None:
-            return f'{consulta_conteo["libro"]} {consulta_conteo["capitulo"]} tiene {cantidad} versiculos.'
-
-    if any(k in consulta_norm for k in [
-        "en que capitulo estan los 10 mandamientos",
-        "en que capitulo estan los diez mandamientos",
-        "en que capitulo estan los mandamientos",
-        "donde estan los 10 mandamientos",
-        "donde estan los diez mandamientos",
-        "donde estan los mandamientos"
-    ]):
-        return "Los Diez Mandamientos están en EXODO capitulo 20 versiculos 3 al 17."
-    # ─────────────────────────────────────────────────────
-
-    # ─── LOS DIEZ MANDAMIENTOS (FIJO) ────────────────────
-        # ─── LOS DIEZ MANDAMIENTOS (FIJO) ────────────────────
-    if any(k in consulta_norm for k in ["10 mandamientos", "diez mandamientos", "mandamientos", "madamientos"]):
-        return """LOS DIEZ MANDAMIENTOS
-        
-                Base bíblica: EXODO capitulo 20 versiculos 3 al 17
-                Versión: Reina-Valera 1909
-                
-                1. EXODO capitulo 20 versiculo 3
-                No tendrás dioses ajenos delante de mí
-                
-                2. EXODO capitulo 20 versiculos 4 al 5
-                No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, ni abajo en la tierra, ni en las aguas debajo de la tierra. No te inclinarás á ellas, ni las honrarás
-                
-                3. EXODO capitulo 20 versiculo 7
-                No tomarás el nombre de Jehová tu Dios en vano
-                
-                4. EXODO capitulo 20 versiculos 8 al 11
-                Acordarte has del día del reposo, para santificarlo
-                
-                5. EXODO capitulo 20 versiculo 12
-                Honra á tu padre y á tu madre
-                
-                6. EXODO capitulo 20 versiculo 13
-                No matarás
-                
-                7. EXODO capitulo 20 versiculo 14
-                No adulterarás
-                
-                8. EXODO capitulo 20 versiculo 15
-                No hurtarás
-                
-                9. EXODO capitulo 20 versiculo 16
-                No hablarás contra tu prójimo falso testimonio
-                
-                10. EXODO capitulo 20 versiculo 17
-                No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo"""
 
     if consulta_norm in ["hola", "buenas", "buen dia", "buenas tardes", "buenas noches"]:
         return respuestas["saludo"]
