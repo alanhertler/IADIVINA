@@ -1032,8 +1032,10 @@ st.markdown(f"""
         [data-testid="stChatMessageContent"], [data-testid="stMarkdownContainer"],
         [data-testid="stChatMessageContent"] p, [data-testid="stChatMessageContent"] li,
         [data-testid="stChatMessageContent"] div {{
-            font-size: clamp(15px, 4vw, 19px) !important;
+            font-size: 18px !important; line-height: 1.85 !important;
         }}
+        .stChatInputContainer textarea {{ font-size: 18px !important; }}
+    }}
         .stChatInputContainer textarea {{ font-size: clamp(16px, 4vw, 18px) !important; }}
     }}
     .stChatInputContainer {{
