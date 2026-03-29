@@ -3,7 +3,7 @@ os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 
 import json
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 from gtts import gTTS
 import base64
 import re
@@ -68,8 +68,10 @@ except Exception:
 st.set_page_config(page_title="IA DIVINA", layout="centered")
 
 API_DISPONIBLE = bool(API_KEY and API_KEY != "TU_API_KEY_ACA")
+client = None
+
 if API_DISPONIBLE:
-    genai.configure(api_key=API_KEY)
+    client = genai.Client(api_key=API_KEY)
 
 
 # =========================
