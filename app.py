@@ -804,7 +804,7 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
         consulta_norm = normalizar_local(consulta)
     
         if any(k in consulta_norm for k in ["10 mandamientos", "diez mandamientos", "mandamientos", "madamientos"]):
-            return """LOS DIEZ MANDAMIENTOS
+        return """LOS DIEZ MANDAMIENTOS
         
                 Base bíblica: EXODO capitulo 20 versiculos 3 al 17
                 Versión: Reina-Valera 1909
