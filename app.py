@@ -467,12 +467,12 @@ def buscar_por_referencia_local(biblia, libro, capitulo, versiculo=None):
                             n = v.get("verse")
                             t = v.get("text", "").strip()
                             versos.append(f"Versiculo {n}. {t}")
-                        return f"{libro.title()} {capitulo}\n\n" + " ".join(versos)
+                        return f"[LOCAL]\n{libro.title()} {capitulo}\n\n" + " ".join(versos)
 
                     for v in chap.get("verses", []):
                         if v.get("verse") == versiculo:
                             texto = v.get("text", "").strip()
-                            return f"{libro.title()} capitulo {capitulo} versiculo {versiculo}. {texto}"
+                            return f"[LOCAL]\n{libro.title()} capitulo {capitulo} versiculo {versiculo}. {texto}"
 
     return None
 
@@ -511,7 +511,7 @@ def buscar_capitulo_local(biblia, libro, capitulo):
                         t = v.get("text", "").strip()
                         versos.append(f"Versiculo {n}. {t}")
 
-                    return f"{libro.title()} {capitulo}\n\n" + " ".join(versos)
+                    return f"[LOCAL]\n{libro.title()} {capitulo}\n\n" + " ".join(versos)
 
     return None
 
