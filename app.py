@@ -3,7 +3,7 @@ os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 
 import json
 import streamlit as st
-from google import genai
+import google.genai as genai
 from gtts import gTTS
 import base64
 import re
