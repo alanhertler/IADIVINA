@@ -618,6 +618,10 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
             referencia["versiculo"]
         )
         return encontrado if encontrado else "No encontré esa referencia en la base local actual."
+    # FILTRO CRÍTICO: Si es pregunta técnica, NO busques temas emocionales
+    intencion = detectar_intencion(consulta)
+    if intencion == "tecnica":
+        return None
 
     tema = detectar_tema_local(consulta)
     if tema:
