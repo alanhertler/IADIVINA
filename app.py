@@ -757,6 +757,16 @@ def responder_hora_fecha(consulta: str):
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
 
+    # ─── IDENTIDAD / CREADOR ─────────────────────────────
+    if any(k in consulta_norm for k in [
+        "quien te creo", "quien es tu creador", "quien fue tu creador",
+        "quien te hizo", "quien te creo a vos", "quien te creo?",
+        "quien sos", "quien eres", "quien es tu dueno",
+        "quien es tu padre", "quien fue tu padre"
+    ]):
+        return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
+    # ─────────────────────────────────────────────────────
+
     if any(k in consulta_norm for k in [
         "en que capitulo estan los 10 mandamientos",
         "en que capitulo estan los diez mandamientos",
