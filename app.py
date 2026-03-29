@@ -1416,9 +1416,9 @@ if prompt:
                     else:
                         contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
             
-                    response = client.models.generate_content(
-                        model="gemini-2.5-flash",
-                        contents=contenido_final,
+                        response = client.models.generate_content(
+                            model="gemini-2.5-flash",
+                            contents=contenido_final,
                         contenido_final = f"{contexto}\n\nUsuario: {prompt}"
                     else:
                         contenido_final = f"{contexto}\n\n{historial}\nUsuario: {prompt}"
