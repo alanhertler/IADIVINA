@@ -752,7 +752,7 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
         "10 mandamientos", "diez mandamientos", "mandamientos", "madamientos",
         "los 10", "los diez", "cuales son los mandamientos", "decime los mandamientos"
     ]):
-        return "Exodo capitulo 20 versiculos 3 al 17."
+        return buscar_capitulo_local(biblia, "Exodo", 20)
 
     # ─── IDENTIDAD / CREADOR ─────────────────────────────
     if any(k in consulta_norm for k in [
