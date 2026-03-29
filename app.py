@@ -3,6 +3,8 @@ os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 
 import json
 import streamlit as st
+from datetime import datetime
+from zoneinfo import ZoneInfo
 # =========================
 # BIBLIA LOCAL (RV1909)
 # =========================
@@ -558,8 +560,224 @@ def formatear_versiculo_local(item):
     )
 
 
+
+
+def contar_versiculos_capitulo_local(biblia, libro, capitulo):
+    if not biblia or "books" not in biblia:
+        return None
+
+    alias_libros = {
+        "genesis": "Genesis",
+        "gen": "Genesis",
+        "exodo": "Exodus",
+        "éxodo": "Exodus",
+        "levitico": "Leviticus",
+        "levítico": "Leviticus",
+        "numeros": "Numbers",
+        "números": "Numbers",
+        "deuteronomio": "Deuteronomy",
+        "josue": "Joshua",
+        "josué": "Joshua",
+        "jueces": "Judges",
+        "rut": "Ruth",
+        "1 samuel": "1 Samuel",
+        "2 samuel": "2 Samuel",
+        "1 reyes": "1 Kings",
+        "2 reyes": "2 Kings",
+        "1 cronicas": "1 Chronicles",
+        "1 crónicas": "1 Chronicles",
+        "2 cronicas": "2 Chronicles",
+        "2 crónicas": "2 Chronicles",
+        "esdras": "Ezra",
+        "nehemias": "Nehemiah",
+        "nehemías": "Nehemiah",
+        "ester": "Esther",
+        "job": "Job",
+        "salmo": "Psalms",
+        "salmos": "Psalms",
+        "proverbios": "Proverbs",
+        "eclesiastes": "Ecclesiastes",
+        "eclesiastés": "Ecclesiastes",
+        "cantares": "Song of Solomon",
+        "cantar de los cantares": "Song of Solomon",
+        "isaias": "Isaiah",
+        "isaías": "Isaiah",
+        "jeremias": "Jeremiah",
+        "jeremías": "Jeremiah",
+        "lamentaciones": "Lamentations",
+        "ezequiel": "Ezekiel",
+        "daniel": "Daniel",
+        "oseas": "Hosea",
+        "joel": "Joel",
+        "amos": "Amos",
+        "abdias": "Obadiah",
+        "abdías": "Obadiah",
+        "jonas": "Jonah",
+        "jonás": "Jonah",
+        "miqueas": "Micah",
+        "nahum": "Nahum",
+        "habacuc": "Habakkuk",
+        "sofonias": "Zephaniah",
+        "sofonías": "Zephaniah",
+        "hageo": "Haggai",
+        "zacarias": "Zechariah",
+        "zacarías": "Zechariah",
+        "malaquias": "Malachi",
+        "malaquías": "Malachi",
+        "mateo": "Matthew",
+        "san mateo": "Matthew",
+        "mate": "Matthew",
+        "san mate": "Matthew",
+        "marcos": "Mark",
+        "san marcos": "Mark",
+        "lucas": "Luke",
+        "san lucas": "Luke",
+        "juan": "John",
+        "san juan": "John",
+        "jn": "John",
+        "hechos": "Acts",
+        "romanos": "Romans",
+        "1 corintios": "1 Corinthians",
+        "2 corintios": "2 Corinthians",
+        "galatas": "Galatians",
+        "gálatas": "Galatians",
+        "efesios": "Ephesians",
+        "filipenses": "Philippians",
+        "colosenses": "Colossians",
+        "1 tesalonicenses": "1 Thessalonians",
+        "2 tesalonicenses": "2 Thessalonians",
+        "1 timoteo": "1 Timothy",
+        "2 timoteo": "2 Timothy",
+        "tito": "Titus",
+        "filemon": "Philemon",
+        "filémon": "Philemon",
+        "hebreos": "Hebrews",
+        "santiago": "James",
+        "1 pedro": "1 Peter",
+        "2 pedro": "2 Peter",
+        "1 juan": "1 John",
+        "2 juan": "2 John",
+        "3 juan": "3 John",
+        "judas": "Jude",
+        "apocalipsis": "Revelation",
+        "revelacion": "Revelation",
+        "revelación": "Revelation",
+    }
+
+    libro_norm = normalizar_local(libro)
+    libro_json = alias_libros.get(libro_norm, libro)
+
+    for book in biblia["books"]:
+        if normalizar_local(book.get("name", "")) == normalizar_local(libro_json):
+            for chap in book.get("chapters", []):
+                if chap.get("chapter") == capitulo:
+                    return len(chap.get("verses", []))
+
+    return None
+
+
+def extraer_consulta_conteo_versiculos(consulta: str):
+    q = normalizar_local(consulta)
+    patrones = [
+        r"cuantos versiculos tiene(?: el)? ([a-z0-9\s]+?) (\d+)$",
+        r"cuantos versos tiene(?: el)? ([a-z0-9\s]+?) (\d+)$",
+        r"cuantos versiculos hay en(?: el)? ([a-z0-9\s]+?) (\d+)$",
+        r"cuantos versos hay en(?: el)? ([a-z0-9\s]+?) (\d+)$",
+    ]
+
+    for patron in patrones:
+        m = re.search(patron, q)
+        if m:
+            libro = canon_libro(m.group(1))
+            if libro:
+                return {
+                    "libro": libro,
+                    "capitulo": int(m.group(2)),
+                }
+    return None
+
+
+def responder_hora_fecha(consulta: str):
+    q = normalizar_local(consulta)
+    tz = ZoneInfo("America/Argentina/Buenos_Aires")
+    ahora = datetime.now(tz)
+
+    preguntas_hora = [
+        "que hora es", "qué hora es", "decime la hora", "dime la hora",
+        "hora actual", "hora ahora", "me decis la hora", "me decís la hora"
+    ]
+    preguntas_fecha = [
+        "que fecha es", "qué fecha es", "fecha de hoy", "que dia es hoy",
+        "qué dia es hoy", "que dia estamos", "qué dia estamos",
+        "decime la fecha", "dime la fecha"
+    ]
+    preguntas_hora_fecha = [
+        "hora y fecha", "fecha y hora", "que hora y fecha es",
+        "qué hora y fecha es", "decime la hora y la fecha",
+        "dime la hora y la fecha"
+    ]
+
+    dias = {
+        0: "lunes",
+        1: "martes",
+        2: "miércoles",
+        3: "jueves",
+        4: "viernes",
+        5: "sábado",
+        6: "domingo",
+    }
+    meses = {
+        1: "enero",
+        2: "febrero",
+        3: "marzo",
+        4: "abril",
+        5: "mayo",
+        6: "junio",
+        7: "julio",
+        8: "agosto",
+        9: "septiembre",
+        10: "octubre",
+        11: "noviembre",
+        12: "diciembre",
+    }
+
+    hora_txt = ahora.strftime("%H:%M")
+    fecha_txt = f'{dias[ahora.weekday()]} {ahora.day} de {meses[ahora.month]} de {ahora.year}'
+
+    if any(p in q for p in preguntas_hora_fecha):
+        return f"Ahora mismo son las {hora_txt} y hoy es {fecha_txt}."
+    if any(p in q for p in preguntas_hora):
+        return f"Ahora mismo son las {hora_txt}."
+    if any(p in q for p in preguntas_fecha):
+        return f"Hoy es {fecha_txt}."
+
+    return None
+
+
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
+
+    if any(k in consulta_norm for k in [
+        "en que capitulo estan los 10 mandamientos",
+        "en que capitulo estan los diez mandamientos",
+        "en que capitulo estan los mandamientos",
+        "donde estan los 10 mandamientos",
+        "donde estan los diez mandamientos",
+        "donde estan los mandamientos",
+        "en que parte estan los 10 mandamientos",
+        "en que parte estan los diez mandamientos"
+    ]):
+        return "Los Diez Mandamientos están en EXODO capitulo 20 versiculos 3 al 17."
+
+    consulta_conteo = extraer_consulta_conteo_versiculos(consulta)
+    if consulta_conteo:
+        cantidad = contar_versiculos_capitulo_local(
+            biblia,
+            consulta_conteo["libro"],
+            consulta_conteo["capitulo"]
+        )
+        if cantidad is not None:
+            return f'{consulta_conteo["libro"]} {consulta_conteo["capitulo"]} tiene {cantidad} versiculos.'
 
     if any(k in consulta_norm for k in [
         "mandamiento", "mandamientos", "madamiento", "madamientos",
@@ -1221,6 +1439,7 @@ PROMPT_BASE = (
     "Sos una guía espiritual cercana, humana, paciente y compasiva. "
     "No sos una iglesia ni debatís religión. "
     "Respondé de forma clara, directa y humana. "
+    "Si te preguntan la hora o la fecha, respondé en español de forma simple y directa. "
 
     "SEGURIDAD CRÍTICA: "
     "Si el mensaje implica abuso, peligro, violencia, autolesión o riesgo inmediato, priorizá SIEMPRE la seguridad antes que la reflexión. "
@@ -1298,6 +1517,7 @@ PROMPT_BASE_AHORRO = (
     "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
     "No menciones a Google ni digas que sos IA. "
     "Tu tono es humano, claro, sereno y compasivo. "
+    "Si te preguntan la hora o la fecha, respondé en español de forma simple y directa. "
     "No sos una iglesia ni debatís religión. "
     "Respondé siempre de manera directa y fiel al Manual. "
     "Nunca uses negritas ni asteriscos. "
@@ -1494,6 +1714,7 @@ st.sidebar.markdown(
     '<a href="https://cafecito.app/iadivina" target="_blank"><img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café"></a>',
     unsafe_allow_html=True
 )
+
 
 
 
