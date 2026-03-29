@@ -754,16 +754,9 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
         "quien es tu padre", "quien fue tu padre"
     ]):
         return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
-    if consulta_conteo:
-        cantidad = contar_versiculos_capitulo_local(
-            biblia,
-            consulta_conteo["libro"],
-            consulta_conteo["capitulo"]
-        )
-        if cantidad is not None:
-            return f'{consulta_conteo["libro"]} {consulta_conteo["capitulo"]} tiene {cantidad} versiculos.' 
+    if consulta_conteo: 
 
-    if consulta_norm in ["hola", "buenas", "buen dia", "buenas tardes", "buenas noches"]:
+    if consulta_norm in ["hola", "buenas", "buen dia", "buenas tardes", "buenas noches"]:    
         return respuestas["saludo"]
 
     if consulta_norm in ["ayuda", "menu", "como funciona"]:
