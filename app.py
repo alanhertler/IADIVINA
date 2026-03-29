@@ -1192,7 +1192,7 @@ if prompt:
         texto_final = mostrar_respuesta_suave(texto)
         st.session_state.messages.append({"role": "assistant", "content": texto_final})
         mostrar_boton_audio(texto_final, clave_extra="nuevo_modelo")
-
+        st.write(buscar_versiculo("Genesis", 1, 1))
 
 # =========================
 # 13. CAFECITO
@@ -1203,4 +1203,4 @@ st.sidebar.markdown(
     '<a href="https://cafecito.app/iadivina" target="_blank"><img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café"></a>',
     unsafe_allow_html=True
 )
- st.write(buscar_versiculo("Genesis", 1, 1))
+ 
