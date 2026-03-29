@@ -3,6 +3,33 @@ os.environ["STREAMLIT_SERVER_FILE_WATCHER_TYPE"] = "none"
 
 import json
 import streamlit as st
+# =========================
+# BIBLIA LOCAL (RV1909)
+# =========================
+def cargar_biblia():
+    try:
+        with open("data/biblia_rv1909_completa.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print("Error cargando Biblia:", e)
+        return None
+
+biblia = cargar_biblia()
+
+
+def buscar_versiculo(libro, capitulo, versiculo):
+    if not biblia:
+        return None
+
+    for book in biblia["books"]:
+        if book["name"].lower() == libro.lower():
+            for chap in book["chapters"]:
+                if chap["chapter"] == capitulo:
+                    for verse in chap["verses"]:
+                        if verse["verse"] == versiculo:
+                            return verse["text"]
+
+    return None
 import google.genai as genai
 from gtts import gTTS
 import base64
