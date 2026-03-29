@@ -472,10 +472,9 @@ def buscar_por_referencia_local(biblia, libro, capitulo, versiculo=None):
                     for v in chap.get("verses", []):
                         if v.get("verse") == versiculo:
                             texto = v.get("text", "").strip()
-                        return f"{libro.title()} capitulo {capitulo} versiculo {versiculo}. {texto}"
+                            return f"{libro.title()} capitulo {capitulo} versiculo {versiculo}. {texto}"
 
     return None
-
 
 def buscar_capitulo_local(biblia, libro, capitulo):
     if not biblia or "books" not in biblia:
