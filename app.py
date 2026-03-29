@@ -1405,12 +1405,15 @@ if prompt:
                     intencion = detectar_intencion(prompt)
 
                     if intencion == "tecnica":
-                        contexto = (
-                            PROMPT_BASE +
-                            " IMPORTANTE: Si la pregunta es técnica o informativa, respondé de forma directa y clara. "
-                            "NO incluyas versículos bíblicos. "
-                            "NO espiritualices la respuesta. "
-                        )
+                    contexto = (
+                        "Responde en español de forma clara y directa.\n"
+                        "Esta es una pregunta técnica o informativa.\n"
+                        "NO uses versículos bíblicos.\n"
+                        "NO hagas reflexión espiritual.\n"
+                        "NO incluyas contenido religioso.\n"
+                        "Solo responde con información clara y concreta.\n\n"
+                        + PROMPT_BASE
+                    )
                     else:
                         contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
             
