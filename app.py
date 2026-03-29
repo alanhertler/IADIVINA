@@ -562,10 +562,9 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
 
     if any(k in consulta_norm for k in [
-    "mandamiento", "mandamientos", "madamiento", "madamientos",
-    "decalogo", "decalogo"
+        "mandamiento", "mandamientos", "madamiento", "madamientos",
+        "decalogo", "decalogo"
     ]):
-        print("ENTRO AL BLOQUE FIJO DE MANDAMIENTOS")
         return (
             "LOS DIEZ MANDAMIENTOS\n\n"
             "Base bíblica: EXODO capitulo 20 versiculos 3 al 17\n"
@@ -573,7 +572,9 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
             "1. EXODO capitulo 20 versiculo 3\n"
             "No tendrás dioses ajenos delante de mí\n\n"
             "2. EXODO capitulo 20 versiculos 4 al 5\n"
-            "No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, ni abajo en la tierra, ni en las aguas debajo de la tierra. No te inclinarás á ellas, ni las honrarás\n\n"
+            "No te harás imagen, ni ninguna semejanza de cosa que esté arriba en el cielo, "
+            "ni abajo en la tierra, ni en las aguas debajo de la tierra. "
+            "No te inclinarás á ellas, ni las honrarás\n\n"
             "3. EXODO capitulo 20 versiculo 7\n"
             "No tomarás el nombre de Jehová tu Dios en vano\n\n"
             "4. EXODO capitulo 20 versiculos 8 al 11\n"
@@ -590,8 +591,10 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
             "No hablarás contra tu prójimo falso testimonio\n\n"
             "10. EXODO capitulo 20 versiculo 17\n"
             "No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, "
-            "ni su siervo, ni su criada, ni su buey, ni su asno, ni cosa alguna de tu prójimo"
+            "ni su siervo, ni su criada, ni su buey, ni su asno, "
+            "ni cosa alguna de tu prójimo"
         )
+
 
     if consulta_norm in ["hola", "buenas", "buen dia", "buenas tardes", "buenas noches"]:
         return respuestas["saludo"]
