@@ -1114,10 +1114,14 @@ if prompt:
                 with st.spinner("Buscando respuesta en el Manual..."):
                     historial = construir_historial(st.session_state.messages, limite=15)
                     contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
-                    model = genai.GenerativeModel("models/gemini-3-flash-preview")
-                    response = model.generate_content(
-                        f"{contexto}\n\n{historial}\nUsuario: {prompt}",
-                        generation_config={"max_output_tokens": 4000, "temperature": 0.45},
+            
+                    response = client.models.generate_content(
+                        model="gemini-2.0-flash",
+                        contents=f"{contexto}\n\n{historial}\nUsuario: {prompt}",
+                        config={
+                            "max_output_tokens": 4000,
+                            "temperature": 0.45,
+                        },
                     )
                     texto_extraido, error_detalle, finish_reason = extraer_texto_seguro(response)
 
