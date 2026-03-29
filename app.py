@@ -1203,8 +1203,4 @@ st.sidebar.markdown(
     '<a href="https://cafecito.app/iadivina" target="_blank"><img src="https://cdn.cafecito.app/imgs/buttons/button_5.png" alt="Invitame un café"></a>',
     unsafe_allow_html=True
 )
-🧪 PRUEBA RÁPIDA (no rompe nada)
-
-En cualquier parte (abajo del todo por ejemplo), probá:
-
 st.write(buscar_versiculo("Genesis", 1, 1))
