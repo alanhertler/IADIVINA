@@ -561,7 +561,12 @@ def formatear_versiculo_local(item):
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
 
-    if any(k in consulta_norm for k in ["10 mandamientos", "diez mandamientos", "mandamientos", "madamientos"]):
+    if any(k in consulta_norm for k in [
+        "mandamiento", "mandamientos", "madamiento", "madamientos",
+        "10 mandamiento", "diez mandamiento",
+        "los 10", "dame los 10", "cuales son los 10",
+        "decalogo", "décalogo"
+    ]):
         return """LOS DIEZ MANDAMIENTOS
 
 Base bíblica: EXODO capitulo 20 versiculos 3 al 17
