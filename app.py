@@ -633,10 +633,8 @@ No codiciarás la casa de tu prójimo, no codiciarás la mujer de tu prójimo, n
             partes = [encabezados.get(tema, "Te comparto una palabra:")]
             for v in versiculos[:2]:
                 partes.append("")
-                partes.append(formatear_versiculo_local(v))
+                partes.append(v)
             return "\n".join(partes)
-
-    return None
 
 
 asegurar_estructura_local()
