@@ -1411,8 +1411,7 @@ if prompt:
                             "NO uses versículos bíblicos.\n"
                             "NO hagas reflexión espiritual.\n"
                             "NO incluyas contenido religioso.\n"
-                            "Solo responde con información clara y concreta.\n\n"
-                            + PROMPT_BASE
+                            "Solo responde con información clara y concreta.\n"
                         )
                     else:
                         contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
