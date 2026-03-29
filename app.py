@@ -497,6 +497,7 @@ def buscar_capitulo_local(biblia, libro, capitulo):
         "salmo": "Psalms",
         "salmos": "Psalms",
         "apocalipsis": "Revelation",
+        "exodo": "Exodus",
     }
 
     libro_norm = normalizar_local(libro)
