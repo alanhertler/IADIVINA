@@ -790,6 +790,18 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
             return f'{consulta_conteo["libro"]} {consulta_conteo["capitulo"]} tiene {cantidad} versiculos.'
 
     if any(k in consulta_norm for k in [
+        "en que capitulo estan los 10 mandamientos",
+        "en que capitulo estan los diez mandamientos",
+        "en que capitulo estan los mandamientos",
+        "donde estan los 10 mandamientos",
+        "donde estan los diez mandamientos",
+        "donde estan los mandamientos"
+    ]):
+        return "Los Diez Mandamientos están en EXODO capitulo 20 versiculos 3 al 17."
+    # ─────────────────────────────────────────────────────
+
+    # ─── LOS DIEZ MANDAMIENTOS (FIJO) ────────────────────
+    if any(k in consulta_norm for k in [
         "mandamiento", "mandamientos", "madamiento", "madamientos",
         "10 mandamiento", "diez mandamiento",
         "los 10", "dame los 10", "cuales son los 10",
