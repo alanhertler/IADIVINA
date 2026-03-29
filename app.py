@@ -478,11 +478,42 @@ def buscar_por_referencia_local(biblia, libro, capitulo, versiculo=None):
 
 
 def buscar_capitulo_local(biblia, libro, capitulo):
+    if not biblia or "books" not in biblia:
+        return None
+
+    alias_libros = {
+        "mateo": "Matthew",
+        "san mateo": "Matthew",
+        "mate": "Matthew",
+        "san mate": "Matthew",
+        "marcos": "Mark",
+        "san marcos": "Mark",
+        "lucas": "Luke",
+        "san lucas": "Luke",
+        "juan": "John",
+        "san juan": "John",
+        "genesis": "Genesis",
+        "salmo": "Psalms",
+        "salmos": "Psalms",
+        "apocalipsis": "Revelation",
+    }
+
     libro_norm = normalizar_local(libro)
-    versiculos = [
-        item for item in biblia
-        if normalizar_local(item.get("libro", "")) == libro_norm and item.get("capitulo") == capitulo
-    ]
+    libro_json = alias_libros.get(libro_norm, libro)
+
+    for book in biblia["books"]:
+        if normalizar_local(book.get("name", "")) == normalizar_local(libro_json):
+            for chap in book.get("chapters", []):
+                if chap.get("chapter") == capitulo:
+                    versos = []
+                    for v in chap.get("verses", []):
+                        n = v.get("verse")
+                        t = v.get("text", "").strip()
+                        versos.append(f"Versiculo {n}. {t}")
+
+                    return f"{libro.title()} {capitulo}\n\n" + " ".join(versos)
+
+    return None
 
     if not versiculos:
         return None
