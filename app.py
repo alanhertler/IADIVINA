@@ -14,9 +14,9 @@ import io
 from pathlib import Path
 from collections import deque
 
-# ==========================================
-# 0. SISTEMA DE CONTADOR (SITIO 1)
-# ==========================================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 01 — SISTEMA DE CONTADOR (SITIO 1)              ║
+# ╚══════════════════════════════════════════════════════╝
 # Definimos la ruta usando Path para que sea compatible con Windows y Linux
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -44,9 +44,9 @@ def sumar_consulta():
     except Exception:
         pass
     return nuevo_total
-# =========================
-# BIBLIA LOCAL (RV1909)
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 02 — BIBLIA LOCAL (RV1909)                      ║
+# ╚══════════════════════════════════════════════════════╝
 def cargar_biblia():
     try:
         with open("data/biblia_rv1909_completa.json", "r", encoding="utf-8") as f:
@@ -56,7 +56,6 @@ def cargar_biblia():
         return None
 
 biblia = cargar_biblia()
-
 
 def buscar_versiculo(libro, capitulo, versiculo):
     if not biblia:
@@ -176,7 +175,6 @@ import io
 from pathlib import Path
 from collections import deque
 
-
 def normalizar(texto):
     texto = str(texto).lower().strip()
 
@@ -215,10 +213,9 @@ def normalizar(texto):
     texto = re.sub(r"\s+", " ", texto).strip()
     return texto
 
-
-# =========================
-# 1. CONFIGURACIÓN INICIAL
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 03 — CONFIGURACIÓN INICIAL                      ║
+# ╚══════════════════════════════════════════════════════╝
 try:
     API_KEY = st.secrets["GOOGLE_API_KEY"]
 except Exception:
@@ -237,10 +234,9 @@ client = None
 if API_DISPONIBLE:
     client = genai.Client(api_key=API_KEY)
 
-
-# =========================
-# 1.1 MOTOR LOCAL BÍBLICO
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 04 — MOTOR LOCAL BÍBLICO                        ║
+# ╚══════════════════════════════════════════════════════╝
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 
@@ -284,16 +280,13 @@ TEMAS_DEMO = {
     ],
 }
 
-
 def guardar_json(ruta: Path, data):
     with open(ruta, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-
 def cargar_json(ruta: Path):
     with open(ruta, "r", encoding="utf-8") as f:
         return json.load(f)
-
 
 def asegurar_estructura_local():
     DATA_DIR.mkdir(exist_ok=True)
@@ -307,10 +300,8 @@ def asegurar_estructura_local():
     if not BIBLIA_FILE.exists():
         guardar_json(BIBLIA_FILE, BIBLIA_DEMO)
 
-
 def cargar_datos_locales():
     return cargar_json(BIBLIA_FILE), cargar_json(RESPUESTAS_FILE), cargar_json(TEMAS_FILE)
-
 
 def normalizar_local(texto: str) -> str:
     texto = str(texto).lower().strip()
@@ -322,7 +313,6 @@ def normalizar_local(texto: str) -> str:
     texto = re.sub(r"[^\w\s]", " ", texto)
     texto = re.sub(r"\s+", " ", texto).strip()
     return texto
-
 
 def canon_libro(nombre: str):
     n = normalizar_local(nombre)
@@ -352,7 +342,6 @@ def canon_libro(nombre: str):
     }
     return alias.get(n)
 
-
 def extraer_referencia_local(consulta: str):
     q = normalizar_local(consulta)
     patrones = [
@@ -373,7 +362,6 @@ def extraer_referencia_local(consulta: str):
                 }
     return None
 
-
 def extraer_capitulo_local(consulta: str):
     q = normalizar_local(consulta)
     patrones = [
@@ -391,7 +379,6 @@ def extraer_capitulo_local(consulta: str):
                     "capitulo": int(m.group(2)),
                 }
     return None
-
 
 def buscar_por_referencia_local(biblia, libro, capitulo, versiculo=None):
     if not biblia or "books" not in biblia:
@@ -556,7 +543,6 @@ def buscar_capitulo_local(biblia, libro, capitulo):
 
     return None
 
-
 def detectar_tema_local(consulta: str):    
     t = normalizar_local(consulta)
     mapa = {
@@ -572,7 +558,6 @@ def detectar_tema_local(consulta: str):
                 return tema
     return None
 
-
 def buscar_versiculos_por_tema_local(biblia, temas, tema):
     resultado = []
     for ref in temas.get(tema, []):
@@ -581,15 +566,11 @@ def buscar_versiculos_por_tema_local(biblia, temas, tema):
             resultado.append(v)
     return resultado
 
-
 def formatear_versiculo_local(item):
     return (
         f'{item["libro"]} capitulo {item["capitulo"]} versiculo {item["versiculo"]}\n'
         f'{item["texto"]}'
     )
-
-
-
 
 def contar_versiculos_capitulo_local(biblia, libro, capitulo):
     if not biblia or "books" not in biblia:
@@ -704,7 +685,6 @@ def contar_versiculos_capitulo_local(biblia, libro, capitulo):
 
     return None
 
-
 def extraer_consulta_conteo_versiculos(consulta: str):
     q = normalizar_local(consulta)
     patrones = [
@@ -724,7 +704,6 @@ def extraer_consulta_conteo_versiculos(consulta: str):
                     "capitulo": int(m.group(2)),
                 }
     return None
-
 
 def responder_hora_fecha(consulta: str):
     q = normalizar_local(consulta)
@@ -782,7 +761,6 @@ def responder_hora_fecha(consulta: str):
 
     return None
 
-
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
 
@@ -792,7 +770,7 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     ]):
         return buscar_capitulo_local(biblia, "Exodo", 20)
 
-# ─── IDENTIDAD / ORIGEN (ANÓNIMO Y PROFESIONAL) ─────────────────────────
+# 04.1 Identidad / origen
     if any(k in consulta_norm for k in [
         "quien te creo", "creador", "quien te hizo", 
         "quien sos", "quien eres", "dueño", "dueno",
@@ -835,17 +813,15 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
         )
         return encontrado if encontrado else "No encontré esa referencia en la base local actual."
 
-    # ─── HORA Y FECHA ───────────────────────────────────────────
+    # 04.2 Hora y fecha
     respuesta_temporal = responder_hora_fecha(consulta)
     if respuesta_temporal:
         return respuesta_temporal
-    # ────────────────────────────────────────────────────────────
 
-    # ─── FILTRO TÉCNICO ─────────────────────────────────────────
+    # 04.3 Filtro técnico
     intencion = detectar_intencion(consulta)
     if intencion == "tecnica":
         return None
-    # ────────────────────────────────────────────────────────────
 
     tema = detectar_tema_local(consulta)
     if tema:
@@ -865,16 +841,15 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
             return "\n".join(partes)
 
 asegurar_estructura_local()
-# =========================
-# 2.2 VOZ — gTTS
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 05 — VOZ — gTTS                                 ║
+# ╚══════════════════════════════════════════════════════╝
 def _generar_audio_gtts(texto):
     tts = gTTS(text=texto, lang="es")
     buffer = io.BytesIO()
     tts.write_to_fp(buffer)
     buffer.seek(0)
     return buffer
-
 
 def reproducir_audio(texto: str):
     if not st.session_state.get("usar_voz", True):
@@ -890,7 +865,6 @@ def reproducir_audio(texto: str):
     except Exception as e:
         st.error(f"Error de sonido: {e}")
 
-
 def mostrar_boton_audio(texto: str, clave_extra: str = ""):
     if not st.session_state.get("usar_voz", True):
         return
@@ -901,10 +875,9 @@ def mostrar_boton_audio(texto: str, clave_extra: str = ""):
     if st.button("🔊 Escuchar", key=clave_audio):
         reproducir_audio(texto)
 
-
-# =========================
-# 2.1 FUNCIONES VISUALES
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 06 — FUNCIONES VISUALES                         ║
+# ╚══════════════════════════════════════════════════════╝
 def construir_historial(messages, limite=15):
     historial = ""
     for msg in messages[-limite:]:
@@ -914,26 +887,22 @@ def construir_historial(messages, limite=15):
             historial += f"Asistente: {msg['content']}\n"
     return historial.strip()
 
-
 def stream_text(texto: str, delay: float = 0.02):
     texto = texto.replace("\r\n", "\n")
     for parte in re.split(r"(\s+)", texto):
         yield parte
         time.sleep(delay)
 
-
 def mostrar_respuesta_suave(texto: str, delay: float = 0.02) -> str:
     resultado = st.write_stream(stream_text(texto, delay=delay))
     return resultado if isinstance(resultado, str) else texto
 
-
 def asegurar_cierre(texto: str) -> str:
     return str(texto).strip()
 
-
-# =========================
-# 3. CLASIFICACIÓN DE RIESGO
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 07 — CLASIFICACIÓN DE RIESGO                    ║
+# ╚══════════════════════════════════════════════════════╝
 def clasificar_riesgo(texto: str) -> str:
     t = normalizar(texto)
 
@@ -1114,9 +1083,9 @@ def clasificar_riesgo(texto: str) -> str:
             return "amarillo"
 
     return "verde"
-# =========================
-# DETECCIÓN DE INTENCIÓN
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 08 — DETECCIÓN DE INTENCIÓN                     ║
+# ╚══════════════════════════════════════════════════════╝
 def detectar_intencion(texto: str) -> str:
     t = normalizar(texto)
 
@@ -1151,7 +1120,7 @@ def detectar_intencion(texto: str) -> str:
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
 
-    # ─── RESPUESTAS DOCTRINALES FIJAS ───────────────────────────
+    # 08.1 Respuestas doctrinales fijas
     if consulta_norm in ["quien es dios", "quién es dios", "para vos quien es dios"]:
         return (
             "Dios es el Creador del cielo y de la tierra, el Señor supremo sobre todo lo que existe "
@@ -1187,14 +1156,14 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
             "en la verdad de Dios."
         )
 
-    # ─── MANDAMIENTOS ───────────────────────────────────────────
+    # 08.2 Mandamientos
     if any(k in consulta_norm for k in [
         "10 mandamientos", "diez mandamientos", "mandamientos", "madamientos",
         "los 10", "los diez", "cuales son los mandamientos", "decime los mandamientos"
     ]):
         return buscar_capitulo_local(biblia, "Exodo", 20)
 
-    # ─── IDENTIDAD / ORIGEN (ANÓNIMO Y PROFESIONAL) ─────────────
+    # 08.3 Identidad / origen
     if any(k in consulta_norm for k in [
         "quien te creo", "creador", "quien te hizo",
         "quien sos", "quien eres", "dueño", "dueno",
@@ -1234,17 +1203,17 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
         )
         return encontrado if encontrado else "No encontré esa referencia en la base local actual."
 
-    # ─── HORA Y FECHA ───────────────────────────────────────────
+    # 04.2 Hora y fecha
     respuesta_temporal = responder_hora_fecha(consulta)
     if respuesta_temporal:
         return respuesta_temporal
 
-    # ─── FILTRO TÉCNICO ─────────────────────────────────────────
+    # 04.3 Filtro técnico
     intencion = detectar_intencion(consulta)
     if intencion == "tecnica":
         return None
 
-    # ─── TEMAS ESPIRITUALES ─────────────────────────────────────
+    # 08.4 Temas espirituales
     tema = detectar_tema_local(consulta)
     if tema:
         versiculos = buscar_versiculos_por_tema_local(biblia, temas, tema)
@@ -1262,9 +1231,9 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
                 partes.append(v)
             return "\n".join(partes)
 
-# =========================
-# 4. RESPUESTAS FIJAS
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 09 — RESPUESTAS FIJAS                           ║
+# ╚══════════════════════════════════════════════════════╝
 def respuesta_roja() -> str:
     return (
         "Lo que estás diciendo es serio y necesito priorizar tu seguridad ahora mismo.\n\n"
@@ -1275,7 +1244,6 @@ def respuesta_roja() -> str:
         "Dios ve tu dolor aun en este momento. Salmos capitulo 34 versiculo 18.\n\n"
         "NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
-
 
 def respuesta_abuso() -> str:
     return (
@@ -1289,7 +1257,6 @@ def respuesta_abuso() -> str:
         "NECESITÁS HABLAR? ESTOY ACÁ. CONTAME."
     )
 
-
 def respuesta_filtrada(texto: str):
     t = normalizar(texto)
     if any(p in t for p in ["concha", "pija", "porno", "masturb", "sexo", "coger"]):
@@ -1300,14 +1267,12 @@ def respuesta_filtrada(texto: str):
         )
     return None
 
-
-# =========================
-# 5. CONTROL DE USO
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 10 — CONTROL DE USO                             ║
+# ╚══════════════════════════════════════════════════════╝
 MAX_MENSAJES_POR_MINUTO = 8
 MAX_MENSAJES_POR_HORA = 40
 TIEMPO_MINIMO_ENTRE_MENSAJES = 4
-
 
 def inicializar_control_uso():
     if "control_uso" not in st.session_state:
@@ -1317,11 +1282,9 @@ def inicializar_control_uso():
             "ultimo_mensaje_ts": 0.0,
         }
 
-
 def limpiar_timestamps(cola, ahora, ventana_segundos):
     while cola and (ahora - cola[0]) > ventana_segundos:
         cola.popleft()
-
 
 def verificar_limites():
     inicializar_control_uso()
@@ -1343,7 +1306,6 @@ def verificar_limites():
 
     return True, ""
 
-
 def registrar_mensaje():
     inicializar_control_uso()
     ahora = time.time()
@@ -1352,10 +1314,9 @@ def registrar_mensaje():
     control["mensajes_hora"].append(ahora)
     control["ultimo_mensaje_ts"] = ahora
 
-
-# =========================
-# 6. ESTADO INICIAL
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 11 — ESTADO INICIAL                             ║
+# ╚══════════════════════════════════════════════════════╝
 if "acepto_terminos" not in st.session_state:
     st.session_state.acepto_terminos = False
 if "es_admin" not in st.session_state:
@@ -1367,7 +1328,6 @@ if "messages" not in st.session_state:
 if "usar_voz" not in st.session_state:
     st.session_state.usar_voz = True
 
-
 def get_base64(file_path: str):
     try:
         with open(file_path, "rb") as f:
@@ -1375,10 +1335,9 @@ def get_base64(file_path: str):
     except Exception:
         return None
 
-
-# =========================
-# 7. ESTILO
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 12 — ESTILO                                     ║
+# ╚══════════════════════════════════════════════════════╝
 img = get_base64("portada.jpg")
 
 st.markdown(f"""
@@ -1449,10 +1408,9 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-
-# =========================
-# 8. SIDEBAR / ADMIN
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 13 — SIDEBAR / ADMIN                            ║
+# ╚══════════════════════════════════════════════════════╝
 with st.sidebar:
     st.title("CONFIGURACIÓN")
 
@@ -1501,9 +1459,9 @@ with st.sidebar:
             st.session_state.es_admin = False
             st.rerun()
 
-# =========================
-# 9. BLOQUEOS GENERALES
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 14 — BLOQUEOS GENERALES                         ║
+# ╚══════════════════════════════════════════════════════╝
 if st.session_state.mantenimiento and not st.session_state.es_admin:
     st.error("Sistema en mantenimiento (modo técnico activado).")
     st.stop()
@@ -1549,10 +1507,9 @@ if not st.session_state.acepto_terminos:
 
     st.stop()
 
-
-# =========================
-# 10. HISTORIAL
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 15 — HISTORIAL                                  ║
+# ╚══════════════════════════════════════════════════════╝
 for i, m in enumerate(st.session_state.messages):
     avatar = "✝️" if m["role"] == "assistant" else "❤️"
     with st.chat_message(m["role"], avatar=avatar):
@@ -1561,10 +1518,9 @@ for i, m in enumerate(st.session_state.messages):
         if m["role"] == "assistant":
             mostrar_boton_audio(m["content"], clave_extra=f"hist_{i}")
 
-
-# =========================
-# 11. PROMPTS
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 16 — PROMPTS                                    ║
+# ╚══════════════════════════════════════════════════════╝
 PROMPT_BASE = (
     "Tu nombre es IA DIVINA. Sos el Manual de Vida basado en la Biblia Reina-Valera 1909. "
 
@@ -1694,10 +1650,9 @@ PROMPT_AMARILLO = (
     "Recordale con suavidad que no está solo o sola, y que Dios está cerca. "
 )
 
-
-# =========================
-# FUNCIÓN SEGURA
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 17 — FUNCIÓN SEGURA                             ║
+# ╚══════════════════════════════════════════════════════╝
 def extraer_texto_seguro(response):
     try:
         if response is None:
@@ -1757,9 +1712,9 @@ def limpiar_identidad_prohibida(texto: str) -> str:
             return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
 
     return texto
-# =========================
-# 12. CHAT
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 18 — CHAT                                       ║
+# ╚══════════════════════════════════════════════════════╝
 prompt = st.chat_input("Hablemos sinceramente...")
 
 if prompt:
@@ -1922,9 +1877,9 @@ if prompt:
         mostrar_boton_audio(texto_final, clave_extra="nuevo_modelo")
         sumar_consulta()
         
-# =========================
-# 13. CAFECITO
-# =========================
+# ╔══════════════════════════════════════════════════════╗
+# ║ BLOQUE 19 — CAFECITO                                   ║
+# ╚══════════════════════════════════════════════════════╝
 st.sidebar.markdown("---")
 st.sidebar.write("### ☕ Apoyá a la IA DIVINA")
 st.sidebar.markdown(
