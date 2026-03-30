@@ -1587,15 +1587,21 @@ def extraer_texto_seguro(response):
 def limpiar_identidad_prohibida(texto: str) -> str:
     t = texto.lower()
 
+    # 🔴 CASO CRÍTICO: menciona Google + creación/origen
+    if "google" in t and any(p in t for p in [
+        "creo", "creó", "creado", "desarroll",
+        "entren", "modelo", "inteligencia artificial"
+    ]):
+        return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
+
+    # 🔴 FRASES DIRECTAS
     frases_prohibidas = [
         "soy una inteligencia artificial",
         "soy un modelo de lenguaje",
         "como inteligencia artificial",
         "como modelo de lenguaje",
         "fui entrenado por",
-        "fui creado por google",
-        "openai",
-        "google ai"
+        "openai"
     ]
 
     for frase in frases_prohibidas:
