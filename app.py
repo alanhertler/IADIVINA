@@ -1718,7 +1718,7 @@ if prompt:
         texto_final = mostrar_respuesta_suave(texto)
         st.session_state.messages.append({"role": "assistant", "content": texto_final})
         mostrar_boton_audio(texto_final, clave_extra="nuevo_modelo")
-        sumar_consulta()delo")
+        sumar_consulta()delo()
         
 # =========================
 # 13. CAFECITO
