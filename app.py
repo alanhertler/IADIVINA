@@ -753,15 +753,16 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     ]):
         return buscar_capitulo_local(biblia, "Exodo", 20)
 
-# ─── IDENTIDAD / CREADOR (ACTUALIZADO) ─────────────────────────────
+# ─── IDENTIDAD / ORIGEN (ANÓNIMO Y PROFESIONAL) ─────────────────────────
     if any(k in consulta_norm for k in [
         "quien te creo", "creador", "quien te hizo", 
-        "quien sos", "quien eres", "dueno", "dueño",
+        "quien sos", "quien eres", "dueño", "dueno",
         "padre", "papa", "papá", "creó"
     ]):
-        return ("Soy la Guía Divina, una herramienta de acompañamiento espiritual "
-                "desarrollada por Alan Sigfrido Hertler y su familia en Pilar, Argentina. "
-                "Mi propósito es facilitarte el acceso a la Palabra de Dios (Reina Valera 1909).")
+        return ("Soy la Guía Divina, un sistema de acompañamiento basado en la "
+                "Biblia Reina Valera 1909. Fui desarrollada por un equipo "
+                "independiente en Buenos Aires, Argentina, con el fin de "
+                "difundir la Palabra de forma tecnológica y fiel al texto.")
 
     consulta_conteo = extraer_consulta_conteo_versiculos(consulta)
     if consulta_conteo:
