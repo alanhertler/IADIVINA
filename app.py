@@ -1117,20 +1117,119 @@ def clasificar_riesgo(texto: str) -> str:
 # =========================
 # DETECCIÓN DE INTENCIÓN
 # =========================
-def detectar_intencion(texto: str) -> str:
-    t = normalizar(texto)
+def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
+    consulta_norm = normalizar_local(consulta)
 
-    palabras_tecnicas = [
-        "diferencia", "version", "versiones", "traduccion",
-        "que es", "como funciona", "porque", "historia",
-        "cuando", "quien", "explicame", "explica"
-    ]
+    # ─── RESPUESTAS DOCTRINALES FIJAS ───────────────────────────
+    if consulta_norm in ["quien es dios", "quién es dios", "para vos quien es dios"]:
+        return (
+            "Dios es el Creador del cielo y de la tierra, el Señor supremo sobre todo lo que existe "
+            "y la fuente de toda vida. Es eterno, santo, todopoderoso, justo y lleno de misericordia. "
+            "No es una idea ni un concepto humano: es el Dios vivo y verdadero."
+        )
 
-    for palabra in palabras_tecnicas:
-        if palabra in t:
-            return "tecnica"
+    if consulta_norm in [
+        "quien es jesus", "quién es jesús",
+        "quien es jesucristo", "quién es jesucristo",
+        "quien es cristo", "quién es cristo"
+    ]:
+        return (
+            "Jesucristo es el Hijo de Dios, el Salvador y el Mesías prometido. "
+            "Él es el camino, la verdad y la vida. Vino para salvar, dar vida y reconciliar al ser humano con Dios."
+        )
 
-    return "espiritual"
+    if consulta_norm in [
+        "que es la trinidad", "qué es la trinidad",
+        "que es trinidad", "qué es trinidad"
+    ]:
+        return (
+            "La Trinidad enseña que hay un solo Dios verdadero, que se manifiesta eternamente como Padre, "
+            "Hijo y Espíritu Santo. No son tres dioses, sino un solo Dios en tres personas."
+        )
+
+    if consulta_norm in [
+        "quien es el espiritu santo", "quién es el espíritu santo",
+        "quien es espiritu santo", "quién es espíritu santo"
+    ]:
+        return (
+            "El Espíritu Santo es Dios. Él consuela, guía, redarguye, fortalece y acompaña al creyente "
+            "en la verdad de Dios."
+        )
+
+    # ─── MANDAMIENTOS ───────────────────────────────────────────
+    if any(k in consulta_norm for k in [
+        "10 mandamientos", "diez mandamientos", "mandamientos", "madamientos",
+        "los 10", "los diez", "cuales son los mandamientos", "decime los mandamientos"
+    ]):
+        return buscar_capitulo_local(biblia, "Exodo", 20)
+
+    # ─── IDENTIDAD / ORIGEN (ANÓNIMO Y PROFESIONAL) ─────────────
+    if any(k in consulta_norm for k in [
+        "quien te creo", "creador", "quien te hizo",
+        "quien sos", "quien eres", "dueño", "dueno",
+        "padre", "papa", "papá", "creó"
+    ]):
+        return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
+
+    consulta_conteo = extraer_consulta_conteo_versiculos(consulta)
+    if consulta_conteo:
+        cantidad = contar_versiculos_capitulo_local(
+            biblia,
+            consulta_conteo["libro"],
+            consulta_conteo["capitulo"]
+        )
+        if cantidad is not None:
+            return f'{consulta_conteo["libro"]} {consulta_conteo["capitulo"]} tiene {cantidad} versiculos.'
+
+    if consulta_norm in ["hola", "buenas", "buen dia", "buenas tardes", "buenas noches"]:
+        return respuestas["saludo"]
+
+    if consulta_norm in ["ayuda", "menu", "como funciona"]:
+        return respuestas["ayuda"]
+
+    capitulo = extraer_capitulo_local(consulta)
+    if capitulo:
+        encontrado = buscar_capitulo_local(biblia, capitulo["libro"], capitulo["capitulo"])
+        if encontrado and encontrado.count("Versiculo") >= 3:
+            return encontrado
+
+    referencia = extraer_referencia_local(consulta)
+    if referencia:
+        encontrado = buscar_por_referencia_local(
+            biblia,
+            referencia["libro"],
+            referencia["capitulo"],
+            referencia["versiculo"]
+        )
+        return encontrado if encontrado else "No encontré esa referencia en la base local actual."
+
+    # ─── HORA Y FECHA ───────────────────────────────────────────
+    respuesta_temporal = responder_hora_fecha(consulta)
+    if respuesta_temporal:
+        return respuesta_temporal
+
+    # ─── FILTRO TÉCNICO ─────────────────────────────────────────
+    intencion = detectar_intencion(consulta)
+    if intencion == "tecnica":
+        return None
+
+    # ─── TEMAS ESPIRITUALES ─────────────────────────────────────
+    tema = detectar_tema_local(consulta)
+    if tema:
+        versiculos = buscar_versiculos_por_tema_local(biblia, temas, tema)
+        if versiculos:
+            encabezados = {
+                "consuelo": respuestas.get("consuelo_base", "Te comparto una palabra:"),
+                "paz": respuestas.get("paz_base", "Te comparto una palabra:"),
+                "miedo": respuestas.get("miedo_base", "Te comparto una palabra:"),
+                "fe": respuestas.get("fe_base", "Te comparto una palabra:"),
+                "ansiedad": respuestas.get("consuelo_base", "Te comparto una palabra:"),
+            }
+            partes = [encabezados.get(tema, "Te comparto una palabra:")]
+            for v in versiculos[:2]:
+                partes.append("")
+                partes.append(v)
+            return "\n".join(partes)
 
 # =========================
 # 4. RESPUESTAS FIJAS
