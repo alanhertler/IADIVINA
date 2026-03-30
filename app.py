@@ -1584,7 +1584,23 @@ def extraer_texto_seguro(response):
     except Exception as e:
         return None, f"Error: {e}", None
 
+def limpiar_identidad_prohibida(texto: str) -> str:
+    prohibidas = [
+        "inteligencia artificial",
+        "modelo de lenguaje",
+        "modelo",
+        "google",
+        "openai",
+        "sistema",
+        "programa"
+    ]
 
+    t = texto.lower()
+    for p in prohibidas:
+        if p in t:
+            return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
+
+    return texto
 # =========================
 # 12. CHAT
 # =========================
@@ -1700,6 +1716,7 @@ if prompt:
 
                     texto = re.sub(r"[*#_]", "", texto_extraido).strip()
                     texto = asegurar_cierre(texto)
+                    texto = limpiar_identidad_prohibida(texto)
 
         except Exception as e:
             try:
