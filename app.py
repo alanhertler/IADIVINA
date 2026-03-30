@@ -5,6 +5,45 @@ import json
 import streamlit as st
 from datetime import datetime
 from zoneinfo import ZoneInfo
+import google.genai as genai
+from gtts import gTTS
+import base64
+import re
+import time
+import io
+from pathlib import Path
+from collections import deque
+
+# ==========================================
+# 0. SISTEMA DE CONTADOR (SITIO 1)
+# ==========================================
+# Definimos la ruta usando Path para que sea compatible con Windows y Linux
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
+CONTADOR_FILE = DATA_DIR / "registro_consultas.json"
+
+def cargar_contador():
+    """Lee el número de consultas desde el archivo JSON."""
+    try:
+        if CONTADOR_FILE.exists():
+            with open(CONTADOR_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data.get("total", 0)
+    except Exception:
+        pass
+    return 0
+
+def sumar_consulta():
+    """Suma 1 al total y lo guarda en el archivo."""
+    actual = cargar_contador()
+    nuevo_total = actual + 1
+    try:
+        DATA_DIR.mkdir(exist_ok=True) # Se asegura que la carpeta data exista
+        with open(CONTADOR_FILE, "w", encoding="utf-8") as f:
+            json.dump({"total": nuevo_total}, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+    return nuevo_total
 # =========================
 # BIBLIA LOCAL (RV1909)
 # =========================
