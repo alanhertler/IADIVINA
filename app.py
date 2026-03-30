@@ -1117,6 +1117,37 @@ def clasificar_riesgo(texto: str) -> str:
 # =========================
 # DETECCIÓN DE INTENCIÓN
 # =========================
+def detectar_intencion(texto: str) -> str:
+    t = normalizar(texto)
+
+    palabras_tecnicas = [
+        "diferencia", "version", "versiones", "traduccion",
+        "como funciona", "porque", "historia",
+        "cuando", "explicame", "explica",
+        "google", "openai", "api", "modelo", "sistema", "programa"
+    ]
+
+    consultas_espirituales = [
+        "quien es dios",
+        "quien es jesus",
+        "quien es jesucristo",
+        "que es la trinidad",
+        "quien es el espiritu santo",
+        "que dice la biblia",
+        "que significa salmo",
+        "que significa juan",
+        "que significa evangelio"
+    ]
+
+    if any(frase in t for frase in consultas_espirituales):
+        return "espiritual"
+
+    for palabra in palabras_tecnicas:
+        if palabra in t:
+            return "tecnica"
+
+    return "espiritual"
+    
 def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     consulta_norm = normalizar_local(consulta)
 
