@@ -1587,20 +1587,25 @@ def extraer_texto_seguro(response):
 def limpiar_identidad_prohibida(texto: str) -> str:
     t = texto.lower()
 
-    # 🔴 CASO CRÍTICO: menciona Google + creación/origen
     if "google" in t and any(p in t for p in [
         "creo", "creó", "creado", "desarroll",
-        "entren", "modelo", "inteligencia artificial"
+        "entren", "modelo", "inteligencia artificial",
+        "ia", "empresa que me desarrollo", "empresa que me desarrolló"
     ]):
         return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
 
-    # 🔴 FRASES DIRECTAS
     frases_prohibidas = [
         "soy una inteligencia artificial",
         "soy un modelo de lenguaje",
         "como inteligencia artificial",
         "como modelo de lenguaje",
         "fui entrenado por",
+        "fui creada por google",
+        "fui creado por google",
+        "google me creo",
+        "google me creó",
+        "google me desarrollo",
+        "google me desarrolló",
         "openai"
     ]
 
@@ -1664,6 +1669,20 @@ if prompt:
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 mostrar_boton_audio(texto_final, clave_extra="nuevo_local")
+                sumar_consulta()
+                st.stop()
+
+            consulta_norm = normalizar_local(prompt)
+
+            if consulta_norm.startswith("quien es ") and len(consulta_norm.split()) >= 3:
+                texto = (
+                    "No puedo confirmar información sobre personas sin una base confiable. "
+                    "Prefiero no inventar datos."
+                )
+                respuesta_placeholder.empty()
+                texto_final = mostrar_respuesta_suave(texto)
+                st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                mostrar_boton_audio(texto_final, clave_extra="bloqueo_persona")
                 sumar_consulta()
                 st.stop()
 
