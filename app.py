@@ -1723,7 +1723,7 @@ if prompt:
                         contents=contenido_final,
                         config={
                             "max_output_tokens": 2000,
-                            "temperature": 0.2,
+                            "temperature": 0.47,
                         },
                     )
                     texto_extraido, error_detalle, finish_reason = extraer_texto_seguro(response)
