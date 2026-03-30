@@ -1605,6 +1605,7 @@ if prompt:
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 mostrar_boton_audio(texto_final, clave_extra="nuevo_rojo")
+                sumar_consulta()
                 st.stop()
 
             elif nivel == "rojo_abuso":
@@ -1613,6 +1614,7 @@ if prompt:
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 mostrar_boton_audio(texto_final, clave_extra="nuevo_abuso")
+                sumar_consulta()
                 st.stop()
 
             respuesta_directa = respuesta_filtrada(prompt)
@@ -1621,6 +1623,7 @@ if prompt:
                 texto_final = mostrar_respuesta_suave(respuesta_directa)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 mostrar_boton_audio(texto_final, clave_extra="nuevo_filtrado")
+                sumar_consulta()
                 st.stop()
 
             biblia_local, respuestas_locales, temas_locales = cargar_datos_locales()
@@ -1631,6 +1634,7 @@ if prompt:
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 mostrar_boton_audio(texto_final, clave_extra="nuevo_local")
+                sumar_consulta()
                 st.stop()
 
             if not API_DISPONIBLE:
@@ -1643,6 +1647,7 @@ if prompt:
                 texto_final = mostrar_respuesta_suave(texto)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 mostrar_boton_audio(texto_final, clave_extra="nuevo_sin_api")
+                sumar_consulta()
                 st.stop()
 
             with respuesta_placeholder.container():
@@ -1659,12 +1664,10 @@ if prompt:
                             "NO incluyas contenido religioso.\n"
                             "Solo responde con información clara y concreta.\n"
                         )
+                        contenido_final = f"{contexto}\n\nUsuario: {prompt}"
                     else:
                         contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
                         contenido_final = f"{contexto}\n\n{historial}\nUsuario: {prompt}"
-
-                    if intencion == "tecnica":
-                        contenido_final = f"{contexto}\n\nUsuario: {prompt}"
 
                     response = client.models.generate_content(
                         model="gemini-2.5-flash",
@@ -1704,6 +1707,7 @@ if prompt:
                 texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
                 mostrar_boton_audio(texto_final, clave_extra="nuevo_fallback")
+                sumar_consulta()
                 st.stop()
             else:
                 st.exception(e)
@@ -1714,6 +1718,7 @@ if prompt:
         texto_final = mostrar_respuesta_suave(texto)
         st.session_state.messages.append({"role": "assistant", "content": texto_final})
         mostrar_boton_audio(texto_final, clave_extra="nuevo_modelo")
+        sumar_consulta()delo")
         
 # =========================
 # 13. CAFECITO
