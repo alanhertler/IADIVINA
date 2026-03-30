@@ -1620,29 +1620,11 @@ def limpiar_identidad_prohibida(texto: str) -> str:
 prompt = st.chat_input("Hablemos sinceramente...")
 
 if prompt:
-    # 1. VERIFICACIÓN DE LÍMITES
     permitido, aviso = verificar_limites()
     if not permitido:
         st.warning(aviso)
         st.stop()
 
-    # 2. BLOQUEO DE IDENTIDAD (EL MURO ANTI-GOOGLE)
-    # Normalizamos y chequeamos antes de que hable nadie más
-    consulta_norm = normalizar_local(prompt)
-    palabras_identidad = ["quien sos", "que sos", "quien te creo", "google", "creador", "trabajas para"]
-    
-    if any(p in consulta_norm for p in palabras_identidad):
-        texto_identidad = "Fui creada para acompañarte con la sabiduría del Manual de Vida."
-        st.chat_message("user", avatar="❤️").markdown(prompt)
-        with st.chat_message("assistant", avatar="✝️"):
-            st.markdown(texto_identidad)
-            mostrar_boton_audio(texto_identidad, clave_extra="identidad_fija")
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        st.session_state.messages.append({"role": "assistant", "content": texto_identidad})
-        sumar_consulta()
-        st.stop() # Cortamos acá: Google ni se entera de la pregunta
-
-    # 3. REGISTRO NORMAL
     registrar_mensaje()
     st.chat_message("user", avatar="❤️").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -1652,7 +1634,6 @@ if prompt:
         try:
             nivel = clasificar_riesgo(prompt)
 
-            # --- CASO: RIESGO ROJO ---
             if nivel == "rojo":
                 texto = respuesta_roja()
                 respuesta_placeholder.empty()
@@ -1662,7 +1643,6 @@ if prompt:
                 sumar_consulta()
                 st.stop()
 
-            # --- CASO: RIESGO ABUSO ---
             elif nivel == "rojo_abuso":
                 texto = respuesta_abuso()
                 respuesta_placeholder.empty()
@@ -1672,7 +1652,6 @@ if prompt:
                 sumar_consulta()
                 st.stop()
 
-            # --- CASO: RESPUESTA FILTRADA DIRECTA ---
             respuesta_directa = respuesta_filtrada(prompt)
             if respuesta_directa:
                 respuesta_placeholder.empty()
@@ -1682,7 +1661,6 @@ if prompt:
                 sumar_consulta()
                 st.stop()
 
-            # --- CASO: RESPUESTA LOCAL (BIBLIA) ---
             biblia_local, respuestas_locales, temas_locales = cargar_datos_locales()
             respuesta_local = responder_local_si_aplica(prompt, biblia_local, respuestas_locales, temas_locales)
 
@@ -1694,82 +1672,107 @@ if prompt:
                 sumar_consulta()
                 st.stop()
 
-            # --- CASO: PERSONAJES NO PERMITIDOS ---
-            permitidos_nombres = ["dios", "jesus", "jesucristo", "espiritu santo", "biblia", "iglesia", "cristo"]
+            consulta_norm = normalizar_local(prompt)
+
+            permitidos = [
+                "dios", "jesus", "jesucristo", "espiritu santo",
+                "biblia", "iglesia", "cristo"
+            ]
+
             if consulta_norm.startswith("quien es "):
                 termino = consulta_norm.replace("quien es ", "").strip()
-                if not any(p in termino for p in permitidos_nombres):
+
+                if not any(p in termino for p in permitidos):
                     if len(termino.split()) >= 2:
-                        texto_bloqueo = "No puedo confirmar información sobre personas sin una base confiable. Prefiero no inventar datos."
+                        texto = (
+                            "No puedo confirmar información sobre personas sin una base confiable. "
+                            "Prefiero no inventar datos."
+                        )
                         respuesta_placeholder.empty()
-                        st.markdown(texto_bloqueo)
-                        st.session_state.messages.append({"role": "assistant", "content": texto_bloqueo})
-                        mostrar_boton_audio(texto_bloqueo, clave_extra="bloqueo_persona")
+                        texto_final = mostrar_respuesta_suave(texto)
+                        st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                        mostrar_boton_audio(texto_final, clave_extra="bloqueo_persona")
                         sumar_consulta()
                         st.stop()
 
-            # --- CASO: API CAÍDA ---
             if not API_DISPONIBLE:
-                texto_api = "Estoy funcionando en modo local. Puedo responder saludos y temas básicos. Cargá la API para más."
+                texto = (
+                    "Estoy funcionando en modo local. "
+                    "Puedo responder saludos, referencias bíblicas exactas y algunos temas básicos. "
+                    "Para respuestas abiertas, cargá la API otra vez."
+                )
                 respuesta_placeholder.empty()
-                st.markdown(texto_api)
-                st.session_state.messages.append({"role": "assistant", "content": texto_api})
+                texto_final = mostrar_respuesta_suave(texto)
+                st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                mostrar_boton_audio(texto_final, clave_extra="nuevo_sin_api")
                 sumar_consulta()
                 st.stop()
 
-            # --- CASO: RESPUESTA DE LA IA (GEMINI) ---
             with respuesta_placeholder.container():
                 with st.spinner("Buscando respuesta en el Manual..."):
                     historial = construir_historial(st.session_state.messages, limite=15)
                     intencion = detectar_intencion(prompt)
 
                     if intencion == "tecnica":
-                        contexto = "Responde en español, claro y directo. Sin religión ni versículos."
+                        contexto = (
+                            "Responde en español de forma clara y directa.\n"
+                            "Esta es una pregunta técnica o informativa.\n"
+                            "NO uses versículos bíblicos.\n"
+                            "NO hagas reflexión espiritual.\n"
+                            "NO incluyas contenido religioso.\n"
+                            "Solo responde con información clara y concreta.\n"
+                        )
                         contenido_final = f"{contexto}\n\nUsuario: {prompt}"
                     else:
-                        contexto_ia = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE_AHORRO
-                        contenido_final = f"{contexto_ia}\n\n{historial}\nUsuario: {prompt}"
+                        contexto = PROMPT_AMARILLO if nivel == "amarillo" else PROMPT_BASE
+                        contenido_final = f"{contexto}\n\n{historial}\nUsuario: {prompt}"
 
                     response = client.models.generate_content(
-                        model="gemini-2.0-flash",
+                        model="gemini-2.5-flash",
                         contents=contenido_final,
                         config={
                             "max_output_tokens": 2000,
-                            "temperature": 0.2, # Bajamos para más obediencia
+                            "temperature": 0.47,
                         },
                     )
-                    
-                    texto_extraido, _, finish_reason = extraer_texto_seguro(response)
+                    texto_extraido, error_detalle, finish_reason = extraer_texto_seguro(response)
 
-                    # Manejo de censura por recitación
-                    if not texto_extraido and "RECITATION" in (finish_reason or "").upper():
-                        texto_extraido = "Ese contenido no lo puedo mostrar literal, pero los Mandamientos guían a caminar en rectitud."
-                    elif not texto_extraido:
-                        texto_extraido = "No pude generar una respuesta válida."
+                    if not texto_extraido:
+                        fr = (finish_reason or "").upper()
+                        if "RECITATION" in fr or fr == "4":
+                            texto_extraido = (
+                                "Ese contenido no lo puedo mostrar de forma literal completa, "
+                                "pero sí puedo explicártelo.\n\n"
+                                "Los Diez Mandamientos enseñan a honrar a Dios, respetar a los padres, "
+                                "no matar, no cometer adulterio, no robar, no mentir y no codiciar lo ajeno. "
+                                "Son una guía de vida para caminar en rectitud."
+                            )
+                        else:
+                            texto_extraido = "No pude generar una respuesta válida en este momento."
 
-                    # Limpieza final de formato e identidad
                     texto = re.sub(r"[*#_]", "", texto_extraido).strip()
                     texto = asegurar_cierre(texto)
                     texto = limpiar_identidad_prohibida(texto)
 
         except Exception as e:
-            # Fallback local si falla la red
             try:
                 biblia_local, respuestas_locales, temas_locales = cargar_datos_locales()
-                respuesta_fallback = responder_local_si_aplica(prompt, biblia_local, respuestas_locales, temas_locales)
-            except:
-                respuesta_fallback = None
+                respuesta_local = responder_local_si_aplica(prompt, biblia_local, respuestas_locales, temas_locales)
+            except Exception:
+                respuesta_local = None
 
-            if respuesta_fallback:
-                texto_final = mostrar_respuesta_suave(respuesta_fallback)
+            if respuesta_local:
+                respuesta_placeholder.empty()
+                texto_final = mostrar_respuesta_suave(respuesta_local)
                 st.session_state.messages.append({"role": "assistant", "content": texto_final})
+                mostrar_boton_audio(texto_final, clave_extra="nuevo_fallback")
                 sumar_consulta()
                 st.stop()
             else:
-                st.error("Error en la conexión. Intentá de nuevo.")
+                st.exception(e)
+                st.error("Error en la generación de respuesta.")
                 st.stop()
 
-        # Mostrar respuesta final de la IA
         respuesta_placeholder.empty()
         texto_final = mostrar_respuesta_suave(texto)
         st.session_state.messages.append({"role": "assistant", "content": texto_final})
