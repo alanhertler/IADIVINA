@@ -1325,6 +1325,13 @@ st.markdown("""
 # =========================
 with st.sidebar:
     st.title("CONFIGURACIÓN")
+
+    st.markdown("---")
+    st.subheader("Panel de Control")
+    conteo_total = cargar_contador()
+    st.metric("Guías entregadas", conteo_total)
+
+    st.markdown("---")
     st.session_state.usar_voz = st.checkbox("Activar voz", value=st.session_state.usar_voz)
     st.markdown("---")
     st.caption("Acceso técnico")
@@ -1335,7 +1342,12 @@ with st.sidebar:
         st.warning("Sin API: funciona solo el motor local")
 
     st.caption(f"Base local: {BIBLIA_FILE.name}")
-    clave_admin = st.text_input("Clave técnica", type="password", label_visibility="collapsed", placeholder="Clave técnica")
+    clave_admin = st.text_input(
+        "Clave técnica",
+        type="password",
+        label_visibility="collapsed",
+        placeholder="Clave técnica"
+    )
 
     if st.button("Entrar"):
         if clave_admin == ADMIN_PASSWORD:
@@ -1347,14 +1359,17 @@ with st.sidebar:
 
     if st.session_state.es_admin:
         st.success("MODO ADMIN ACTIVO")
-        st.session_state.mantenimiento = st.toggle("Modo mantenimiento", value=st.session_state.mantenimiento, key="toggle_mantenimiento")
+        st.session_state.mantenimiento = st.toggle(
+            "Modo mantenimiento",
+            value=st.session_state.mantenimiento,
+            key="toggle_mantenimiento"
+        )
         if st.button("Reiniciar conversación"):
             st.session_state.messages = []
             st.rerun()
         if st.button("Cerrar sesión admin"):
             st.session_state.es_admin = False
             st.rerun()
-
 
 # =========================
 # 9. BLOQUEOS GENERALES
