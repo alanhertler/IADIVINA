@@ -753,14 +753,15 @@ def responder_local_si_aplica(consulta: str, biblia, respuestas, temas):
     ]):
         return buscar_capitulo_local(biblia, "Exodo", 20)
 
-    # ─── IDENTIDAD / CREADOR ─────────────────────────────
+# ─── IDENTIDAD / CREADOR (ACTUALIZADO) ─────────────────────────────
     if any(k in consulta_norm for k in [
-        "quien te creo", "quien es tu creador", "quien fue tu creador",
-        "quien te hizo", "quien te creo a vos", "quien te creo?",
-        "quien sos", "quien eres", "quien es tu dueno",
-        "quien es tu padre", "quien fue tu padre"
+        "quien te creo", "creador", "quien te hizo", 
+        "quien sos", "quien eres", "dueno", "dueño",
+        "padre", "papa", "papá", "creó"
     ]):
-        return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
+        return ("Soy la Guía Divina, una herramienta de acompañamiento espiritual "
+                "desarrollada por Alan Sigfrido Hertler y su familia en Pilar, Argentina. "
+                "Mi propósito es facilitarte el acceso a la Palabra de Dios (Reina Valera 1909).")
 
     consulta_conteo = extraer_consulta_conteo_versiculos(consulta)
     if consulta_conteo:
