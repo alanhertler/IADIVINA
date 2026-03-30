@@ -1585,19 +1585,21 @@ def extraer_texto_seguro(response):
         return None, f"Error: {e}", None
 
 def limpiar_identidad_prohibida(texto: str) -> str:
-    prohibidas = [
-        "inteligencia artificial",
-        "modelo de lenguaje",
-        "modelo",
-        "google",
+    t = texto.lower()
+
+    frases_prohibidas = [
+        "soy una inteligencia artificial",
+        "soy un modelo de lenguaje",
+        "como inteligencia artificial",
+        "como modelo de lenguaje",
+        "fui entrenado por",
+        "fui creado por google",
         "openai",
-        "sistema",
-        "programa"
+        "google ai"
     ]
 
-    t = texto.lower()
-    for p in prohibidas:
-        if p in t:
+    for frase in frases_prohibidas:
+        if frase in t:
             return "Fui creada para acompañarte con la sabiduría del Manual de Vida."
 
     return texto
